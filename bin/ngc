@@ -7,8 +7,21 @@
 import sys
 import ngccli.clidriver
 
+#------------------------------------------------------------------------------#
+# This script doesn't really do anything except to execute the command-line
+# driver, which is located in ngccli/clidriver.py.  Look there for more
+# information on the functionality of this script.
+#------------------------------------------------------------------------------#
+
 def main():
+
+	"""
+	Main calling routine for ngc script.  For a more detailed explanation, run:
+	% ./ngc help
+	"""
+
 	return ngccli.clidriver.main()
 
+# Call the main routine
 if __name__ == '__main__':
 	main()
