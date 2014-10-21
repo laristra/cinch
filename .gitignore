@@ -1,2 +1,4 @@
 *.pyc
 build
+dist
+ngccli.egg-info

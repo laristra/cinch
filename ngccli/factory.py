@@ -19,7 +19,7 @@ class ServiceFactory:
 	# A dict of factories to be used to access subclass constructors.
 	factories = {}
 
-	def create_service(id):
+	def create_service(id, subparsers):
 
 		"""
 		Create the service indicated by id.  This method uses a special naming
@@ -32,6 +32,12 @@ class ServiceFactory:
 		Using this convention, new service classes can be instantiated without
 		altering the command-line driver logic.  Subclasses are automatically
 		identified and added.
+
+		Args:
+			id: The qualified name of the subclass to instantiate.
+
+			subparsers: A subparsers object to be used to add command-line
+			arguments for the service.
 		"""
 
 		# If we haven't seen this class, add it to the dict
@@ -40,7 +46,7 @@ class ServiceFactory:
 				eval(id + '.Factory()')
 		
 		# Return the newly created instance
-		return ServiceFactory.factories[id].create();
+		return ServiceFactory.factories[id].create(subparsers);
 	# create_service
 
 	# Cause this method to be static so that it may be called without an
@@ -48,15 +54,3 @@ class ServiceFactory:
 	create_service = staticmethod(create_service)			
 
 # class ServiceFactory
-
-#------------------------------------------------------------------------------#
-		# Service base class
-#------------------------------------------------------------------------------#
-
-class Service(object): pass
-
-	"""
-	Service is the base class from which all services derive.
-	"""
-
-# class Service

@@ -7,6 +7,7 @@ from __future__ import generators
 import random
 import sys
 import argparse
+from ngccli.__init__ import __version__
 from ngccli.factory import *
 from ngccli.base import *
 from ngccli.utils import *
@@ -53,12 +54,22 @@ class CLIDriver():
 		"""
 		"""
 
-		self.parser = argparse.ArgumentParser()
-		self.parser.add_argument('service', help='service to execute')
-		self.subparsers = self.parser.add_subparsers(help='sub-command help',
-			dest='subparser_name')
-
+		# initialize empty services dictionary
 		self.services = dict()
+
+		# create top-level argument parser
+		self.parser = argparse.ArgumentParser(prog='ngc')
+
+		# create subparsers object to pass into services
+		self.subparsers = self.parser.add_subparsers(help='sub-command help')
+
+		# create all available services
+		create_services(self.services, self.subparsers)
+
+		# add command-line options
+		self.parser.add_argument('-v', '--version', action='version',
+			version='ngc version: ' + __version__)
+
 	# __init__
 
 	def main(self, args=None):
@@ -66,12 +77,11 @@ class CLIDriver():
 		"""
 		"""
 
-		create_services(self.services)
+		# parse arguments and call the appropriate function
+		# as set by the Service subclass.
+		args = self.parser.parse_args()
+		args.func(args)
 
-		for s in self.services:
-			print s
-
-		self.parser.parse_args()
 	# main
 
 # class CLIDriver

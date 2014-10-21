@@ -11,7 +11,7 @@ from ngccli.services import *
 # create_services
 #------------------------------------------------------------------------------#
 
-def create_services(services):
+def create_services(services, subparsers):
 
 	"""
 	Populate the input dict with available services discovered by
@@ -36,7 +36,7 @@ def create_services(services):
 		# updated if the directory structure changes.
 		root = s.__module__.split('.')[-1]
 		services[s.__name__] = \
-			ServiceFactory.create_service(root + '.' + s.__name__)
+			ServiceFactory.create_service(root + '.' + s.__name__, subparsers)
 	# for
 
 # create_services
