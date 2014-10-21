@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from ngccli.factory import Service
+from ngccli.base import Service
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -20,7 +20,7 @@ class NGCUnitTest(Service):
 	#---------------------------------------------------------------------------#
 	#---------------------------------------------------------------------------#
 
-	class factory:
-		def create(self): return UnitTest()
+	class Factory:
+		def create(self): return NGCUnitTest()
 
 # class NGCSource

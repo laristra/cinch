@@ -3,24 +3,8 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from ngccli.base import Service
-
 #------------------------------------------------------------------------------#
+		# Service base class
 #------------------------------------------------------------------------------#
 
-class NGCSource(Service):
-
-	def __init__(self):
-		self.dummy = None
-
-	def main(self, args=None):
-		"""
-		"""
-
-	#---------------------------------------------------------------------------#
-	#---------------------------------------------------------------------------#
-
-	class Factory:
-		def create(self): return NGCSource()
-
-# class NGCSource
+class Service(object): pass
