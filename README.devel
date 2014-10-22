@@ -1,0 +1,66 @@
+#------------------------------------------------------------------------------#
+# Adding services
+#------------------------------------------------------------------------------#
+
+Ngc can easily be extended with new services.  To add a new service, first
+take a look at one of the files under 'ngccli/services' (other than
+__init__.py or any of the .pyc files).  Each of these services inherits
+from the Service base class (defined in 'ngccli/base.py').  The important
+parts to include in a new service are captured in the following example:
+
+00 #### example_service.py ####
+01
+02 from ngccli.base import Service
+03
+04 class MyService(Service):
+05
+06		def __init__(self, subparsers):
+07
+08			# add a parser for this service
+09			self.parser = subparsers.add_parser('name of service',
+10				help='description of service')
+11
+12			# set the callback for this service
+13			self.parser.set_defaults(func=self.main)
+14
+15		# __init__
+16
+17		def main(self, args=None)
+18			print 'Hello World'
+19		# main
+20
+21	class Factory:
+22		def create(self, subparsers): return MyService(subparsers)
+23
+24 #### example_service.py ####
+
+In this strawman example, we import the Service base class definition on
+line 02.  Line 04 defines our new service class.  In lines 06 through 15,
+we define the class initialization.  Lines 09 and 10 request a parser
+for our service that was passed in from the main command-line interface
+class (defined in 'ngccli/clidriver.py').  To add new options, take a look
+at the python documentation for the argparse module.  Line 13 sets the
+callback method associated with our service name to the main method of
+our new service class.  In this example, the main method just prints out
+the familiar 'Hello World'.  This method can be modified and extended to
+implement the actual details of the new service.
+
+The last detail is the factory class defined on lines 21 through 22. This
+class defines a single method 'create' that returns a new instance of our
+service class. The naming conventions used in the factory class definition
+and create method must be observed for this pattern to automatically
+recognize and add new services.
+
+That's it!  Put your new .py file into the services subdirectory and it
+should automatically be recognized by the ngc command-line script.  If you
+have a more complex implementation that requires multiple files, you can
+create a new subdirectory in 'services' (an example is the 'source_drivers'
+directory).
+
+The new service 'myservice' can be called using:
+
+% ngc myservice
+
+Help for the service is available with:
+
+% ngc myservice -h
