@@ -49,7 +49,8 @@ The last detail is the factory class defined on lines 21 through 22. This
 class defines a single method 'create' that returns a new instance of our
 service class. The naming conventions used in the factory class definition
 and create method must be observed for this pattern to automatically
-recognize and add new services.
+recognize and add new services.  NOTE: The factory class is nested within
+the service class.
 
 That's it!  Put your new .py file into the services subdirectory and it
 should automatically be recognized by the ngc command-line script.  If you
