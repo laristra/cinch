@@ -12,6 +12,10 @@ from ngccli.services.source_drivers.default import *
 
 class NGCSource(Service):
 
+	#----------------------------------------------------------------------------#
+	# Initialization.
+	#----------------------------------------------------------------------------#
+
 	def __init__(self, subparsers):
 
 		"""
@@ -41,8 +45,14 @@ class NGCSource(Service):
 				'  If this argument is not provided,' +
 				' output file names will be created using the classname')
 
+		# set the callback for this sub-command
 		self.parser.set_defaults(func=self.main)
+
 	# __init__
+
+	#----------------------------------------------------------------------------#
+	# Main.
+	#----------------------------------------------------------------------------#
 
 	def main(self, args=None):
 
