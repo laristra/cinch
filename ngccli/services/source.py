@@ -4,8 +4,10 @@
 #------------------------------------------------------------------------------#
 
 from ngccli.base import Service
+from ngccli.services.source_drivers.default import *
 
 #------------------------------------------------------------------------------#
+# Source handler.
 #------------------------------------------------------------------------------#
 
 class NGCSource(Service):
@@ -16,7 +18,8 @@ class NGCSource(Service):
 		"""
 
 		# get a command-line parser
-		self.parser = subparsers.add_parser('source', help='source help')
+		self.parser = subparsers.add_parser('source',
+			help='Service to generate sourcefile templates.')
 
 		# add command-line options
 		self.parser.add_argument('-t', '--template', action="store_true",
@@ -24,6 +27,9 @@ class NGCSource(Service):
 
 		self.parser.add_argument('-b', '--baseclass', action="store_true",
 			help='create a base class from which other classes can derive')
+
+		self.parser.add_argument('-c', '--ccfile', action="store_true",
+			help='genefate a c++ source file (in addition to the header)')
 
 		self.parser.add_argument('classname',
 			help='the name of the class.' +
@@ -43,12 +49,13 @@ class NGCSource(Service):
 		"""
 		"""
 
-		print args.classname
-		print args.filename
-		print args.template
-		print args.baseclass
+		create_header_template(args)
+		
+		if args.ccfile:
+			create_source_template(args)
 
 	#---------------------------------------------------------------------------#
+	# Object factory for service creation.
 	#---------------------------------------------------------------------------#
 
 	class Factory:
