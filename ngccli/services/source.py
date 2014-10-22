@@ -54,6 +54,8 @@ class NGCSource(Service):
 		if args.ccfile:
 			create_source_template(args)
 
+	# main
+
 	#---------------------------------------------------------------------------#
 	# Object factory for service creation.
 	#---------------------------------------------------------------------------#
