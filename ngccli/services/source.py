@@ -59,11 +59,8 @@ class NGCSource(Service):
 		"""
 		"""
 
-		create_header_template(args)
+		create_cpp_files(args)
 		
-		if args.ccfile:
-			create_source_template(args)
-
 	# main
 
 	#---------------------------------------------------------------------------#

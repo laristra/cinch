@@ -3,160 +3,69 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-#------------------------------------------------------------------------------#
-# Helper strings
-#------------------------------------------------------------------------------#
-
-begin_cmnt = '/*--------------------------------------------'
-begin_cmnt += '--------------------------------*\n'
-end_cmnt = ' *--------------------------------------------'
-end_cmnt += '--------------------------------*/\n'
-
-copyright =   ' * Copyright (c) 2014 Los Alamos National Security, LLC\n'
-copyright +=  ' * All rights reserved.\n'
-
-newline = '\n'
-tab = '\t'
+from cppheader import cpp_header_template
+from cppsource import cpp_source_template
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-def create_header_template(args):
+def create_cpp_files(args):
 
-	"""
-	"""
-	
-	if not args.filename == None:
-		header = args.filename + '.hh'
-	else:
-		header = args.classname + '.hh'
+  """
+  """
 
-	fd = open(header, 'w')
+  # Set virtual destructor and add protected section if this is a base class.
+  virtual = 'virtual' if args.baseclass else ''
+  protected = 'protected:\n\n' if args.baseclass else ''
 
-	# write copyright and opening define
-	fd.write(begin_cmnt)
-	fd.write(copyright)
-	fd.write(end_cmnt + newline)
+  # Setup template keywords if the class is templated.
+  template = 'template<typename T>\n' if args.template else ''
 
-	fd.write('#ifndef ' + args.classname + '_hh' + newline)
-	fd.write('#define ' + args.classname + '_hh' + newline)
-	fd.write(newline)
+  # Setup output file names
+  hfile = (args.filename if args.filename != None else args.classname) + '.h'
+  # Do substitutions on header template
+  header_output = cpp_header_template.substitute(
+    CLASSNAME=args.classname,
+    VIRTUAL=virtual,
+    PROTECTED=protected,
+    TEMPLATE=template,
+    FILENAME=hfile
+  )
 
-	#---------------------------------------------------------------------------#
-	# Doxygen class stubs
-	#---------------------------------------------------------------------------#
+  # Output to file (will overwrite if it exists)
+  fd = open(hfile, 'w')
+  fd.write(header_output[1:-1])
+  fd.close()
 
-	fd.write('/*!' + newline)
-	fd.write('\t\\class ' + args.classname + ' ' +
-		args.classname + '.hh' + newline)
-	fd.write('\t\\brief ' + args.classname + ' provides...' + newline)
-	fd.write(' */' + newline)
+  # Write a source file if requested.
+  if args.ccfile:
+    # Setup template keywords if the class is templated.
+    template = 'template<typename T>\n' if args.template else ''
+    template_type = '<T>' if args.template else ''
 
-	if args.template:
-		fd.write('template<typename T>' + newline)
+    cfile = (args.filename if args.filename != None
+      else args.classname) + '.cc'
 
-	#---------------------------------------------------------------------------#
-	# open class
-	#---------------------------------------------------------------------------#
+    # Do substitutions on source template
+    source_output = cpp_source_template.substitute(
+      CLASSNAME=args.classname,
+      VIRTUAL=virtual,
+      PROTECTED=protected,
+      TEMPLATE=template,
+      TEMPLATE_TYPE=template_type,
+      FILENAME=hfile
+    )
 
-	fd.write('class ' + args.classname + newline + '{' + newline)
+    # Output to file (will overwrite if it exists)
+    fd = open(cfile, 'w')
+    fd.write(source_output[1:-1])
+    fd.close()
+  # if
 
-	#---------------------------------------------------------------------------#
-	# public methods and members
-	#---------------------------------------------------------------------------#
+# create_cpp_files
 
-	fd.write('public:')
-	fd.write(newline)
-	fd.write(newline)
-
-	fd.write(tab + '//! Default constructor' + newline)
-	fd.write(tab + args.classname + '() {}\n')
-
-	fd.write(newline)
-
-	fd.write(tab + '//! Destructor' + newline)
-	if args.baseclass:
-		fd.write(tab + 'virtual ~' + args.classname + '() {}' + newline)
-	else:
-		fd.write(tab + '~' + args.classname + '() {}' + newline)
-
-	fd.write(newline)
-
-	#---------------------------------------------------------------------------#
-	# protected methods and members
-	#---------------------------------------------------------------------------#
-
-	if args.baseclass:
-		fd.write('protected:' + newline)
-		fd.write(newline)
-
-	#---------------------------------------------------------------------------#
-	# private methods and members
-	#---------------------------------------------------------------------------#
-
-	fd.write('private:' + newline)
-	fd.write(newline)
-
-	fd.write(tab + '//! Copy constructor' + newline)
-	fd.write(tab + args.classname + '(const & ' + args.classname +
-		') {} = delete;' + newline)
-	fd.write(newline)
-
-	fd.write(tab + '//! Assignment operator' + newline)
-	fd.write(tab + args.classname + ' & operator = (const & ' +
-		args.classname + ') {} = delete;' + newline)
-	fd.write(newline)
-
-	#---------------------------------------------------------------------------#
-	# close class
-	#---------------------------------------------------------------------------#
-
-	fd.write('}; // class ' + args.classname + newline)
-	fd.write(newline)
-
-
-	#---------------------------------------------------------------------------#
-	# closing define
-	#---------------------------------------------------------------------------#
-
-	fd.write('#endif // ' + args.classname + '_hh' + newline)
-
-	#---------------------------------------------------------------------------#
-	# close file handle
-	#---------------------------------------------------------------------------#
-
-	fd.close()
-
-# create_header_template
-
-def create_source_template(args):
-
-	"""
-	"""
-
-	if not args.filename == None:
-		source = args.filename + '.cc'
-	else:
-		source = args.classname + '.cc'
-
-	fd = open(source, 'w')
-
-	# write copyright and opening define
-	fd.write(begin_cmnt)
-	fd.write(copyright)
-	fd.write(end_cmnt + newline)
-
-	# include header
-	fd.write('#include <' + args.classname + '.hh>' + newline)
-	fd.write(newline)
-
-	# method stub
-	fd.write('/*' + newline)
-	fd.write(' * Method description (not doxygen)' + newline)
-	fd.write(' * Doxygen documentaiton should go in the header' + newline)
-	fd.write(' */' + newline)
-	fd.write(args.classname + '::method()' + newline)
-	fd.write('{' + newline)
-	fd.write('} // ' + args.classname + '::method' + newline)
-
-# create_source_template
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+#
+# vim: set expandtab :
+#------------------------------------------------------------------------------#
