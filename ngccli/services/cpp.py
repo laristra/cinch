@@ -22,8 +22,8 @@ class NGCSource(Service):
 		"""
 
 		# get a command-line parser
-		self.parser = subparsers.add_parser('source',
-			help='Service to generate sourcefile templates.')
+		self.parser = subparsers.add_parser('cpp',
+			help='Service to generate c++ file templates.')
 
 		# add command-line options
 		self.parser.add_argument('-t', '--template', action="store_true",
