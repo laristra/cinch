@@ -14,5 +14,5 @@ file(REMOVE Makefile)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
-# vim: set tabstop=2 shiftwidth=2 expandtab :
+# vim: set tabstop=4 shiftwidth=4 expandtab :
 #------------------------------------------------------------------------------#
