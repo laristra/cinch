@@ -18,7 +18,7 @@ function(make_info target headers sources)
 
     file(APPEND "${output}" "\n")
 
-    # write C++ header list
+    # Write C++ header list
     file(APPEND "${output}" "# C++ Headers\n")
     foreach(hdr ${headers})
         file(APPEND "${output}" "${hdr}\n")
@@ -26,7 +26,7 @@ function(make_info target headers sources)
 
     file(APPEND "${output}" "\n")
 
-    # write C++ header list
+    # Write C++ source list
     file(APPEND "${output}" "# C++ Sources\n")
     foreach(src ${sources})
         file(APPEND "${output}" "${src}\n")
