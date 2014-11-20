@@ -5,15 +5,15 @@
 
 function(detect_subproject)
 
-	if("${CONFIG_TOPLEVEL}" STREQUAL "")
-		message(STATUS "NOT SUBPROJECT")
-	else()
-		message(STATUS "SUBPROJECT")
-	endif()
+    if("${CONFIG_TOPLEVEL}" STREQUAL "")
+        message(STATUS "NOT SUBPROJECT")
+    else()
+        message(STATUS "SUBPROJECT")
+    endif()
 
 endfunction(detect_subproject)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
-# vim: set tabstop=2 shiftwidth=2 expandtab :
+# vim: set tabstop=4 shiftwidth=4 expandtab :
 #------------------------------------------------------------------------------#
