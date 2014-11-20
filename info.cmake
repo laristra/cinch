@@ -34,6 +34,12 @@ function(make_info target headers sources)
 
   file(APPEND "${output}" "\n")
 
+  add_custom_target(info.${target} cat ${output}) 
+  if (NOT TARGET info)
+    add_custom_target(info)
+  endif (NOT TARGET info)
+  add_dependencies(info info.${target})
+
 endfunction(make_info)
 
 #------------------------------------------------------------------------------#
