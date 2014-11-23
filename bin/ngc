@@ -15,13 +15,21 @@ import ngccli.clidriver
 
 def main():
 
-	"""
-	Main calling routine for ngc script.  For a more detailed explanation, run:
-	% ./ngc help
-	"""
+    """
+    Main calling routine for ngc script.  For a more detailed explanation, run:
+    % ./ngc help
+    """
 
-	return ngccli.clidriver.main()
+    return ngccli.clidriver.main()
+
+# main
 
 # Call the main routine
 if __name__ == '__main__':
-	main()
+    main()
+# if
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#

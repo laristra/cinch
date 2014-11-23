@@ -38,7 +38,7 @@ setup_options = dict(
 	packages = find_packages('.', exclude=['tests*']),
 
 	# package dir
-	package_dir = {'ngccli': 'ngccli'},
+	package_dir = {'ngccli' : 'ngccli'},
 
 	# license
 	license = 'NONE'

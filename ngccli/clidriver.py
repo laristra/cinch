@@ -20,11 +20,12 @@ from ngccli.services import *
 
 def main():
 
-	"""
-	"""
+    """
+    """
 
-	driver = create_clidriver()
-	return driver.main()
+    driver = create_clidriver()
+    return driver.main()
+
 # main
 
 #------------------------------------------------------------------------------#
@@ -33,11 +34,12 @@ def main():
 
 def create_clidriver():
 
-	"""
-	"""
+    """
+    """
 
-	driver = CLIDriver()
-	return driver
+    driver = CLIDriver()
+    return driver
+
 # create_clidriver
 
 #------------------------------------------------------------------------------#
@@ -46,42 +48,47 @@ def create_clidriver():
 
 class CLIDriver():
 
-	"""
-	"""
+    """
+    """
 
-	def __init__(self):
+    def __init__(self):
 
-		"""
-		"""
+        """
+        """
 
-		# initialize empty services dictionary
-		self.services = dict()
+        # initialize empty services dictionary
+        self.services = dict()
 
-		# create top-level argument parser
-		self.parser = argparse.ArgumentParser(prog='ngc')
+        # create top-level argument parser
+        self.parser = argparse.ArgumentParser(prog='ngc')
 
-		# create subparsers object to pass into services
-		self.subparsers = self.parser.add_subparsers(help='sub-command help')
+        # create subparsers object to pass into services
+        self.subparsers = self.parser.add_subparsers(help='sub-command help')
 
-		# create all available services
-		create_services(self.services, self.subparsers)
+        # create all available services
+        create_services(self.services, self.subparsers)
 
-		# add command-line options
-		self.parser.add_argument('-v', '--version', action='version',
-			version='ngc version: ' + __version__)
+        # add command-line options
+        self.parser.add_argument('-v', '--version', action='version',
+            version='ngc version: ' + __version__)
 
-	# __init__
+    # __init__
 
-	def main(self, args=None):
+    def main(self, args=None):
 
-		"""
-		"""
+        """
+        """
 
-		# parse arguments and call the appropriate function
-		# as set by the Service subclass.
-		args = self.parser.parse_args()
-		args.func(args)
+        # parse arguments and call the appropriate function
+        # as set by the Service subclass.
+        args = self.parser.parse_args()
+        args.func(args)
 
-	# main
+    # main
 
 # class CLIDriver
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#
