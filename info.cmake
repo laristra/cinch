@@ -3,14 +3,16 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(make_info target headers sources)
+function(make_info directory headers sources)
 
-    set(output "${CMAKE_BINARY_DIR}/.${target}.buildinfo")
+    set(output "${CMAKE_BINARY_DIR}/.${directory}.buildinfo")
 
     file(WRITE "${output}" "#---------------------------------------"
              "---------------------------------------#\n")
     file(APPEND "${output}"
-        "# CMake configuration information for target ${target}\n")
+        "# CMake configuration information for directory ${directory}\n")
+    file(APPEND "${output}"
+        "# of top-level project ${CMAKE_PROJECT_NAME}\n#\n")
     file(APPEND "${output}" "# This information is stored in:\n"
         "# ${output}\n")
     file(APPEND "${output}" "#---------------------------------------"
@@ -34,11 +36,11 @@ function(make_info target headers sources)
 
     file(APPEND "${output}" "\n")
 
-    add_custom_target(info.${target} cat ${output}) 
+    add_custom_target(info.${directory} cat ${output}) 
     if (NOT TARGET info)
         add_custom_target(info)
     endif (NOT TARGET info)
-    add_dependencies(info info.${target})
+    add_dependencies(info info.${directory})
 
 endfunction(make_info)
 
