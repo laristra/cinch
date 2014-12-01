@@ -13,67 +13,75 @@ from ngccli.services.doc_drivers.walk import *
 
 class NGCDoc(Service):
 
-	#---------------------------------------------------------------------------#
-	# Initialization.
-	#---------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
+    # Initialization.
+    #--------------------------------------------------------------------------#
 
-	def __init__(self, subparsers):
+    def __init__(self, subparsers):
 
-		"""
-		"""
+        """
+        """
 
-		# get a command-line parser
-		self.parser = subparsers.add_parser('doc',
-			help='Service to generate documentation using Pandoc.')
+        # get a command-line parser
+        self.parser = subparsers.add_parser('doc',
+            help='Service to generate documentation using Pandoc.')
 
-		self.parser.add_argument('-c', '--config', action="store",
-			help='configuration file.' +
-				'  Load the configuration information from file')
+        self.parser.add_argument('-c', '--config', action="store",
+            help='configuration file.' +
+                '  Load the configuration information from file')
 
-		# add command-line options
-		self.parser.add_argument('directory',
-			help='Top-level source directory at which to begin parsing.')
+        # add command-line options
+        self.parser.add_argument('directory',
+            help='Top-level source directory at which to begin parsing.')
 
-		# set the callback for this sub-command
-		self.parser.set_defaults(func=self.main)
+        # set the callback for this sub-command
+        self.parser.set_defaults(func=self.main)
 
-	# __init__
+    # __init__
 
-	#---------------------------------------------------------------------------#
-	# Main.
-	#---------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
+    # Main.
+    #--------------------------------------------------------------------------#
 
-	def main(self, args=None):
+    def main(self, args=None):
 
-		"""
-		"""
+        """
+        """
 
-		suffixes = (".markdown", ".mdown", ".mkd", ".mkdn", ".mdwn")
+        # Recognized file suffixes
+        suffixes = (".markdown", ".mdown", ".mkd", ".mkdn", ".mdwn")
 
-		# Setup default options
-		opts = { document: 'Default', target: 'ngcdoc.mdwn' }
+        # Setup default options
+        opts = { 'document' : 'default', 'output' : 'ngcdoc.mdwn' }
 
-		if args.config:
-			with open(args.config) as f:
-				for line in f:
-					(key, value) = line.split(':')
-					key = key.strip()
-					value = value.strip()
-					opts[key] = value
+        # Check for user-defined configuration
+        if args.config:
+            with open(args.config) as f:
+                for line in f:
+                    (key, value) = line.split(':')
+                    key = key.strip()
+                    value = value.strip()
+                    opts[key] = value
 
-		documents = dict()
+        documents = dict()
 
-		walk_tree(args.directory, suffixes, documents)
+        walk_tree(args.directory, suffixes, documents)
 
-		documents[opts['document']].write(opts['target'])
+        documents[opts['document']].write(opts['output'])
 
-	# main
+    # main
 
-	#---------------------------------------------------------------------------#
-	# Object factory for service creation.
-	#---------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
+    # Object factory for service creation.
+    #--------------------------------------------------------------------------#
 
-	class Factory:
-		def create(self, subparsers): return NGCDoc(subparsers)
+    class Factory:
+        def create(self, subparsers): return NGCDoc(subparsers)
+    # class Factory
 
 # class NGCDoc
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#
