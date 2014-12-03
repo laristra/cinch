@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(make_info directory headers sources)
+function(cinch_make_info directory headers sources)
 
     set(output "${CMAKE_BINARY_DIR}/.${directory}.buildinfo")
 
@@ -42,7 +42,7 @@ function(make_info directory headers sources)
     endif (NOT TARGET info)
     add_dependencies(info info.${directory})
 
-endfunction(make_info)
+endfunction(cinch_make_info)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

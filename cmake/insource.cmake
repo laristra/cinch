@@ -5,7 +5,7 @@
 
 # This script prevents users from creating in-source builds
 
-function(prevent_insource_builds)
+function(cinch_prevent_insource_builds)
 
     if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         message(FATAL_ERROR "\nIn-place builds are not supported!!!\n"
@@ -23,7 +23,7 @@ function(prevent_insource_builds)
         )
     endif()
 
-endfunction(prevent_insource_builds)
+endfunction(cinch_prevent_insource_builds)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
