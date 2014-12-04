@@ -1,3 +1,4 @@
 [submodule "gtest"]
 	path = gtest
 	url = git@darwin.lanl.gov:gtest.git
+	branch = master
