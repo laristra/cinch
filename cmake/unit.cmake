@@ -7,7 +7,10 @@ function(cinch_add_unit target sources)
 
     add_executable(${target} ${sources})
     target_link_libraries(${target} gtest gtest_main)
-    add_test(${target} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target})
+    set_target_properties(${target}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+    add_test(${target} ${CMAKE_BINARY_DIR}/test/${target})
 
 endfunction(cinch_add_unit)
 
