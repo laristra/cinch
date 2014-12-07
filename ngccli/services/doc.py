@@ -4,6 +4,7 @@
 #------------------------------------------------------------------------------#
 
 import ast
+from pickle import Unpickler
 from ngccli.base import Service
 from ngccli.services.doc_drivers.walk import *
 
@@ -26,11 +27,12 @@ class NGCDoc(Service):
         self.parser = subparsers.add_parser('doc',
             help='Service to generate documentation using Pandoc.')
 
-        self.parser.add_argument('-c', '--config', action="store",
-            help='configuration file.' +
-                '  Load the configuration information from file')
-
         # add command-line options
+        self.parser.add_argument('-c', '--config', action="store",
+            help='configuration module.' +
+                '  Load the configuration information' +
+                ' from python module CONFIG.')
+
         self.parser.add_argument('directory',
             help='Top-level source directory at which to begin parsing.')
 
@@ -52,21 +54,23 @@ class NGCDoc(Service):
         suffixes = (".markdown", ".mdown", ".mkd", ".mkdn", ".mdwn")
 
         # Setup default options
-        opts = { 'document' : 'default', 'output' : 'ngcdoc.mdwn' }
+        opts = {
+            'document' : 'default',
+            'output' : 'ngcdoc.mdwn'
+        }
 
-        # Check for user-defined configuration
+        # Check for user-defined configuration and import as module
+        # if option is set
         if args.config:
-            with open(args.config) as f:
-                for line in f:
-                    (key, value) = line.split(':')
-                    key = key.strip()
-                    value = value.strip()
-                    opts[key] = value
+            opts = __import__(os.path.splitext(args.config)[0]).opts
 
+        # Create documents storage
         documents = dict()
 
+        # Search sub-directories for documentation files
         walk_tree(args.directory, suffixes, documents)
 
+        # For now, just write to the specified output
         documents[opts['document']].write(opts['output'])
 
     # main

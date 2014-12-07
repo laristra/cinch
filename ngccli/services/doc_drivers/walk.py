@@ -49,9 +49,11 @@ def walk_tree(directory, suffixes, documents):
                                 # read all of the symbols off of the line
                                 for key in symbols:
                                     if symbols[key] in line:
-                                        parsed[key] = read_token(symbols[key], line)
+                                        parsed[key] =
+                                            read_token(symbols[key], line)
                             else:
-                                # If not, read symbols until a close-comment is encountered
+                                # If not, read symbols until a close-comment
+                                # is encountered
                                 while True:
                                     index += 1
                                     line = lines[index]
@@ -61,7 +63,8 @@ def walk_tree(directory, suffixes, documents):
 
                                     for key in symbols:
                                         if symbols[key] in line:
-                                            parsed[key] = read_token(symbols[key], line)
+                                            parsed[key] =
+                                                read_token(symbols[key], line)
                                         # if
                                     # for
                                 # while
@@ -70,19 +73,23 @@ def walk_tree(directory, suffixes, documents):
                             # See if the document needs to be created or reset
                             if 'document' in parsed:
                                 if not parsed['document'] in documents:
-                                    documents[parsed['document']] = Document(parsed['document'])
+                                    documents[parsed['document']] =
+                                        Document(parsed['document'])
                                 # if
             
-                                current_document = documents[parsed['document']]
+                                current_document =
+                                    documents[parsed['document']]
                             # if
 
                             # See if the chapter needs to be created or reset
                             if 'chapter' in parsed:
-                                current_chapter = current_document.chapter(parsed['chapter'])
+                                current_chapter =
+                                    current_document.chapter(parsed['chapter'])
                             # if
 
-                            # Read the actual content until the end of the file, or until
-                            # another NGCDOC block is encountered
+                            # Read the actual content until the end
+                            # of the file, or until another NGCDOC block
+                            # is encountered
                             while True and (index < len(lines) - 1):
                                 index += 1
                                 line = lines[index]
@@ -99,7 +106,6 @@ def walk_tree(directory, suffixes, documents):
             # if
         # for
     # for
-
 # walk_tree
 
 #------------------------------------------------------------------------------#
