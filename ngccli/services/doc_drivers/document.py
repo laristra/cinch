@@ -5,6 +5,7 @@
 
 import sys
 import string
+from collections import OrderedDict
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -45,7 +46,8 @@ class Chapter():
 	# print
 
 	def str_content(self):
-		return string.join(self.content)
+		# Don't use any seperator
+		return string.join(self.content, '')
 	# str_content
 
 #------------------------------------------------------------------------------#
@@ -62,7 +64,7 @@ class Document():
 		"""
 		"""
 
-		self.chapters = dict()
+		self.chapters = OrderedDict()
 		self.title = title
 
 	# __init__
@@ -80,12 +82,22 @@ class Document():
 			self.chapters[title] = Chapter(title)
 
 		return self.chapters[title]
-
 	# chapter
+
+	def add_chapter(self, title, obj=None):
+		if obj:
+			self.chapters[title] = obj
+		elif not title in self.chapters:
+			self.chapters[title] = Chapter(title)
+	# add_chapter			
+		
+	def delete_chapter(self, title):
+		del self.chapters[title]
 
 	def print_content(self):
 		for chapter in self.chapters:
 			self.chapters[chapter].print_content()
+	# print_content
 
 	def write(self, output):
 		with open(output, 'w+') as f:

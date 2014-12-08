@@ -19,9 +19,7 @@ symbols = {
 
 def walk_tree(directory, suffixes, documents):
 
-    # Set default document
-    documents['default'] = Document('Default')
-    current_document = documents['default']
+    current_document = documents['document']
     current_chapter = current_document.chapter('Default')
 
     # Walk directory looking for files in suffixes
@@ -49,7 +47,7 @@ def walk_tree(directory, suffixes, documents):
                                 # read all of the symbols off of the line
                                 for key in symbols:
                                     if symbols[key] in line:
-                                        parsed[key] =
+                                        parsed[key] = \
                                             read_token(symbols[key], line)
                             else:
                                 # If not, read symbols until a close-comment
@@ -63,7 +61,7 @@ def walk_tree(directory, suffixes, documents):
 
                                     for key in symbols:
                                         if symbols[key] in line:
-                                            parsed[key] =
+                                            parsed[key] = \
                                                 read_token(symbols[key], line)
                                         # if
                                     # for
@@ -73,17 +71,17 @@ def walk_tree(directory, suffixes, documents):
                             # See if the document needs to be created or reset
                             if 'document' in parsed:
                                 if not parsed['document'] in documents:
-                                    documents[parsed['document']] =
+                                    documents[parsed['document']] = \
                                         Document(parsed['document'])
                                 # if
             
-                                current_document =
+                                current_document = \
                                     documents[parsed['document']]
                             # if
 
                             # See if the chapter needs to be created or reset
                             if 'chapter' in parsed:
-                                current_chapter =
+                                current_chapter = \
                                     current_document.chapter(parsed['chapter'])
                             # if
 

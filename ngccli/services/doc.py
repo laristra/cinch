@@ -5,6 +5,8 @@
 
 import ast
 from pickle import Unpickler
+from collections import OrderedDict
+
 from ngccli.base import Service
 from ngccli.services.doc_drivers.walk import *
 
@@ -55,23 +57,73 @@ class NGCDoc(Service):
 
         # Setup default options
         opts = {
-            'document' : 'default',
+            'document' : 'Default',
             'output' : 'ngcdoc.mdwn'
         }
 
         # Check for user-defined configuration and import as module
         # if option is set
         if args.config:
-            opts = __import__(os.path.splitext(args.config)[0]).opts
+            (path, configfile) = os.path.split(args.config)
+
+            # Add configfile path to module search path
+            if not path:
+                sys.path.append(os.getcwd())
+            else:
+                sys.path.append(path)
+
+            # import the options from the specified module
+            opts = __import__(os.path.splitext(configfile)[0]).opts
+
+        # if
 
         # Create documents storage
         documents = dict()
 
+        # Set default document
+        documents['document'] = Document(opts['document'])
+        doc = documents['document']
+
+        # Process chapters-prepend option
+        for chapter in opts['chapters-prepend']:
+            doc.add_chapter(chapter)
+
+        # Process chapters option
+        for chapter in opts['chapters']:
+            doc.add_chapter(chapter)
+
         # Search sub-directories for documentation files
         walk_tree(args.directory, suffixes, documents)
 
+        # Remove the default chapter if chapters were found
+        if len(doc.chapters):
+            doc.delete_chapter('Default')
+
+        #----------------------------------------------------------------------#
+        # Process chapters-append
+        # This removes chapter-append keys and then re-adds them, this
+        # effectively sorts them to the end in-order because we are using
+        # an ordered dict.
+        #----------------------------------------------------------------------#
+
+        saved = dict()
+        for chapter in doc.chapters:
+            for key in opts['chapters-append']:
+                if key == chapter:
+                    saved[key] = doc.chapters[key]
+
+        for key in saved:
+            doc.delete_chapter(key)
+
+        for key in saved:
+            doc.add_chapter(key, saved[key])
+
+        #----------------------------------------------------------------------#
+        # End Process chapters-append
+        #----------------------------------------------------------------------#
+
         # For now, just write to the specified output
-        documents[opts['document']].write(opts['output'])
+        doc.write(opts['output'])
 
     # main
 
