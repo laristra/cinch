@@ -53,7 +53,7 @@ class NGCDoc(Service):
         """
 
         # Recognized file suffixes
-        suffixes = (".markdown", ".mdown", ".mkd", ".mkdn", ".mdwn")
+        suffixes = (".md", ".markdown", ".mdown", ".mkd", ".mkdn", ".mdwn")
 
         # Setup default options
         opts = {
@@ -74,15 +74,18 @@ class NGCDoc(Service):
 
             # import the options from the specified module
             opts = __import__(os.path.splitext(configfile)[0]).opts
-
         # if
 
         # Create documents storage
         documents = dict()
 
+        # Create default document
+        documents['Default'] = Document('Default')
+
         # Set default document
-        documents['document'] = Document(opts['document'])
-        doc = documents['document']
+        if not opts['document'] in documents:
+            documents[opts['document']] = Document(opts['document'])
+        doc = documents[opts['document']]
 
         # Process chapters-prepend option
         for chapter in opts['chapters-prepend']:
@@ -96,7 +99,7 @@ class NGCDoc(Service):
         walk_tree(args.directory, suffixes, documents)
 
         # Remove the default chapter if chapters were found
-        if len(doc.chapters):
+        if len(doc.chapters()) and 'Default' in doc.chapters():
             doc.delete_chapter('Default')
 
         #----------------------------------------------------------------------#
@@ -107,7 +110,7 @@ class NGCDoc(Service):
         #----------------------------------------------------------------------#
 
         saved = dict()
-        for chapter in doc.chapters:
+        for chapter in doc.chapters():
             for key in opts['chapters-append']:
                 if key == chapter:
                     saved[key] = doc.chapters[key]

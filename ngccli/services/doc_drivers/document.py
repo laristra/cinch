@@ -20,8 +20,8 @@ class Chapter():
 		"""
 		"""
 
-		self.title = title
-		self.content = []
+		self._title = title
+		self._content = []
 
 	# __init__
 
@@ -30,7 +30,7 @@ class Chapter():
 		"""
 		"""
 
-		self.content.append(content)
+		self._content.append(content)
 
 	# append
 
@@ -39,7 +39,7 @@ class Chapter():
 		"""
 		"""
 
-		for line in self.content:
+		for line in self._content:
 			sys.stdout.write(line)
 		# for
 
@@ -47,7 +47,7 @@ class Chapter():
 
 	def str_content(self):
 		# Don't use any seperator
-		return string.join(self.content, '')
+		return string.join(self._content, '')
 	# str_content
 
 #------------------------------------------------------------------------------#
@@ -64,13 +64,13 @@ class Document():
 		"""
 		"""
 
-		self.chapters = OrderedDict()
-		self.title = title
+		self._chapters = OrderedDict()
+		self._title = title
 
 	# __init__
 
 	def title(self):
-		return self.title
+		return self._title
 	# title
 
 	def chapter(self, title):
@@ -78,31 +78,35 @@ class Document():
 		"""
 		"""
 
-		if not title in self.chapters:
-			self.chapters[title] = Chapter(title)
+		if not title in self._chapters:
+			self._chapters[title] = Chapter(title)
 
-		return self.chapters[title]
+		return self._chapters[title]
 	# chapter
+
+	def chapters(self):
+		return self._chapters
+	# chapters
 
 	def add_chapter(self, title, obj=None):
 		if obj:
-			self.chapters[title] = obj
-		elif not title in self.chapters:
-			self.chapters[title] = Chapter(title)
+			self._chapters[title] = obj
+		elif not title in self._chapters:
+			self._chapters[title] = Chapter(title)
 	# add_chapter			
 		
 	def delete_chapter(self, title):
-		del self.chapters[title]
+		del self._chapters[title]
 
 	def print_content(self):
-		for chapter in self.chapters:
-			self.chapters[chapter].print_content()
+		for chapter in self._chapters:
+			self._chapters[chapter].print_content()
 	# print_content
 
 	def write(self, output):
 		with open(output, 'w+') as f:
-			for chapter in self.chapters:
-				f.write(self.chapters[chapter].str_content())
+			for chapter in self._chapters:
+				f.write(self._chapters[chapter].str_content())
 	# write
 
 # Document
