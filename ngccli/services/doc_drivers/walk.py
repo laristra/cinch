@@ -17,9 +17,9 @@ symbols = {
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-def walk_tree(directory, suffixes, documents):
+def walk_tree(directory, suffixes, documents, initial_document):
 
-    current_document = documents['Default']
+    current_document = documents[initial_document]
     current_chapter = current_document.chapter('Default')
 
     # Walk directory looking for files in suffixes
@@ -70,10 +70,6 @@ def walk_tree(directory, suffixes, documents):
 
                             # See if the document needs to be created or reset
                             if 'document' in parsed:
-                                print parsed['document']
-                                print documents
-                                for key in documents:
-                                    print "Doc Key: ", key
                                 if not parsed['document'] in documents:
                                     documents[parsed['document']] = \
                                         Document(parsed['document'])

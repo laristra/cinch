@@ -35,6 +35,10 @@ class NGCDoc(Service):
                 '  Load the configuration information' +
                 ' from python module CONFIG.')
 
+        self.parser.add_argument('-o', '--output', action="store",
+            help='output target.' +
+                '  Write output to file OUTPUT.')
+
         self.parser.add_argument('directory',
             help='Top-level source directory at which to begin parsing.')
 
@@ -61,6 +65,10 @@ class NGCDoc(Service):
             'output' : 'ngcdoc.mdwn'
         }
 
+        #----------------------------------------------------------------------#
+        # Process command-line arguments
+        #----------------------------------------------------------------------#
+
         # Check for user-defined configuration and import as module
         # if option is set
         if args.config:
@@ -75,6 +83,14 @@ class NGCDoc(Service):
             # import the options from the specified module
             opts = __import__(os.path.splitext(configfile)[0]).opts
         # if
+
+        # Check for command-line output specification
+        # NOTE: this option will over-write the value specified in
+        # the configuration file
+        if args.output:
+            opts['output'] = args.output
+
+        #----------------------------------------------------------------------#
 
         # Create documents storage
         documents = dict()
@@ -96,7 +112,7 @@ class NGCDoc(Service):
             doc.add_chapter(chapter)
 
         # Search sub-directories for documentation files
-        walk_tree(args.directory, suffixes, documents)
+        walk_tree(args.directory, suffixes, documents, opts['document'])
 
         # Remove the default chapter if chapters were found
         if len(doc.chapters()) and 'Default' in doc.chapters():
@@ -113,7 +129,7 @@ class NGCDoc(Service):
         for chapter in doc.chapters():
             for key in opts['chapters-append']:
                 if key == chapter:
-                    saved[key] = doc.chapters[key]
+                    saved[key] = doc.chapters()[key]
 
         for key in saved:
             doc.delete_chapter(key)
