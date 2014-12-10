@@ -22,10 +22,10 @@ function(cinch_add_doc target config directory output)
 
     find_package(Pandoc)
 
-    if(NOT NGC_FOUND)
+    if(NOT PANDOC_FOUND)
         message(FATAL_ERROR
             "Pandoc is needed to enable this option")
-    endif(NOT NGC_FOUND)
+    endif(NOT PANDOC_FOUND)
 
     #--------------------------------------------------------------------------#
     # Create the target directory if it doesn't exist.  This is where the
@@ -49,8 +49,8 @@ function(cinch_add_doc target config directory output)
     #--------------------------------------------------------------------------#
 
 	add_custom_target(${target}_markdown
-		${NGC} doc -c ${config} -o ${CMAKE_BINARY_DIR}/doc/${target}.md
-			${directory}
+		${NGC_EXECUTABLE} doc -c ${config}
+            -o ${CMAKE_BINARY_DIR}/doc/${target}.md ${directory}
 		DEPENDS ${_DOCFILES})
 
     #--------------------------------------------------------------------------#
@@ -59,7 +59,7 @@ function(cinch_add_doc target config directory output)
     #--------------------------------------------------------------------------#
 
 	add_custom_target(${target} ALL
-		${PANDOC} ${CMAKE_BINARY_DIR}/doc/${target}.md
+		${PANDOC_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/${target}.md
 			-o ${CMAKE_BINARY_DIR}/doc/${output})
 
     #--------------------------------------------------------------------------#

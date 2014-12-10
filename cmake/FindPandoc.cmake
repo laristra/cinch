@@ -7,10 +7,18 @@
 # Find pandoc markdown interpreter
 #------------------------------------------------------------------------------#
 
-find_program(PANDOC_EXECUTABLE pandoc)
-set(PANDOC ${PANDOC_EXECUTABLE})
+find_program(PANDOC_EXECUTABLE
+    NAMES pandoc
+    DOC "pandoc markdown processing tool")
+
+if(PANDOC_EXECUTABLE)
+    execute_process(COMMAND ${PANDOC_EXECUTABLE} "--version" OUTPUT_VARIABLE
+        PANDOC_VERSION OUTPUT_QUIET ERROR_QUIET)
+endif(PANDOC_EXECUTABLE)
 
 include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(pandoc REQUIRED_VARS PANDOC_EXECUTABLE
+    VERSION_VAR PANDOC_VERSION)
 mark_as_advanced(PANDOC_EXECUTABLE)
 
 #------------------------------------------------------------------------------#
