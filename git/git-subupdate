@@ -9,6 +9,7 @@ git submodule foreach --recursive "
 	git push
 ";
 
-#git add -u;
-#git commit -m "Updating submodules";
-#git push
+git add -u;
+git commit -m "Updating submodules";
+git push
+
