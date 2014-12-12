@@ -10,7 +10,13 @@ function(cinch_add_unit target sources)
     set_target_properties(${target}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-    add_test(${target} ${CMAKE_BINARY_DIR}/test/${target})
+    if(RUN_JENKINS)
+        add_test(${target} ${CMAKE_BINARY_DIR}/test/${target}
+            --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${target}.xml
+            --gtest_color=yes)
+    else()
+        add_test(${target} ${CMAKE_BINARY_DIR}/test/${target})
+    endif()
 
 endfunction(cinch_add_unit)
 
