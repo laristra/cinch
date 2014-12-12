@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+#------------------------------------------------------------------------------#
+# git script to recursively update project to latest submodule heads.
+#------------------------------------------------------------------------------#
+
+git submodule foreach --recursive "
+	git add -u;
+	git commit -m \"Updating submodules\";
+	git push
+"
