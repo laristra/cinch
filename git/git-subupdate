@@ -4,7 +4,10 @@
 #------------------------------------------------------------------------------#
 
 git submodule foreach --recursive "
-	git pull;
+	git pull
+";
+
+git submodule foreach --recursive "
 	git add -u;
 	git commit -m \"Updating submodules\";
 	git push
