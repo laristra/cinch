@@ -6,4 +6,4 @@ Next-Gen Code Command-Line Interface
 
 To install in your user site-package:
 
-% python setup.py install --user
+% python2 setup.py install --user

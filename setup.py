@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 #------------------------------------------------------------------------------#
 # Copyright (c) 2014 Los Alamos National Security, LLC
 # All rights reserved.
@@ -43,6 +43,11 @@ setup_options = dict(
 	# license
 	license = 'NONE'
 )
+
+import sys
+if not sys.version_info[0] == 2:
+    print "Sorry, Python 3 is not supported (yet)"
+    sys.exit(1)
 
 # call setup
 setup(**setup_options)

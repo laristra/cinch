@@ -12,4 +12,4 @@ The currently supported tools include:
 
 The ngccli package works with Python versions:
 
-* 3.3.x and greater
+* 2.7.x
