@@ -59,7 +59,8 @@ function(cinch_add_doc target config directory output)
     #--------------------------------------------------------------------------#
 
 	add_custom_target(${target} ALL
-		${PANDOC_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/${target}.md
+		${PANDOC_EXECUTABLE} -f markdown+raw_tex
+            ${CMAKE_BINARY_DIR}/doc/${target}.md
 			-o ${CMAKE_BINARY_DIR}/doc/${output})
 
     #--------------------------------------------------------------------------#
