@@ -5,18 +5,17 @@
 
 # This will make sure that all sub-modules have their latest changes
 git submodule foreach --recursive "
-	git pull
+    git pull
 ";
 
 # Commit changes to any nested submodules
 git submodule foreach --recursive "
-	git add -u;
-	git commit -m \"Updating submodules\";
-	git push
+    git add -u;
+    git commit -m \"Updating submodules\";
+    git push
 ";
 
 # Update the top-level project
 git add -u;
 git commit -m "Updating submodules";
 git push
-
