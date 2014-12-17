@@ -1,0 +1,35 @@
+#! /usr/bin/env python2
+#------------------------------------------------------------------------------#
+# Copyright (c) 2014 Los Alamos National Security, LLC
+# All rights reserved.
+#------------------------------------------------------------------------------#
+
+import sys
+import ngccli.clidriver
+
+#------------------------------------------------------------------------------#
+# This script doesn't really do anything except to execute the command-line
+# driver, which is located in ngccli/clidriver.py.  Look there for more
+# information on the functionality of this script.
+#------------------------------------------------------------------------------#
+
+def main():
+
+    """
+    Main calling routine for ngc script.  For a more detailed explanation, run:
+    % ./ngc help
+    """
+
+    return ngccli.clidriver.main()
+
+# main
+
+# Call the main routine
+if __name__ == '__main__':
+    main()
+# if
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#
