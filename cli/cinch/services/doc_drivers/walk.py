@@ -6,8 +6,8 @@
 import re
 import os
 from os.path import join
-from ngccli.services.doc_drivers.utils import *
-from ngccli.services.doc_drivers.document import *
+from cinch.services.doc_drivers.utils import *
+from cinch.services.doc_drivers.document import *
 
 symbols = {
     'document' : 'DOCUMENT',

@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from ngccli.base import Service
+from cinch.base import Service
 
 #------------------------------------------------------------------------------#
 # Unit test handler.

@@ -6,7 +6,7 @@
 
 import os
 import glob
-import ngccli
+import cinch
 from setuptools import setup, find_packages
 
 # This is for future requirements
@@ -14,10 +14,10 @@ requires = []
 
 setup_options = dict(
 	# module name
-	name = 'ngccli',
+	name = 'cinch',
 
 	# module version
-	version = ngccli.__version__,
+	version = cinch.__version__,
 
 	# description
 	description = 'Command Line Environment for NGC',
@@ -38,7 +38,7 @@ setup_options = dict(
 	packages = find_packages('.', exclude=['tests*']),
 
 	# package dir
-	package_dir = {'ngccli' : 'ngccli'},
+	package_dir = {'cinch' : 'cinch'},
 
 	# license
 	license = 'NONE'

@@ -3,8 +3,8 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from ngccli.base import Service
-from ngccli.services.cpp_drivers.default import *
+from cinch.base import Service
+from cinch.services.cpp_drivers.default import *
 
 #------------------------------------------------------------------------------#
 # Source handler.

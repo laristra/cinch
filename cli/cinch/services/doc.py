@@ -7,8 +7,8 @@ import ast
 from pickle import Unpickler
 from collections import OrderedDict
 
-from ngccli.base import Service
-from ngccli.services.doc_drivers.walk import *
+from cinch.base import Service
+from cinch.services.doc_drivers.walk import *
 
 #------------------------------------------------------------------------------#
 # Documentation handler.

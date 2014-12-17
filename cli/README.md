@@ -1,6 +1,6 @@
-### NGCCLI
+### CINCH
 
-Next-Gen Code Command-Line Interface
+Cinch Command-Line Interface
 
 ## Installation
 

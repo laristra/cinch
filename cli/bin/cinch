@@ -5,11 +5,11 @@
 #------------------------------------------------------------------------------#
 
 import sys
-import ngccli.clidriver
+import cinch.clidriver
 
 #------------------------------------------------------------------------------#
 # This script doesn't really do anything except to execute the command-line
-# driver, which is located in ngccli/clidriver.py.  Look there for more
+# driver, which is located in cinch/clidriver.py.  Look there for more
 # information on the functionality of this script.
 #------------------------------------------------------------------------------#
 
@@ -20,7 +20,7 @@ def main():
     % ./ngc help
     """
 
-    return ngccli.clidriver.main()
+    return cinch.clidriver.main()
 
 # main
 

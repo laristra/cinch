@@ -7,15 +7,15 @@ from __future__ import generators
 import random
 import sys
 import argparse
-from ngccli.__init__ import __version__
-from ngccli.factory import *
-from ngccli.base import *
-from ngccli.utils import *
-from ngccli.services import *
+from cinch.__init__ import __version__
+from cinch.factory import *
+from cinch.base import *
+from cinch.utils import *
+from cinch.services import *
 
 #------------------------------------------------------------------------------#
 # Internal main routine.  This is the top-level once we are inside of the
-# ngccli module.
+# cinch module.
 #------------------------------------------------------------------------------#
 
 def main():

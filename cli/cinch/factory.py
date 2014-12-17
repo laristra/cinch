@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from ngccli.services import *
+from cinch.services import *
 
 #------------------------------------------------------------------------------#
 # Service factory to create instances of classes that derive from Service.

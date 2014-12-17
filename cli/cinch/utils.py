@@ -3,9 +3,9 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from ngccli.factory import *
-from ngccli.base import *
-from ngccli.services import *
+from cinch.factory import *
+from cinch.base import *
+from cinch.services import *
 
 #------------------------------------------------------------------------------#
 # create_services
