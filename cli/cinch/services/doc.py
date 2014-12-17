@@ -57,7 +57,7 @@ class CINCHDoc(Service):
         """
 
         # Recognized file suffixes
-        suffixes = (".md", ".markdown", ".mdown", ".mkd", ".mkdn", ".mdwn")
+        suffixes = (".md", ".tex")
 
         # Setup default options
         opts = {
