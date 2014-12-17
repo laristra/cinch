@@ -20,7 +20,7 @@ setup_options = dict(
 	version = cinch.__version__,
 
 	# description
-	description = 'Command Line Environment for NGC',
+	description = 'Command Line Environment for cinch',
 
 	# long description from README
 	long_description = open('README.rst').read(),
@@ -32,7 +32,7 @@ setup_options = dict(
 	author_email = 'bergen@lanl.gov',
 
 	# scripts to install
-	scripts = ['bin/ngc'],
+	scripts = ['bin/cinch'],
 
 	# packages
 	packages = find_packages('.', exclude=['tests*']),

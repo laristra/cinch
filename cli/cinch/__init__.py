@@ -4,9 +4,9 @@
 #------------------------------------------------------------------------------#
 
 """
-NGCCLI
+CINCHCLI
 ----
-A Command Line Environment for NGC.
+A Command Line Environment for cinch.
 """
 
 __version__ = '1.0.0'

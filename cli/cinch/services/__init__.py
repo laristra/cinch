@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 """
-Services for NGC Command Line Environment
+Services for cinch Command Line Environment
 """
 
 import os

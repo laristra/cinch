@@ -14,7 +14,7 @@ from cinch.services.doc_drivers.walk import *
 # Documentation handler.
 #------------------------------------------------------------------------------#
 
-class NGCDoc(Service):
+class CINCHDoc(Service):
 
     #--------------------------------------------------------------------------#
     # Initialization.
@@ -62,7 +62,7 @@ class NGCDoc(Service):
         # Setup default options
         opts = {
             'document' : 'Default',
-            'output' : 'ngcdoc.mdwn'
+            'output' : 'cinchdoc.mdwn'
         }
 
         #----------------------------------------------------------------------#
@@ -151,10 +151,10 @@ class NGCDoc(Service):
     #--------------------------------------------------------------------------#
 
     class Factory:
-        def create(self, subparsers): return NGCDoc(subparsers)
+        def create(self, subparsers): return CINCHDoc(subparsers)
     # class Factory
 
-# class NGCDoc
+# class CINCHDoc
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

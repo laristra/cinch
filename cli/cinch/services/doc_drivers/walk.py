@@ -38,11 +38,13 @@ def walk_tree(directory, suffixes, documents, initial_document):
                     for index, line in enumerate(lines):
 
                         # If this is a doc line, parse the symbols
-                        if '<!-- NGCDOC' in line:
+                        if '<!-- CINCHDOC' in line or '% CINCHDOC' in line:
                             parsed = {}
 
                             # Check to see if this is all on one line
-                            if '-->' in line:
+                            # If this is a latex file, the symbols
+                            # must be on a single line
+                            if '-->' in line or '% CINCHDOC' in line:
                                 # If it is all on one line,
                                 # read all of the symbols off of the line
                                 for key in symbols:
@@ -86,13 +88,14 @@ def walk_tree(directory, suffixes, documents, initial_document):
                             # if
 
                             # Read the actual content until the end
-                            # of the file, or until another NGCDOC block
+                            # of the file, or until another CINCHDOC block
                             # is encountered
                             while True and (index < len(lines) - 1):
                                 index += 1
                                 line = lines[index]
 
-                                if '<!-- NGCDOC' in line:
+                                if '<!-- CINCHDOC' in line or \
+                                    '% CINCHDOC' in line:
                                     break
                                 # if
 

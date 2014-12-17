@@ -2,7 +2,7 @@
 # Adding services
 #------------------------------------------------------------------------------#
 
-Ngc can easily be extended with new services.  To add a new service, first
+Cinch can easily be extended with new services.  To add a new service, first
 take a look at one of the files under 'cinch/services' (other than
 __init__.py or any of the .pyc files).  Each of these services inherits
 from the Service base class (defined in 'cinch/base.py').  The important
@@ -53,15 +53,15 @@ recognize and add new services.  NOTE: The factory class is nested within
 the service class.
 
 That's it!  Put your new .py file into the services subdirectory and it
-should automatically be recognized by the ngc command-line script.  If you
+should automatically be recognized by the cinch command-line script.  If you
 have a more complex implementation that requires multiple files, you can
 create a new subdirectory in 'services' (an example is the 'source_drivers'
 directory).
 
 The new service 'myservice' can be called using:
 
-% ngc myservice
+% cinch myservice
 
 Help for the service is available with:
 
-% ngc myservice -h
+% cinch myservice -h

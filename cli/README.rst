@@ -3,7 +3,7 @@ cinch
 ======
 
 This package provides a command line interface to many of the development
-tools for the NGC project.
+tools for the cinch project.
 
 The currently supported tools include:
 

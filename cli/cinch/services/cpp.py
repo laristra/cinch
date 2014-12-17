@@ -10,7 +10,7 @@ from cinch.services.cpp_drivers.default import *
 # Source handler.
 #------------------------------------------------------------------------------#
 
-class NGCSource(Service):
+class CINCHSource(Service):
 
     #--------------------------------------------------------------------------#
     # Initialization.
@@ -68,9 +68,9 @@ class NGCSource(Service):
     #--------------------------------------------------------------------------#
 
     class Factory:
-        def create(self, subparsers): return NGCSource(subparsers)
+        def create(self, subparsers): return CINCHSource(subparsers)
 
-# class NGCSource
+# class CINCHSource
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

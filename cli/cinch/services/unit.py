@@ -9,7 +9,7 @@ from cinch.base import Service
 # Unit test handler.
 #------------------------------------------------------------------------------#
 
-class NGCUnitTest(Service):
+class CINCHUnitTest(Service):
 
 	#---------------------------------------------------------------------------#
 	# Initialization.
@@ -45,6 +45,6 @@ class NGCUnitTest(Service):
 	#---------------------------------------------------------------------------#
 
 	class Factory:
-		def create(self, subparsers): return NGCUnitTest(subparsers)
+		def create(self, subparsers): return CINCHUnitTest(subparsers)
 
-# class NGCSource
+# class CINCHSource

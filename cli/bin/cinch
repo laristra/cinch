@@ -16,8 +16,10 @@ import cinch.clidriver
 def main():
 
     """
-    Main calling routine for ngc script.  For a more detailed explanation, run:
-    % ./ngc help
+    Main calling routine for cinch script.  For a more detailed explanation,
+    run:
+
+    % ./cinch help
     """
 
     return cinch.clidriver.main()

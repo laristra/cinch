@@ -60,7 +60,7 @@ class CLIDriver():
         self.services = dict()
 
         # create top-level argument parser
-        self.parser = argparse.ArgumentParser(prog='ngc')
+        self.parser = argparse.ArgumentParser(prog='cinch')
 
         # create subparsers object to pass into services
         self.subparsers = self.parser.add_subparsers(help='sub-command help')
@@ -70,7 +70,7 @@ class CLIDriver():
 
         # add command-line options
         self.parser.add_argument('-v', '--version', action='version',
-            version='ngc version: ' + __version__)
+            version='cinch version: ' + __version__)
 
     # __init__
 
