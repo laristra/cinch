@@ -4,23 +4,23 @@
 #------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------#
-# Find NGC Command-Line Interface Program
+# Find cinch Command-Line Interface Program
 #------------------------------------------------------------------------------#
 
-find_program(NGC_EXECUTABLE
-    NAMES ngc
-    DOC "NGC Command-Line Tool"
+find_program(CINCH_EXECUTABLE
+    NAMES cinch
+    DOC "Cinch Command-Line Tool"
 )
 
-if(NGC_EXECUTABLE)
-    execute_process(COMMAND ${NGC_EXECUTABLE} "--version" OUTPUT_VARIABLE
-        NGC_VERSION OUTPUT_QUIET ERROR_QUIET)
-endif(NGC_EXECUTABLE)
+if(CINCH_EXECUTABLE)
+    execute_process(COMMAND ${CINCH_EXECUTABLE} "--version" OUTPUT_VARIABLE
+        CINCH_VERSION OUTPUT_QUIET ERROR_QUIET)
+endif(CINCH_EXECUTABLE)
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ngc REQUIRED_VARS NGC_EXECUTABLE
-    VERSION_VAR NGC_VERSION)
-mark_as_advanced(NGC_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(cinch REQUIRED_VARS CINCH_EXECUTABLE
+    VERSION_VAR CINCH_VERSION)
+mark_as_advanced(CINCH_EXECUTABLE)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

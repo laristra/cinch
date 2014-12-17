@@ -6,15 +6,17 @@
 function(cinch_add_doc target config directory output)
 
     #--------------------------------------------------------------------------#
-    # Find the NGC command-line tool
+    # Find the cinch command-line tool
     #--------------------------------------------------------------------------#
 
-    find_package(NGC)
+    find_package(Cinch)
 
-    if(NOT NGC_FOUND)
+    if(NOT CINCH_FOUND)
+        # FIXME: Try to build and install cinch
+
         message(FATAL_ERROR
-            "The NGC command-line tool is needed to enable this option")
-    endif(NOT NGC_FOUND)
+            "The cinch command-line tool is needed to enable this option")
+    endif(NOT CINCH_FOUND)
 
     #--------------------------------------------------------------------------#
     # Find pandoc
@@ -49,7 +51,7 @@ function(cinch_add_doc target config directory output)
     #--------------------------------------------------------------------------#
 
 	add_custom_target(${target}_markdown
-		${NGC_EXECUTABLE} doc -c ${config}
+		${CINCH_EXECUTABLE} doc -c ${config}
             -o ${CMAKE_BINARY_DIR}/doc/${target}.md ${directory}
 		DEPENDS ${_DOCFILES})
 
