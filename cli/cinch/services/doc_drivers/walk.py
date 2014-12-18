@@ -87,6 +87,12 @@ def walk_tree(directory, suffixes, documents, initial_document):
                                     current_document.chapter(parsed['chapter'])
                             # if
 
+                            # Append file information
+                            current_chapter.append('<!-- cinch metadata\n')
+                            current_chapter.append('FILE(' + join(root, file) +
+                                ')\n')
+                            current_chapter.append('-->\n')
+
                             # Read the actual content until the end
                             # of the file, or until another CINCHDOC block
                             # is encountered
