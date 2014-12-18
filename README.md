@@ -1,6 +1,4 @@
-# Copyright (c) 2014 Los Alamos National Security, LLC</br></br>All rights reserved.
-
-----
+# Cinch CMake Build Utilities
 
 Cinch is a set of utilities and configuration options designed to make
 cmake builds easy to use and manage.
@@ -91,7 +89,7 @@ cinch-created version would be similar to: 1.0-35-g2f657a
 
 For new releases, this approach may not be optimal.  In this case, cinch
 allows you to override the automatic versioning by specifying a static version
-to cmake via the CINCH_STATIC_VERSION option.  Simply set this to the
+to cmake via the CINCH\_STATIC\_VERSION option.  Simply set this to the
 desired version and it will be used.
 
 ## Unit Tests with GoogleTest: ENABLE\_UNIT\_TESTS (default OFF)
