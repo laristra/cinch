@@ -28,3 +28,50 @@ def read_tokens(line):
 
   return parsed
 # read_tokens
+
+special = [
+    '\'',
+    '"',
+    '`'
+]
+
+start_delimiters = [
+    '<!-- CINCHDOC',
+    '% CINCHDOC'
+]
+
+single_line_delimiters = [
+    '-->',
+    '% CINCHDOC'
+]
+
+end_delimiters = [
+    '-->'
+]
+
+def begin_identifier(line):
+    for char in special:
+        if char in line:
+            return False
+
+    for delimiter in start_delimiters:
+        if delimiter in line:
+            return True
+# block_identifier
+
+def single_line_identifier(line):
+    for single in single_line_delimiters:
+        if single in line:
+            return True
+# single_line_identifier
+
+def end_identifier(line):
+    for end in end_delimiters:
+        if end in line:
+            return True
+# end_identifier
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#

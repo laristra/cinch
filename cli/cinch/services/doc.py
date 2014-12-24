@@ -104,18 +104,22 @@ class CINCHDoc(Service):
         doc = documents[opts['document']]
 
         # Process chapters-prepend option
-        for chapter in opts['chapters-prepend']:
-            doc.add_chapter(chapter)
+        if 'chapters-prepend' in opts:
+            for chapter in opts['chapters-prepend']:
+                doc.add_chapter(chapter)
 
         # Process chapters option
-        for chapter in opts['chapters']:
-            doc.add_chapter(chapter)
+        if 'chapters' in opts:
+            for chapter in opts['chapters']:
+                doc.add_chapter(chapter)
 
         # Search sub-directories for documentation files
         walk_tree(args.directory, suffixes, documents, opts['document'])
 
         # Remove the default chapter if chapters were found
-        if len(doc.chapters()) and 'Default' in doc.chapters():
+        # Because we add a 'header' chapter, there should be
+        # two chapters if none were added by the user.
+        if (len(doc.chapters()) > 2) and 'Default' in doc.chapters():
             doc.delete_chapter('Default')
 
         #----------------------------------------------------------------------#
@@ -125,17 +129,18 @@ class CINCHDoc(Service):
         # an ordered dict.
         #----------------------------------------------------------------------#
 
-        saved = dict()
-        for chapter in doc.chapters():
-            for key in opts['chapters-append']:
-                if key == chapter:
-                    saved[key] = doc.chapters()[key]
+        if 'chapters-append' in opts:
+            saved = dict()
+            for chapter in doc.chapters():
+                for key in opts['chapters-append']:
+                    if key == chapter:
+                        saved[key] = doc.chapters()[key]
 
-        for key in saved:
-            doc.delete_chapter(key)
+            for key in saved:
+                doc.delete_chapter(key)
 
-        for key in saved:
-            doc.add_chapter(key, saved[key])
+            for key in saved:
+                doc.add_chapter(key, saved[key])
 
         #----------------------------------------------------------------------#
         # End Process chapters-append

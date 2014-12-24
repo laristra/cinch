@@ -38,13 +38,15 @@ def walk_tree(directory, suffixes, documents, initial_document):
                     for index, line in enumerate(lines):
 
                         # If this is a doc line, parse the symbols
-                        if '<!-- CINCHDOC' in line or '% CINCHDOC' in line:
+                        #if '<!-- CINCHDOC' in line or '% CINCHDOC' in line:
+                        if begin_identifier(line):
                             parsed = {}
 
                             # Check to see if this is all on one line
                             # If this is a latex file, the symbols
                             # must be on a single line
-                            if '-->' in line or '% CINCHDOC' in line:
+                            #if '-->' in line or '% CINCHDOC' in line:
+                            if single_line_identifier(line):
                                 # If it is all on one line,
                                 # read all of the symbols off of the line
                                 for key in symbols:
@@ -58,7 +60,8 @@ def walk_tree(directory, suffixes, documents, initial_document):
                                     index += 1
                                     line = lines[index]
                                     
-                                    if '-->' in line:
+                                    #if '-->' in line:
+                                    if end_identifier(line):
                                         break
 
                                     for key in symbols:
@@ -100,8 +103,9 @@ def walk_tree(directory, suffixes, documents, initial_document):
                                 index += 1
                                 line = lines[index]
 
-                                if '<!-- CINCHDOC' in line or \
-                                    '% CINCHDOC' in line:
+                                #if '<!-- CINCHDOC' in line or \
+                                #    '% CINCHDOC' in line:
+                                if begin_identifier(line):
                                     break
                                 # if
 

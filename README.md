@@ -1,3 +1,4 @@
+<!-- CINCHDOC DOCUMENT(User Guide) -->
 # Cinch CMake Build Utilities
 
 Cinch is a set of utilities and configuration options designed to make
@@ -9,7 +10,7 @@ Cinch eases build system maintainence by imposing a specific structure on
 the project source layout.
 
     project/
-	         CMakeLists.txt
+            CMakeLists.txt
             src/
             app/
             doc/
@@ -78,7 +79,7 @@ instructions for how to clean up and create an out-of-source build.
 Cinch provides various command-line options that may be passed on the cmake
 configuration line to affect its behavior.
 
-## Project Version: CINCH\_STATIC\_VERSION (default OFF)
+## Project Version: STATIC\_VERSION (default OFF)
 
 Cinch can automatically create version information for projects that use git.
 This feature uses the 'git describe' function, which creates a version from
@@ -89,7 +90,7 @@ cinch-created version would be similar to: 1.0-35-g2f657a
 
 For new releases, this approach may not be optimal.  In this case, cinch
 allows you to override the automatic versioning by specifying a static version
-to cmake via the CINCH\_STATIC\_VERSION option.  Simply set this to the
+to cmake via the STATIC\_VERSION option.  Simply set this to the
 desired version and it will be used.
 
 ## Unit Tests with GoogleTest: ENABLE\_UNIT\_TESTS (default OFF)
