@@ -11,12 +11,6 @@
 ################################################################################
 
 #------------------------------------------------------------------------------#
-# Include project configuration
-#------------------------------------------------------------------------------#
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/project.cmake)
-
-#------------------------------------------------------------------------------#
 # Require some version of cmake
 #------------------------------------------------------------------------------#
 
@@ -29,7 +23,7 @@ cmake_minimum_required(VERSION 2.8.12)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cinch/cmake)
 
 #------------------------------------------------------------------------------#
-# CMake includes
+# Cinch includes
 #------------------------------------------------------------------------------#
 
 include(info)
@@ -38,6 +32,12 @@ include(subdirlist)
 include(unit)
 include(documentation)
 include(version)
+
+#------------------------------------------------------------------------------#
+# Include project configuration
+#------------------------------------------------------------------------------#
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
 #------------------------------------------------------------------------------#
 # Create a version for the project
@@ -57,6 +57,12 @@ endif(STATIC_VERSION)
 #------------------------------------------------------------------------------#
 
 cinch_prevent_insource_builds()
+
+#------------------------------------------------------------------------------#
+# Include project documentation
+#------------------------------------------------------------------------------#
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 
 #------------------------------------------------------------------------------#
 # Add top-level targets
@@ -80,7 +86,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
     if(ENABLE_UNIT_TESTS)
         enable_testing()
-        find_package(GTest)
+        find_package(GTest QUIET)
         if(GTEST_FOUND)
           include_directories(GTEST_INCLUDE_DIRS)
         else()
@@ -89,21 +95,6 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
           set(GTEST_BOTH_LIBRARIES gtest gtest_main)
         endif()
     endif(ENABLE_UNIT_TESTS)
-
-    #--------------------------------------------------------------------------#
-    # Add support for cinch documentation
-    #--------------------------------------------------------------------------#
-
-    option(ENABLE_DOCUMENTATION "Enable documentation build" OFF)
-
-    if(ENABLE_DOCUMENTATION)
-        cinch_add_doc(${PROJECT_NAME}-ug ${CMAKE_SOURCE_DIR}/doc/ugconfig.py
-            ${CMAKE_SOURCE_DIR}/src
-            ${PROJECT_NAME}-ug-${${PROJECT_NAME}_VERSION}.pdf)
-        cinch_add_doc(${PROJECT_NAME}-dg ${CMAKE_SOURCE_DIR}/doc/dgconfig.py
-            ${CMAKE_SOURCE_DIR}/src
-            ${PROJECT_NAME}-dg-${${PROJECT_NAME}_VERSION}.pdf)
-    endif(ENABLE_DOCUMENTATION)
 
     #--------------------------------------------------------------------------#
     # Add support for Doxygen documentation

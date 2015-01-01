@@ -5,71 +5,84 @@
 
 function(cinch_add_doc target config directory output)
 
-    #--------------------------------------------------------------------------#
-    # Find the cinch command-line tool
-    #--------------------------------------------------------------------------#
+    option(ENABLE_DOCUMENTATION "Enable documentation" OFF)
 
-    find_package(Cinch)
+    if(ENABLE_DOCUMENTATION)
 
-    if(NOT CINCH_FOUND)
-        # FIXME: Try to build and install cinch
+        #----------------------------------------------------------------------#
+        # Find the cinch command-line tool
+        #----------------------------------------------------------------------#
 
-        message(FATAL_ERROR
-            "The cinch command-line tool is needed to enable this option")
-    endif(NOT CINCH_FOUND)
+        find_package(Cinch)
 
-    #--------------------------------------------------------------------------#
-    # Find pandoc
-    #--------------------------------------------------------------------------#
+        if(NOT CINCH_FOUND)
+            # FIXME: Try to build and install cinch
 
-    find_package(Pandoc)
+            message(FATAL_ERROR
+                "The cinch command-line tool is needed to enable this option")
+        endif(NOT CINCH_FOUND)
 
-    if(NOT PANDOC_FOUND)
-        message(FATAL_ERROR
-            "Pandoc is needed to enable this option")
-    endif(NOT PANDOC_FOUND)
+        #----------------------------------------------------------------------#
+        # Find pandoc
+        #----------------------------------------------------------------------#
 
-    #--------------------------------------------------------------------------#
-    # Create the target directory if it doesn't exist.  This is where the
-    # documentation intermediate files and target will be written.
-    #--------------------------------------------------------------------------#
+        find_package(Pandoc)
 
-	if(NOT EXISTS ${CMAKE_BINARY_DIR}/doc)
-        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
-	endif(NOT EXISTS ${CMAKE_BINARY_DIR}/doc)
+        if(NOT PANDOC_FOUND)
+            message(FATAL_ERROR
+                "Pandoc is needed to enable this option")
+        endif(NOT PANDOC_FOUND)
 
-    #--------------------------------------------------------------------------#
-    # Glob files in search directory to add as dependency information
-    # for the target.
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Create the target directory if it doesn't exist.  This is where the
+        # documentation intermediate files and target will be written.
+        #----------------------------------------------------------------------#
 
-    file(GLOB_RECURSE _DOCFILES ${directory} *.md)
+        if(NOT EXISTS ${CMAKE_BINARY_DIR}/doc)
+            file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
+        endif(NOT EXISTS ${CMAKE_BINARY_DIR}/doc)
 
-    #--------------------------------------------------------------------------#
-    # Add a target to generate the aggregate markdown file for the
-    # document.
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Create absolute directory pathes from relative input
+        #----------------------------------------------------------------------#
 
-	add_custom_target(${target}_markdown
-		${CINCH_EXECUTABLE} doc -c ${config}
-            -o ${CMAKE_BINARY_DIR}/doc/${target}.md ${directory}
-		DEPENDS ${_DOCFILES})
+        set(_directory ${CMAKE_CURRENT_SOURCE_DIR}/${directory})
+        set(_config ${CMAKE_CURRENT_SOURCE_DIR}/doc/${config})
 
-    #--------------------------------------------------------------------------#
-    # Add the output target to be created by calling pandoc on the
-    # aggregate markdown file created in the previous step.
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Glob files in search directory to add as dependency information
+        # for the target.
+        #----------------------------------------------------------------------#
 
-	add_custom_target(${target} ALL
-		${PANDOC_EXECUTABLE} -f markdown+raw_tex
-            ${CMAKE_BINARY_DIR}/doc/${target}.md
-			-o ${CMAKE_BINARY_DIR}/doc/${output})
+        file(GLOB_RECURSE _DOCFILES ${_directory} *.md)
 
-    #--------------------------------------------------------------------------#
-    # Make the target depend on the aggregate markdown file
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Add a target to generate the aggregate markdown file for the
+        # document.
+        #----------------------------------------------------------------------#
 
-	add_dependencies(${target} ${target}_markdown)
+        add_custom_target(${target}_markdown
+            ${CINCH_EXECUTABLE} doc -c ${_config}
+                -o ${CMAKE_BINARY_DIR}/doc/${target}.md ${_directory}
+            DEPENDS ${_DOCFILES})
+
+        #----------------------------------------------------------------------#
+        # Add the output target to be created by calling pandoc on the
+        # aggregate markdown file created in the previous step.
+        #----------------------------------------------------------------------#
+
+        add_custom_target(${target} ALL
+            ${PANDOC_EXECUTABLE} -f markdown+raw_tex
+                ${CMAKE_BINARY_DIR}/doc/${target}.md
+                -o ${CMAKE_BINARY_DIR}/doc/${output})
+
+        #----------------------------------------------------------------------#
+        # Make the target depend on the aggregate markdown file
+        #----------------------------------------------------------------------#
+
+        add_dependencies(${target} ${target}_markdown)
+
+    endif(ENABLE_DOCUMENTATION)
 
 endfunction(cinch_add_doc)
 
