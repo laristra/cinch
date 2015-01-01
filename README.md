@@ -133,6 +133,25 @@ within a single input file.  For latex fragments, use a header of the form:
 
 Latex-style CINCHDOC headers must be on a single line.
 
+Build targets can be added to the documentation.cmake file in the config
+directory.  Each target should be created by calling:
+
+*cinch\_add\_doc*(target-name config.py top-level-search-directory output)
+
+**target-name** The build target label, i.e., a make target will be created
+such that 'make target-name' can be called to generate the documentation
+target.
+
+**config.py** A configuration file that must live in the 'doc' subdirectory
+of the top-level directory of your project.  This file should contain a
+single python dictionary *opts* that sets the cinch command-line
+interface options for your docuement.
+
+**top-level-search-directory** The *relative* path to the head of the
+directory tree within which to search for markdown documentation files.
+
+**output** The name of the output file that should be produced by pandoc.
+
 ## Doxygen Documentation: ENABLE\_DOXYGEN (default OFF)
 <a name="interface-documentation"></a>
 

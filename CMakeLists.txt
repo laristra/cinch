@@ -22,13 +22,7 @@ else()
     cinch_make_version()
 endif(STATIC_VERSION)
 
-option(ENABLE_DOCUMENTATION "Enable documentation build" OFF)
-
-if(ENABLE_DOCUMENTATION)
-    cinch_add_doc(${PROJECT_NAME}-ug ${CMAKE_SOURCE_DIR}/doc/ugconfig.py
-        ${CMAKE_SOURCE_DIR}
-        ${PROJECT_NAME}-ug-${${PROJECT_NAME}_VERSION}.pdf)
-endif(ENABLE_DOCUMENTATION)
+cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
