@@ -3,14 +3,14 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-macro(cinch_subdirlist result curdir)
+macro(cinch_subdirlist result directory)
 
-    file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+    file(GLOB children RELATIVE ${directory} ${directory}/*)
 
     set(dirlist "")
 
     foreach(child ${children})
-        if(IS_DIRECTORY ${curdir}/${child})
+        if(IS_DIRECTORY ${directory}/${child})
             list(APPEND dirlist ${child})
         endif()
     endforeach()

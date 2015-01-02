@@ -1,4 +1,4 @@
-<!-- CINCHDOC DOCUMENT(User Guide) -->
+<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(Overview) -->
 # Cinch CMake Build Utilities
 
 Cinch is a set of utilities and configuration options designed to make
@@ -10,45 +10,96 @@ Cinch eases build system maintainence by imposing a specific structure on
 the project source layout.
 
     project/
-            CMakeLists.txt
-            src/
             app/
-            doc/
             cinch/
+            CMakeLists.txt -> cinch/cmake/ProjectLists.txt
+            config/
+                   documentation.cmake
+                   packages.cmake
+                   project.cmake
+            doc/
+            src/
+                CMakeLists.txt -> cinch/cmake/SourceLists.txt
 
-**project**
+*You may also have any number of submodules under the project directory.*
+
+## Description of Basic Structure
+
+### project
 
 The project top-level directory.
 
-**CMakeLists.txt**
-
-The cinch CMakeLists.txt file.  The user should edit the top few lines
-of this file to match the project name and targets.
-
-**src**
-
-The library source subdirectory.
-The structure for this subdirectory
-is covered in detail
-[below](#library-source).
-
-**app**
+### app
 
 The application target subdirectory.  The actual name of this directory
-is configurable in the CMakeLists.txt file.  This subdirectory should
-contain a CMakeLists.txt file that add whatever cmake targets are needed
-for the specific application.
+is configurable in the *project.cmake* configuration file detailed
+[below](#config-subdirectory).  This subdirectory
+should contain a CMakeLists.txt file that adds whatever cmake targets are
+needed for the specific application.
 
-**doc**
+### cinch
+
+The cinch subdirectory.  This should be checked-out from the cinch
+git server: 'git clone git@darwin.lanl.gov:cinch.git'.
+
+##CMakeLists.txt
+
+A link to the cinch ProjectLists.txt file.
+
+### config
+
+The project configuration directory.  This directory is covered in
+detail [below](#config-subdirectory).
+
+### doc
 
 The documentation subdirectory.  This subdirectory should contain configuration
 files for cinch-generated [guide documentation](#guide-documentation), and
 for [doxygen interface documentation](#interface-documentation).
 
-**cinch**
+### src
 
-The cinch subdirectory.  This should be checked-out from the cinch
-git server: 'git clone git@darwin.lanl.gov:cinch.git'.
+The library source subdirectory.  The structure for this subdirectory
+is covered in detail [below](#library-source).
+
+## Config Subdirectory
+<a name="config-subdirectory"></a>
+
+The config subdirectory must contain the following files
+that provide specialization of the project.  Although all of
+the files must exist, the only file that is required to have content
+is the *project.cmake* file.
+
+### project.cmake
+
+This file cannot be empty.  At a minimum, it must specify the name
+of the top-level project by calling the CMake *project* function to
+set the name, version and enabled languages for the entire project.
+For more documentation, at a prompt on a machine with a valid CMake
+installation, type:
+
+% cmake --help project
+
+Additionally, this file may set the following Cinch
+variables(They may also be left Null):
+
+* CINCH\_APPLICATION\_DIRECTORY
+
+    The name of a project-specific build directory that should be included
+    by CMake when searching for list files.  This directory should contain
+    a valid CMakeLists.txt file that configures additional build targets.
+
+* CINCH\_LIBRARY\_TARGET
+
+    The name of the library target to build for this project,
+    e.g., setting this variable with
+    'set(CINCH\_LIBRARY\_TARGET test)' will create a library
+    target libtest.libext.
+
+* CINCH\_CONFIG\_SUBPROJECTS
+
+    A semicolon-delimited list of subprojects that should be included
+    in the build.
 
 ## Library Source Subdirectory
 <a name="library-source"></a>

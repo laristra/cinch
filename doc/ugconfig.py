@@ -33,11 +33,10 @@ opts = {
     # chapters in the the document.
     #--------------------------------------------------------------------------#
 
-#    'chapters' : [
-#    'First Chapter',
-#    'Test',
-#    'Geometry'
-#    ],
+    'chapters' : [
+    'Overview',
+    'Interface'
+    ],
 
     #--------------------------------------------------------------------------#
     # Chapters Append List
