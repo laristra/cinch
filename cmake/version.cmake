@@ -25,6 +25,7 @@ function(cinch_make_version)
 
         execute_process(COMMAND ${GIT_EXECUTABLE} describe master
             OUTPUT_VARIABLE _version
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     endif(NOT GIT_FOUND)
