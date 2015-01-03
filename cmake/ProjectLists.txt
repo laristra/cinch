@@ -31,6 +31,7 @@ include(insource)
 include(subdirlist)
 include(unit)
 include(documentation)
+include(doxygen)
 include(version)
 
 #------------------------------------------------------------------------------#
@@ -51,6 +52,9 @@ if(STATIC_VERSION)
 else()
     cinch_make_version()
 endif(STATIC_VERSION)
+
+message(STATUS "Creating build for version "
+    "${PROJECT_NAME}-${${PROJECT_NAME}_VERSION}")
 
 #------------------------------------------------------------------------------#
 # Keep users from creating insource builds.
@@ -102,26 +106,6 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
         endif()
     endif(ENABLE_UNIT_TESTS)
 
-    #--------------------------------------------------------------------------#
-    # Add support for Doxygen documentation
-    #--------------------------------------------------------------------------#
-
-    option(ENABLE_DOXYGEN "Enable Doxygen documentation build" OFF)
-
-    if(ENABLE_DOXYGEN)
-        find_package(Doxygen)
-
-        if(NOT DOXYGEN_FOUND)
-            message(FATAL_ERROR "Doxygen is needed to enable this option")
-        endif(NOT DOXYGEN_FOUND)
-
-        configure_file(${CMAKE_SOURCE_DIR}/doc/doxygen.conf.in
-            ${CMAKE_BINARY_DIR}/doc/doxygen.conf)
-        add_custom_target(doxygen ALL
-            ${DOXYGEN} ${CMAKE_BINARY_DIR}/doc/doxygen.conf
-            DEPENDS ${CMAKE_SOURCE_DIR}/doc/doxygen.conf.in)
-    endif(ENABLE_DOXYGEN)
-
 else()
 
     #--------------------------------------------------------------------------#
@@ -131,6 +115,14 @@ else()
     set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
 
 endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+
+#------------------------------------------------------------------------------#
+# Add support for Doxygen documentation
+#
+# NOTE: This depends on CINCH_CONFIG_INFOTAG being set.
+#------------------------------------------------------------------------------#
+
+cinch_add_doxygen()
 
 #------------------------------------------------------------------------------#
 # Set output directories for targets

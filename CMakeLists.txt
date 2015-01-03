@@ -22,7 +22,9 @@ else()
     cinch_make_version()
 endif(STATIC_VERSION)
 
-cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf)
+cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py
+    "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex" .
+    cinch-ug-${cinch_VERSION}.pdf)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
