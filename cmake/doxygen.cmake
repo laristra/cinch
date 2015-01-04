@@ -25,7 +25,7 @@ function(cinch_add_doxygen)
 
         #----------------------------------------------------------------------#
         # Create the output directory if it doesn't exist. This is where
-        # the documentation target and intermediate files will be written.
+        # the documentation target will be written.
         #
         # NOTE: This differs depending on whether or not the project is
         # a top-level project or not.  Subprojects are put under their
@@ -51,18 +51,25 @@ function(cinch_add_doxygen)
             set(${PROJECT_NAME}_DOXYGEN_TARGET)
         endif(CINCH_CONFIG_INFOTAG)
 
+        #----------------------------------------------------------------------#
+        # Create directory for intermediate files
+        #----------------------------------------------------------------------#
+
+        if(NOT EXISTS ${_directory}/.doxygen)
+            file(MAKE_DIRECTORY ${_directory}/.doxygen)
+        endif(NOT EXISTS ${_directory}/.doxygen)
 
         #----------------------------------------------------------------------#
         #----------------------------------------------------------------------#
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in
-            ${_directory}/doxygen.conf)
+            ${_directory}/.doxygen/doxygen.conf)
 
         #----------------------------------------------------------------------#
         #----------------------------------------------------------------------#
 
         add_custom_target(${CINCH_CONFIG_INFOTAG}doxygen ALL
-            ${DOXYGEN} ${_directory}/doxygen.conf
+            ${DOXYGEN} ${_directory}/.doxygen/doxygen.conf
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in)
 
     endif(ENABLE_DOXYGEN)

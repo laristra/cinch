@@ -88,11 +88,12 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     set(CINCH_CONFIG_INFOTAG)
 
     #--------------------------------------------------------------------------#
-    # Add support for ctest
+    # Add support for ctest and GTest
     #--------------------------------------------------------------------------#
 
     option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
-    option(RUN_JENKINS "Generate jenkins xml output for every test" OFF)
+    option(ENABLE_JENKINS_OUTPUT
+        "Generate jenkins xml output for every test" OFF)
 
     if(ENABLE_UNIT_TESTS)
         enable_testing()
