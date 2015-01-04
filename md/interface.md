@@ -1,8 +1,7 @@
 <!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(Interface) -->
+# Cinch CMake Interface{#cmake-interface}
 
-# Cinch CMake Interface
-
-## *cinch\_add\_doc*(target config directory output)
+## *cinch\_add\_doc*(target config directory output){#cinch-add-doc}
 
 Add a documentation build target.
 
@@ -19,12 +18,12 @@ directory tree within which to search for markdown documentation files.
 
 **output** - The name of the output file that should be produced by pandoc.
 
-## *cinch\_add\_unit*(target sources)
+## *cinch\_add\_unit*(target sources){#cinch-add-unit}
 
-## *cinch\_make\_info*(directory headers sources)
+## *cinch\_make\_info*(directory headers sources){#cinch-make-info}
 
-## *cinch\_prevent\_insource\_builds*()
+## *cinch\_prevent\_insource\_builds*(){#cinch-prevent-insource-builds}
 
-## *cinch\_subdirlist*(result directory)
+## *cinch\_subdirlist*(result directory){#cinch-subdirlist}
 
-## *cinch\_subfilelist*(result directory)
+## *cinch\_subfilelist*(result directory){#cinch-subfilelist}

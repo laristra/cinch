@@ -22,9 +22,20 @@ else()
     cinch_make_version()
 endif(STATIC_VERSION)
 
-cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py
-    "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex" .
-    cinch-ug-${cinch_VERSION}.pdf)
+set(ug_pandoc_options
+    "--toc"
+    "--chapters"
+#    "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex"
+    "--include-in-header=${CMAKE_SOURCE_DIR}/doc/cinchheader.tex"
+    "--include-in-header=${CMAKE_SOURCE_DIR}/doc/cinchtitle.tex"
+    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/maketitle.tex"
+#    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/firstpageempty.tex"
+#    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"
+)
+    
+
+cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py .  cinch-ug-${cinch_VERSION}.pdf
+    PANDOC_OPTIONS ${ug_pandoc_options})
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

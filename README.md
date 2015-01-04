@@ -4,6 +4,25 @@
 Cinch is a set of utilities and configuration options designed to make
 cmake builds easy to use and manage.
 
+# General Features
+
+## Recursive Sub-Project Structure
+
+The cinch build system is designed to make modular code development easy.
+By modular, we mean that subprojects can be incorporated into a cinch-based
+top-level project, and they will be automatically added to the top-level
+project's build targets.  This makes it easy to create new projects that
+combine the capabilities of a set of subprojects.  This allows users to
+build up functionality and control the functionality of the top-level
+project.
+
+## Prevent In-Place Builds
+
+Cinch prohibits users from creating in-place builds, i.e., builds that are
+rooted in the top-level project directory of a cinch project.  If the user
+attempts to configure such a build, cmake will exit with an error and
+instructions for how to clean up and create an out-of-source build.
+
 # Basic Structure
 
 Cinch eases build system maintainence by imposing a specific structure on
@@ -55,15 +74,14 @@ detail [below](#config-subdirectory).
 
 The documentation subdirectory.  This subdirectory should contain configuration
 files for cinch-generated [guide documentation](#guide-documentation), and
-for [doxygen interface documentation](#interface-documentation).
+for [doxygen interface documentation](#doxygen-documentation).
 
 ### src
 
 The library source subdirectory.  The structure for this subdirectory
 is covered in detail [below](#library-source).
 
-## Config Subdirectory
-<a name="config-subdirectory"></a>
+## Config Subdirectory{#config-subdirectory}
 
 The config subdirectory must contain the following files
 that provide specialization of the project.  Although all of
@@ -101,29 +119,23 @@ variables(They may also be left Null):
     A semicolon-delimited list of subprojects that should be included
     in the build.
 
-## Library Source Subdirectory
-<a name="library-source"></a>
+### packages.cmake
+
+This file is used to specify CMake find\_package requirements for
+locating installed third-party packages.  The content of this file
+can be any set of valid CMake commands.  Values that are set in this
+file will be available to low-level CMakeLists.txt files for configuring
+source-level build options.
+
+### documentation.cmake
+
+This file is used to add documentation targets with the
+[cinch\_add\_doc](#cinch-add-doc)
+interface (Doxygen documentation is handled separately).  
+
+## Library Source Subdirectory{#library-source}
 
 The library source subdirectory for a cinch project... FIXME
-
-# General Features
-
-## Recursive Sub-Project Structure
-
-The cinch build system is designed to make modular code development easy.
-By modular, we mean that subprojects can be incorporated into a cinch-based
-top-level project, and they will be automatically added to the top-level
-project's build targets.  This makes it easy to create new projects that
-combine the capabilities of a set of subprojects.  This allows users to
-build up functionality and control the functionality of the top-level
-project.
-
-## Prevent In-Place Builds
-
-Cinch prohibits users from creating in-place builds, i.e., builds that are
-rooted in the top-level project directory of a cinch project.  If the user
-attempts to configure such a build, cmake will exit with an error and
-instructions for how to clean up and create an out-of-source build.
 
 # Command-Line Options
 
@@ -144,7 +156,9 @@ allows you to override the automatic versioning by specifying a static version
 to cmake via the STATIC\_VERSION option.  Simply set this to the
 desired version and it will be used.
 
-## Unit Tests with GoogleTest: ENABLE\_UNIT\_TESTS (default OFF)
+## Unit Tests with GoogleTest{#unit-tests}
+
+***CMake Option:*** **ENABLE\_UNIT\_TESTS (default OFF)**
 
 Cinch has support for unit testing using a combination of CTest
 (the native CMake testing facility) and GoogleTest (for C++ support).
@@ -157,8 +171,9 @@ Cinch will check for a local GoogleTest installation on the system during
 the Cmake configuration step.  If GoogleTest is not found, it will be
 built by cinch (GoogleTest source code is included with cinch).
 
-## Guide Documentation: ENABLE\_DOCUMENTATION (default OFF)
-<a name="guide-documentation"></a>
+## Guide Documentation{#guide-documentation}
+
+***CMake Option:*** **ENABLE\_DOCUMENTATION (default OFF)**
 
 Cinch has a powerful documentation facility implemented using the cinch
 command-line utility and [Pandoc](http://johnmacfarlane.net/pandoc).
@@ -203,10 +218,12 @@ directory tree within which to search for markdown documentation files.
 
 **output** The name of the output file that should be produced by pandoc.
 
-## Doxygen Documentation: ENABLE\_DOXYGEN (default OFF)
-<a name="interface-documentation"></a>
+## Doxygen Documentation{#doxygen-documentation}
+
+***CMake Option:*** **ENABLE\_DOXYGEN (default OFF)**
 
 Cinch supports interface documentation using Doxygen.  The doxygen
 configuration file should be called 'doxygen.conf.in' and should reside
 in the 'doc' subdirectory.  For documentation on using Doxygen, please
 take a look at the [Doxygen Homepage](http://www.doxygen.org).
+

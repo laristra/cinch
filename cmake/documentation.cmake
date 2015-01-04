@@ -83,7 +83,7 @@ function(cinch_add_doc target config directory output)
         # easier to use the --option= format for pandoc options
         #----------------------------------------------------------------------#
 
-        set(pandoc_options "--from=markdown+raw_tex")
+        set(pandoc_options "--from=markdown+raw_tex+header_attributes")
 
         if(extra_PANDOC_OPTIONS)
             set(pandoc_options ${pandoc_options} ${extra_PANDOC_OPTIONS})
