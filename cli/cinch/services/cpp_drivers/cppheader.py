@@ -16,26 +16,26 @@ cpp_header_template = Template(
 #define ${CLASSNAME}_hh
 
 /*!
-  \class $CLASSNAME ${FILENAME}
-  \\brief $CLASSNAME provides...
+    \class $CLASSNAME ${FILENAME}
+    \\brief $CLASSNAME provides...
  */
 ${TEMPLATE}class ${CLASSNAME}
 {
 public:
 
-  //! Default constructor
-  ${CLASSNAME} {}
+    //! Default constructor
+    ${CLASSNAME} {}
 
-  //! Destructor
-  ${VIRTUAL} ~${CLASSNAME}() {}
+    //! Destructor
+    ${VIRTUAL} ~${CLASSNAME}() {}
 
 ${PROTECTED}private:
 
-  //! Copy constructor
-  ${CLASSNAME}(const & ${CLASSNAME}) {} = delete;
+    //! Copy constructor
+    ${CLASSNAME}(const & ${CLASSNAME}) {} = delete;
 
-  //! Assignment operator
-  ${CLASSNAME} & operator = (const & ${CLASSNAME}) {} = delete;
+    //! Assignment operator
+    ${CLASSNAME} & operator = (const & ${CLASSNAME}) {} = delete;
 
 }; // class ${CLASSNAME}
 
