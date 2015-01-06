@@ -5,6 +5,7 @@
 
 # This will make sure that all sub-modules have their latest changes
 git submodule foreach --recursive "
+    git checkout master
     git pull
 ";
 
