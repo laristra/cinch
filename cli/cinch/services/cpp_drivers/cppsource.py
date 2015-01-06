@@ -27,8 +27,8 @@ ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
  *
  * mode:c++
  * indent-tabs-mode:t
- * c-basic-offset:2
- * tab-width:2
- * vim: set tabstop=2 shiftwidth=2 expandtab :
+ * c-basic-offset:4
+ * tab-width:4
+ * vim: set tabstop=4 shiftwidth=4 expandtab :
  *----------------------------------------------------------------------------*/
 """)

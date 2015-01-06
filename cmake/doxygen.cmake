@@ -17,11 +17,7 @@ function(cinch_add_doxygen)
         # Find Doxygen
         #----------------------------------------------------------------------#
 
-        find_package(Doxygen)
-
-        if(NOT DOXYGEN_FOUND)
-            message(FATAL_ERROR "Doxygen is required to enable this option")
-        endif(NOT DOXYGEN_FOUND)
+        find_package(Doxygen REQUIRED)
 
         #----------------------------------------------------------------------#
         # Create the output directory if it doesn't exist. This is where
