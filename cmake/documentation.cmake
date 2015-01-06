@@ -101,12 +101,12 @@ function(cinch_add_doc target config directory output)
 
             foreach(img ${_IMAGE_FILES})
                 get_filename_component(_img ${img} NAME_WE)
-                add_custom_target(private_${_img}
+                add_custom_target(${target}_private_${_img}
                     ${CMAKE_COMMAND} -E copy ${img}
                         ${CMAKE_BINARY_DIR}/doc/.${target}
                     DEPENDS ${img}
                     )
-                list(APPEND image_dependencies private_${_img})
+                list(APPEND image_dependencies ${target}_private_${_img})
             endforeach(img ${_IMAGE_FILES})
         endif(extra_IMAGE_GLOB)
 
