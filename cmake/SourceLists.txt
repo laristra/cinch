@@ -32,6 +32,7 @@ cinch_subdirlist(_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 # located in the top-level 'cmake' directory.
 #foreach(_SUBDIR ${CINCH_CONFIG_SUBDIRECTORIES})
 foreach(_SUBDIR ${_SUBDIRECTORIES})
+    message(STATUS "Adding source subdirectory '${_SUBDIR}' to ${CINCH_LIBRARY_TARGET}")
     add_subdirectory(${_SUBDIR})
     list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR})
     list(APPEND HEADERS ${${_SUBDIR}_HEADERS})
