@@ -5,6 +5,6 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 
-\lhead{}
+\lhead{Version: ${${PROJECT_NAME}_VERSION}}
 \chead{Cinch User Guide}
 \rhead{\today}

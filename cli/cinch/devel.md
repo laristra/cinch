@@ -1,38 +1,40 @@
-#------------------------------------------------------------------------------#
-# Adding services
-#------------------------------------------------------------------------------#
+<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(CLI) -->
 
-Cinch can easily be extended with new services.  To add a new service, first
+## Adding services
+
+The Cinch CLI can easily be extended with new services.
+To add a new service, first
 take a look at one of the files under 'cinch/services' (other than
-__init__.py or any of the .pyc files).  Each of these services inherits
+\_init\_.py or any of the .pyc files).  Each of these services inherits
 from the Service base class (defined in 'cinch/base.py').  The important
 parts to include in a new service are captured in the following example:
 
-00 #### example_service.py ####
-01
-02 from cinch.base import Service
-03
-04 class MyService(Service):
-05
-06		def __init__(self, subparsers):
-07
-08			# add a parser for this service
-09			self.parser = subparsers.add_parser('name of service',
-10				help='description of service')
-11
-12			# set the callback for this service
-13			self.parser.set_defaults(func=self.main)
-14
-15		# __init__
-16
-17		def main(self, args=None)
-18			print 'Hello World'
-19		# main
-20
-21	class Factory:
-22		def create(self, subparsers): return MyService(subparsers)
-23
-24 #### example_service.py ####
+~~~~ {#serviceexample .python .numberLines startFrom="0"}
+   # example_service.py
+
+    from cinch.base import Service
+
+    class MyService(Service):
+
+    def __init__(self, subparsers):
+
+        # add a parser for this service
+        self.parser = subparsers.add_parser('name of service',
+            help='description of service')
+  
+        # set the callback for this service
+        self.parser.set_defaults(func=self.main)
+  
+    # __init__
+  
+    def main(self, args=None)
+        print 'Hello World'
+    # main
+  
+    class Factory:
+        def create(self, subparsers): return MyService(subparsers)
+~~~~
+
 
 In this strawman example, we import the Service base class definition on
 line 02.  Line 04 defines our new service class.  In lines 06 through 15,
@@ -60,8 +62,8 @@ directory).
 
 The new service 'myservice' can be called using:
 
-% cinch myservice
+*% cinch myservice*
 
 Help for the service is available with:
 
-% cinch myservice -h
+*% cinch myservice -h*

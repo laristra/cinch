@@ -22,15 +22,17 @@ else()
     cinch_make_version()
 endif(STATIC_VERSION)
 
+configure_file(${CMAKE_SOURCE_DIR}/doc/cinchheader.tex.in
+    ${CMAKE_BINARY_DIR}/doc/cinchheader.tex)
+
 set(ug_pandoc_options
     "--toc"
-    "--chapters"
-#    "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex"
-    "--include-in-header=${CMAKE_SOURCE_DIR}/doc/cinchheader.tex"
+    "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex"
+    "--include-in-header=${CMAKE_BINARY_DIR}/doc/cinchheader.tex"
     "--include-in-header=${CMAKE_SOURCE_DIR}/doc/cinchtitle.tex"
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/maketitle.tex"
-#    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/firstpageempty.tex"
-#    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"
+    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/firstpageempty.tex"
+    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"
 )
     
 
