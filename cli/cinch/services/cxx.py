@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from cinch.base import Service
-from cinch.services.cpp_drivers.default import *
+from cinch.services.cxx_drivers.default import *
 
 #------------------------------------------------------------------------------#
 # Source handler.
@@ -22,7 +22,7 @@ class CINCHSource(Service):
         """
 
         # get a command-line parser
-        self.parser = subparsers.add_parser('cpp',
+        self.parser = subparsers.add_parser('cxx',
             help='Service to generate c++ file templates.')
 
         # add command-line options
@@ -30,7 +30,9 @@ class CINCHSource(Service):
             help='create a templated class prototype')
 
         self.parser.add_argument('-b', '--baseclass', action="store_true",
-            help='create a base class from which other classes can derive')
+            help='create a base class from which other classes can derive. ' +
+                'In addition to adding a protected section, this flag ' +
+                'causes the desctructor to be virtual.')
 
         self.parser.add_argument('-c', '--ccfile', action="store_true",
             help='genefate a c++ source file (in addition to the header)')
@@ -43,7 +45,7 @@ class CINCHSource(Service):
         self.parser.add_argument('-f', '--filename', action="store",
             help='output file base name.' +
                 '  If this argument is not provided,' +
-                ' output file names will be created using the classname')
+                ' output file names will be created using the classname.')
 
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)
@@ -59,7 +61,7 @@ class CINCHSource(Service):
         """
         """
 
-        create_cpp_files(args)
+        create_cxx_files(args)
 
     # main
 

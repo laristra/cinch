@@ -3,13 +3,13 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from cppheader import cpp_header_template
-from cppsource import cpp_source_template
+from cxxheader import cxx_header_template
+from cxxsource import cxx_source_template
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-def create_cpp_files(args):
+def create_cxx_files(args):
 
   """
   """
@@ -24,7 +24,7 @@ def create_cpp_files(args):
   # Setup output file names
   hfile = (args.filename if args.filename != None else args.classname) + '.h'
   # Do substitutions on header template
-  header_output = cpp_header_template.substitute(
+  header_output = cxx_header_template.substitute(
     CLASSNAME=args.classname,
     VIRTUAL=virtual,
     PROTECTED=protected,
@@ -47,7 +47,7 @@ def create_cpp_files(args):
       else args.classname) + '.cc'
 
     # Do substitutions on source template
-    source_output = cpp_source_template.substitute(
+    source_output = cxx_source_template.substitute(
       CLASSNAME=args.classname,
       VIRTUAL=virtual,
       PROTECTED=protected,
@@ -62,7 +62,7 @@ def create_cpp_files(args):
     fd.close()
   # if
 
-# create_cpp_files
+# create_cxx_files
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
