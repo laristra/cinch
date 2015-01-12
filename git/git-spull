@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+#------------------------------------------------------------------------------#
+# git script to recursively pull latest submodule changes
+#------------------------------------------------------------------------------#
+
+# This will make sure that all sub-modules have their latest changes
+git submodule foreach --recursive "
+    git checkout master
+    git pull
+";
+
+git pull
