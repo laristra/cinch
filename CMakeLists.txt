@@ -34,7 +34,13 @@ set(ug_pandoc_options
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/firstpageempty.tex"
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"
 )
+
+find_package(PythonInterp REQUIRED)
     
+add_custom_target(install-cli
+    COMMAND ${PYTHON_EXECUTABLE} setup.py install --user
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cli
+)
 
 cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py .  cinch-ug-${cinch_VERSION}.pdf
     PANDOC_OPTIONS ${ug_pandoc_options})
