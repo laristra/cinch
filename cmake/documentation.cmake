@@ -24,6 +24,7 @@ function(cinch_add_doc target config directory output)
     #--------------------------------------------------------------------------#
 
     option(ENABLE_DOCUMENTATION "Enable documentation" OFF)
+    option(ENABLE_CINCH_VERBOSE "Enable cinch verbose output" OFF)
 
     if(ENABLE_DOCUMENTATION)
 
@@ -39,6 +40,13 @@ function(cinch_add_doc target config directory output)
             message(FATAL_ERROR
                 "The cinch command-line tool is needed to enable this option")
         endif(NOT CINCH_FOUND)
+
+        set(CINCH_VERBOSE "")
+
+        if(ENABLE_CINCH_VERBOSE)
+            message(STATUS "enabling verbose cinch output")
+            set(CINCH_VERBOSE "-v")
+        endif(ENABLE_CINCH_VERBOSE)
 
         #----------------------------------------------------------------------#
         # Find pandoc
@@ -124,7 +132,7 @@ function(cinch_add_doc target config directory output)
         #----------------------------------------------------------------------#
 
         add_custom_target(${target}_markdown
-            ${CINCH_EXECUTABLE} doc -c ${_config}
+            ${CINCH_EXECUTABLE} doc ${CINCH_VERBOSE} -c ${_config}
                 -o ${CMAKE_BINARY_DIR}/doc/.${target}/${target}.md
                 ${_directory}
             DEPENDS ${_DOCFILES})

@@ -40,6 +40,10 @@ class Chapter():
 
 	# __init__
 
+	def title(self):
+		return self._title
+	# title
+
 	def append(self, content):
 
 		"""

@@ -17,10 +17,16 @@ symbols = {
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-def walk_tree(directory, suffixes, documents, initial_document):
+def walk_tree(directory, suffixes, documents, initial_document, verbose):
 
     current_document = documents[initial_document]
     current_chapter = current_document.chapter('Default')
+
+    if(verbose):
+        print 'cinch: current document ' + \
+            current_document.title()
+        print 'cinch: current chapter ' + \
+            current_chapter.title()
 
     # Walk directory looking for files in suffixes
     for root, dirs, files in os.walk(directory):
@@ -30,6 +36,8 @@ def walk_tree(directory, suffixes, documents, initial_document):
 
                 # Open file to search for symbols
                 with open(join(root,file)) as fd:
+                    if(verbose):
+                        print 'cinch: processing ---- ' + file + ' ----'
 
                     # Grab all of the lines
                     lines = fd.readlines()
@@ -88,6 +96,10 @@ def walk_tree(directory, suffixes, documents, initial_document):
                             if 'chapter' in parsed:
                                 current_chapter = \
                                     current_document.chapter(parsed['chapter'])
+
+                                if(verbose):
+                                    print 'cinch new chapter ' + \
+                                        current_chapter.title()
                             # if
 
                             # Append file information

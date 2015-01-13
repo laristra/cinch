@@ -39,6 +39,9 @@ class CINCHDoc(Service):
             help='output target.' +
                 '  Write output to file OUTPUT.')
 
+        self.parser.add_argument('-v', '--verbose', action="store_true",
+            help='verbose output.')
+
         self.parser.add_argument('directory',
             help='Top-level source directory at which to begin parsing.')
 
@@ -114,7 +117,8 @@ class CINCHDoc(Service):
                 doc.add_chapter(chapter)
 
         # Search sub-directories for documentation files
-        walk_tree(args.directory, suffixes, documents, opts['document'])
+        walk_tree(args.directory, suffixes, documents,
+            opts['document'], args.verbose)
 
         # Remove the default chapter if chapters were found
         # Because we add a 'header' chapter, there should be
