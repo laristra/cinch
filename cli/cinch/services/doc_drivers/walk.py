@@ -23,10 +23,11 @@ def walk_tree(directory, suffixes, documents, initial_document, verbose):
     current_chapter = current_document.chapter('Default')
 
     if(verbose):
-        print 'cinch: current document ' + \
+        print 'cinch: initial document ' + \
             current_document.title()
-        print 'cinch: current chapter ' + \
+        print 'cinch: initial chapter ' + \
             current_chapter.title()
+    # if
 
     # Walk directory looking for files in suffixes
     for root, dirs, files in os.walk(directory):
@@ -90,6 +91,11 @@ def walk_tree(directory, suffixes, documents, initial_document, verbose):
             
                                 current_document = \
                                     documents[parsed['document']]
+
+                                if(verbose):
+                                    print 'cinch: -> document ' + \
+                                        current_document.title()
+                                # if
                             # if
 
                             # See if the chapter needs to be created or reset
@@ -98,8 +104,9 @@ def walk_tree(directory, suffixes, documents, initial_document, verbose):
                                     current_document.chapter(parsed['chapter'])
 
                                 if(verbose):
-                                    print 'cinch new chapter ' + \
+                                    print 'cinch: -> chapter ' + \
                                         current_chapter.title()
+                                # if
                             # if
 
                             # Append file information
