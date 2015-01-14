@@ -6,10 +6,10 @@
 import re
 
 cxx_syntax = {
-    'begin' : '/*-',
+    'begin' : '/*~',
     'bstart' : 10,
     'bend' : 2,
-    'end' : ' *--',
+    'end' : ' *~-',
     'estart' : 11,
     'eend' : 3,
     'set' : '~',
@@ -18,11 +18,11 @@ cxx_syntax = {
     'prepend' : ' * '
 }
 
-shell_syntax = {
-    'begin' : '#--',
+cmake_syntax = {
+    'begin' : '#~-',
     'bstart' : 10,
     'bend' : 2,
-    'end' : '#=-',
+    'end' : '#~-',
     'estart' : 10,
     'eend' : 2,
     'set' : '~',
@@ -31,13 +31,44 @@ shell_syntax = {
     'prepend' : '# '
 }
 
+python_syntax = {
+    'begin' : '#~-',
+    'bstart' : 10,
+    'bend' : 2,
+    'end' : '#~-',
+    'estart' : 10,
+    'eend' : 2,
+    'set' : '~',
+    'unset' : '-',
+    'suffixes' : ('.py'),
+    'prepend' : '# '
+}
+
+latex_syntax = {
+    'begin' : '%~-',
+    'bstart' : 10,
+    'bend' : 2,
+    'end' : '%~-',
+    'estart' : 10,
+    'eend' : 2,
+    'set' : '~',
+    'unset' : '-',
+    'suffixes' : ('.tex'),
+    'prepend' : '# '
+}
+
 comment_syntax = {
     'cxx' : cxx_syntax,
-    'shell' : shell_syntax
+    'cmake' : cmake_syntax,
+    'python' : python_syntax,
+    'latex' : latex_syntax
 }
 
 def begin_identifier(line, syntax, refs):
-    if syntax['begin'] in line and syntax['set'] in line:
+    # This conditional only looks at the last n-10 characters
+    # of the line so that we can use '~' as a delimiter at the
+    # start of the comment.
+    if syntax['begin'] in line and syntax['set'] in line[10:]:
         signature = re.sub(syntax['set'], '1', re.sub(syntax['unset'], '0',
             line[len(line)-syntax['bstart']:len(line)-syntax['bend']]))
         refs['index'] = int(signature, base=2)
@@ -48,7 +79,10 @@ def begin_identifier(line, syntax, refs):
 # begin_identifier
 
 def end_identifier(line, syntax, refs):
-    if syntax['end'] in line and syntax['set'] in line:
+    # This conditional only looks at the last n-10 characters
+    # of the line so that we can use '~' as a delimiter at the
+    # start of the comment.
+    if syntax['end'] in line and syntax['set'] in line[10:]:
         signature = re.sub(syntax['set'], '1', re.sub(syntax['unset'], '0',
             line[len(line)-syntax['estart']:len(line)-syntax['eend']]))
         refs['end'] = line.rstrip('\n')

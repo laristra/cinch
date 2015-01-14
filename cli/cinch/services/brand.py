@@ -33,7 +33,8 @@ class CINCHDoc(Service):
                 '  Load the branding information' +
                 ' from python module BRAND.')
 
-        self.parser.add_argument('syntax', choices=['cxx', 'shell'],
+        self.parser.add_argument('syntax',
+            choices=['cxx', 'cmake', 'python'],
             help='Input syntax for search and replacement.')
 
         self.parser.add_argument('directory',
