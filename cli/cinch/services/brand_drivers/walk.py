@@ -19,11 +19,13 @@ def walk_tree(directory, syn, brand):
     for root, dirs, files in os.walk(directory):
         for file in files:
 
-            if file.endswith(syntax['suffixes']):
+            infile = join(root,file)
+            outfile = join(root,file) + '.tmp'
+
+            if file.endswith(syntax['suffixes']) and \
+                not os.path.islink(infile):
 
                 # Open file to search for symbols
-                infile = join(root,file)
-                outfile = join(root,file) + '.tmp'
                 with open(infile) as fd, open(outfile, 'w+') as out:
 
                     # Grab all of the lines
