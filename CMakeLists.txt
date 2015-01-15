@@ -56,7 +56,7 @@ cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf
 
 find_package(PythonInterp 2 REQUIRED)
 
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as cg; print cg.get_python_lib(1,0,prefix='cli')" OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as cg; print cg.get_python_lib(0,0,prefix='cli')" OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py install --root ${CMAKE_INSTALL_PREFIX} --prefix cli --install-scripts bin WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cli OUTPUT_QUIET)")
 
