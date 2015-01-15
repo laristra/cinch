@@ -159,6 +159,13 @@ function(cinch_add_doc target config directory output)
 
         add_dependencies(${target} ${target}_markdown ${image_dependencies})
 
+        #----------------------------------------------------------------------#
+        # Add install target
+        #----------------------------------------------------------------------#
+        
+        install(FILES ${CMAKE_BINARY_DIR}/doc/${output}
+            DESTINATION share/cinch)
+
     endif(ENABLE_DOCUMENTATION)
 
 endfunction(cinch_add_doc)

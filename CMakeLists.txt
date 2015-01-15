@@ -47,27 +47,43 @@ set(ug_pandoc_options
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"
 )
 
+cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf
+    PANDOC_OPTIONS ${ug_pandoc_options})
+
 #------------------------------------------------------------------------------#
 # Setup for command-line interface
 #------------------------------------------------------------------------------#
 
-find_package(PythonInterp REQUIRED)
+find_package(PythonInterp 2 REQUIRED)
 
-#set(PYTHON_SCRIPT "import distutils.sysconfig as cg"
-#    "print cg.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}')")
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as cg; print cg.get_python_lib(1,0,prefix='cli')" OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-#execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "${PYTHON_SCRIPT}"
-#    OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py install --root ${CMAKE_INSTALL_PREFIX} --prefix cli --install-scripts bin WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cli OUTPUT_QUIET)")
 
-#message(STATUS "${PYTHON_INSTDIR}")
+#------------------------------------------------------------------------------#
+# Setup for shell configuration files
+#------------------------------------------------------------------------------#
 
-add_custom_target(install-cli
-    COMMAND ${PYTHON_EXECUTABLE} setup.py install --user
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cli
-)
+# bash
+configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.sh.in
+    ${CMAKE_BINARY_DIR}/env/cinchenv.sh)
 
-cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py .  cinch-ug-${cinch_VERSION}.pdf
-    PANDOC_OPTIONS ${ug_pandoc_options})
+# csh
+configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.csh.in
+    ${CMAKE_BINARY_DIR}/env/cinchenv.csh)
+
+file(GLOB ENV_HELPERS ${CMAKE_BINARY_DIR}/env/*)
+
+install(FILES ${ENV_HELPERS} DESTINATION bin)
+
+#------------------------------------------------------------------------------#
+# Install git utilities
+#------------------------------------------------------------------------------#
+
+file(GLOB GIT_HELPERS ${CMAKE_SOURCE_DIR}/git/scripts/*)
+
+install(FILES ${GIT_HELPERS} DESTINATION bin
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

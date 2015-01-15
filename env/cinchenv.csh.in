@@ -1,0 +1,10 @@
+#------------------------------------------------------------------------------#
+# Copyright (c) 2014 Los Alamos National Security, LLC
+# All rights reserved.
+#------------------------------------------------------------------------------#
+
+# Add bin directory to path
+setenv PATH ${PATH}:@CMAKE_INSTALL_PREFIX@/bin
+
+# Add python module directory to path
+setenv PYTHONPATH ${PYTHONPATH}:@CMAKE_INSTALL_PREFIX@/@PYTHON_INSTDIR@
