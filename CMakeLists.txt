@@ -39,6 +39,7 @@ configure_file(${CMAKE_SOURCE_DIR}/doc/cinchheader.tex.in
 
 set(ug_pandoc_options
     "--toc"
+    "--toc-depth=2"
     "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex"
     "--include-in-header=${CMAKE_BINARY_DIR}/doc/cinchheader.tex"
     "--include-in-header=${CMAKE_SOURCE_DIR}/doc/cinchtitle.tex"

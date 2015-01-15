@@ -2,31 +2,33 @@
 
 # Installation
 
-To install the Cinch command-line tool,
-use the python setup utility by calling:
+Cinch uses standard CMake install features. However, because Cinch depends
+on its own command-line tool to build its documentation, it must be
+installed in stages.
 
-% python setup.py install
+## Install Command-Line Tool
 
-This should be done from the cli subdirectory.
+To begin, configure Cinch to install without documentation:
 
-Optionally, you can specify that the install should be local
-(for users who do not have root privileges):
+    % mkdir build
+    % cd build
+    % cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
+    % make install
 
-% python setup.py install --user
+This will install the command-line tool and some helper scripts to
+setup your environment.  After you have performed the above step, you
+should source the appropriate environment script, e.g.:
 
-This will install the package in the user site-packages, which varies
-depending on the operating system:
+    % source /path/to/install/bin/cinchenv.sh (bash)
 
-* **OS X**
+or
 
-    /Users/username/Library/Python/*version*/lib/python/site-packages
+    % source /path/to/install/bin/cinchenv.csh (csh/tcsh)
 
-* **Linux**
+## Install Documentation
 
-    /home/username/.local/Python/*version*/lib/python/site-packages
+To install the Cinch documentation, you should rerun cmake with
+documentation enabled:
 
-**You must add the local Python bin directory to your PATH!!**
-
-For more documentation on python setup:
-
-% python setup.py --help
+    % cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DENABLE_DOCUMENTATION=ON ..
+    % make install
