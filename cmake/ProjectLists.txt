@@ -27,6 +27,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cinch/cmake)
 #------------------------------------------------------------------------------#
 
 include(info)
+include(common)
 include(insource)
 include(subdirlist)
 include(unit)
@@ -161,6 +162,13 @@ if(CINCH_LIBRARY_TARGET)
     cinch_make_info("${CINCH_CONFIG_INFOTAG}main"
         "${${CINCH_LIBRARY_TARGET}_HEADERS}"
         "${${CINCH_LIBRARY_TARGET}_SOURCES}")
+
+    #--------------------------------------------------------------------------#
+    # Generate common header
+    #--------------------------------------------------------------------------#
+
+    cinch_make_common_header("${CINCH_LIBRARY_TARGET}"
+        "${${CINCH_LIBRARY_TARGET}_HEADERS}")
 
     #--------------------------------------------------------------------------#
     # Add a rule to build the library
