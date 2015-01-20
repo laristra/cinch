@@ -24,6 +24,8 @@ rooted in the top-level project directory of a cinch project.  If the user
 attempts to configure such a build, cmake will exit with an error and
 instructions for how to clean up and create an out-of-source build.
 
+<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(Structure) -->
+
 # Basic Structure
 
 Cinch eases build system maintainence by imposing a specific structure on
@@ -62,7 +64,7 @@ needed for the specific application.
 The cinch subdirectory.  This should be checked-out from the cinch
 git server: 'git clone git@darwin.lanl.gov:cinch.git'.
 
-##CMakeLists.txt
+### CMakeLists.txt
 
 A link to the cinch ProjectLists.txt file.
 
@@ -143,7 +145,9 @@ The library source subdirectory for a cinch project... FIXME
 Cinch provides various command-line options that may be passed on the cmake
 configuration line to affect its behavior.
 
-## Project Version: STATIC\_VERSION (default OFF)
+## Project Version{#project-version}
+
+***CMake Option:*** **STATIC\_VERSION (default OFF)**
 
 Cinch can automatically create version information for projects that use git.
 This feature uses the 'git describe' function, which creates a version from

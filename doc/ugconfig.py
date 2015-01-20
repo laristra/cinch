@@ -34,8 +34,9 @@ opts = {
     #--------------------------------------------------------------------------#
 
     'chapters' : [
-	 'Installation',
     'Overview',
+	 'Installation',
+	 'Structure',
     'CLI',
     'Interface'
     ],
