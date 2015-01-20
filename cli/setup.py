@@ -4,6 +4,10 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
+# add support for setuptools
+from distribute_setup import use_setuptools
+use_setuptools()
+
 import os
 import glob
 import cinch
