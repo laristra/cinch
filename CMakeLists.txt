@@ -73,11 +73,11 @@ install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py install --ro
 
 # bash
 configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.sh.in
-    ${CMAKE_BINARY_DIR}/env/cinchenv.sh)
+    ${CMAKE_BINARY_DIR}/env/cinchenv.sh @ONLY)
 
 # csh
 configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.csh.in
-    ${CMAKE_BINARY_DIR}/env/cinchenv.csh)
+    ${CMAKE_BINARY_DIR}/env/cinchenv.csh @ONLY)
 
 file(GLOB ENV_HELPERS ${CMAKE_BINARY_DIR}/env/*)
 
