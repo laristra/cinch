@@ -27,10 +27,10 @@ public:
     ${CLASSNAME}() {}
 
     //! Copy constructor (disabled)
-    ${CLASSNAME}(const & ${CLASSNAME}) {} = delete;
+    ${CLASSNAME}(const ${CLASSNAME} &) = delete;
 
     //! Assignment operator (disabled)
-    ${CLASSNAME} & operator = (const & ${CLASSNAME}) {} = delete;
+    ${CLASSNAME} & operator = (const ${CLASSNAME} &) = delete;
 
     //! Destructor
     ${VIRTUAL} ~${CLASSNAME}() {}
@@ -46,6 +46,7 @@ public:
         This method does something useful...
      */
     int methodA(double arg0, double arg1) {
+        return 0;
     } // methodA
 
 ${PROTECTED}private:

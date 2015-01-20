@@ -14,6 +14,7 @@ cxx_source_template = Template(
 
 #include <${FILENAME}>
 
+/*
 ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 {
 } // ${CLASSNAME}${TEMPLATE_TYPE}::method
@@ -21,6 +22,7 @@ ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 {
 } // ${CLASSNAME}${TEMPLATE_TYPE}::method
+*/
 
 /*-------------------------------------------------------------------------~--*
  * Formatting options for Emacs and vim.
