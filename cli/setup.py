@@ -5,13 +5,23 @@
 #------------------------------------------------------------------------------#
 
 import os
+import re
 import glob
 import cinch
-from setuptools import setup, find_packages
+from distutils.core import setup
 
 # This is for future requirements
 requires = []
 
+# convenience function to find __init__.py files
+def find_packages(path='.'):
+    ret = []
+    for root, dirs, files in os.walk(path):
+        if '__init__.py' in files:
+            ret.append(re.sub('^[^A-z0-9_]+', '', root.replace('/', '.')))
+    return ret
+
+# setup
 setup_options = dict(
 	# module name
 	name = 'cinch',
@@ -35,10 +45,10 @@ setup_options = dict(
 	scripts = ['bin/cinch'],
 
 	# packages
-	packages = find_packages('.', exclude=['tests*']),
+	packages = find_packages(),
 
 	# package dir
-	package_dir = {'cinch' : 'cinch'},
+	package_dir = { 'cinch' : 'cinch' },
 
 	# license
 	license = 'NONE'
