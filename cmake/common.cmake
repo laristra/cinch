@@ -30,6 +30,7 @@ function(cinch_make_common_header target headers)
     file(APPEND "${output}" "#endif // ${target}_h\n")
 
     include_directories(${CMAKE_BINARY_DIR}/include)
+    install(FILES ${output} DESTINATION ${CINCH_CONFIG_INSTTAG}include)
 
 endfunction(cinch_make_common_header)
 

@@ -96,6 +96,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
     add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
     set(CINCH_CONFIG_INFOTAG)
+    set(CINCH_CONFIG_INSTTAG)
 
     #--------------------------------------------------------------------------#
     # Add support for ctest and GTest
@@ -124,6 +125,7 @@ else()
     #--------------------------------------------------------------------------#
 
     set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
+    set(CINCH_CONFIG_INSTTAG "${PROJECT_NAME}/")
 
 endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -185,6 +187,14 @@ if(CINCH_LIBRARY_TARGET)
 
     add_library(${CINCH_LIBRARY_TARGET} ${${CINCH_LIBRARY_TARGET}_SOURCES}
         ${${CINCH_LIBRARY_TARGET}_HEADERS})
+
+    #--------------------------------------------------------------------------#
+    # Add install targets
+    #--------------------------------------------------------------------------#
+
+    install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
+    install(FILES ${${CINCH_LIBRARY_TARGET}_HEADERS}
+        DESTINATION ${CINCH_CONFIG_INSTTAG}include)
 
 endif(CINCH_LIBRARY_TARGET)
 
