@@ -21,15 +21,29 @@ def create_cxx_files(args):
   # Setup template keywords if the class is templated.
   template = 'template<typename T>\n' if args.template else ''
 
+  # Setup namespace keywords if a namespace was given.
+  namespace_guard = \
+    args.namespace + '_' if args.namespace != None else ''
+
+  namespace_start = \
+    'namespace ' + args.namespace + ' {\n' if args.namespace != None else ''
+
+  namespace_end = \
+    '} // namespace ' + args.namespace + '\n' if args.namespace != None else ''
+
   # Setup output file names
   hfile = (args.filename if args.filename != None else args.classname) + '.h'
+
   # Do substitutions on header template
   header_output = cxx_header_template.substitute(
     CLASSNAME=args.classname,
     VIRTUAL=virtual,
     PROTECTED=protected,
     TEMPLATE=template,
-    FILENAME=hfile
+    FILENAME=hfile,
+    NAMESPACE_START=namespace_start,
+    NAMESPACE_END=namespace_end,
+    NAMESPACE_GUARD=namespace_guard
   )
 
   # Output to file (will overwrite if it exists)
@@ -53,7 +67,10 @@ def create_cxx_files(args):
       PROTECTED=protected,
       TEMPLATE=template,
       TEMPLATE_TYPE=template_type,
-      FILENAME=hfile
+      FILENAME=hfile,
+      NAMESPACE_START=namespace_start,
+      NAMESPACE_END=namespace_end,
+      NAMESPACE_GUARD=namespace_guard
     )
 
     # Output to file (will overwrite if it exists)

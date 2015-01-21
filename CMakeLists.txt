@@ -61,7 +61,7 @@ cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf
 # Setup for command-line interface
 #------------------------------------------------------------------------------#
 
-find_package(PythonInterp 2 REQUIRED)
+find_package(PythonInterp 2.7 REQUIRED)
 
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as cg; print cg.get_python_lib(0,0,prefix='cli')" OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 

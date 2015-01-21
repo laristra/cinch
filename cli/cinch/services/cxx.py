@@ -37,6 +37,12 @@ class CINCHSource(Service):
         self.parser.add_argument('-c', '--ccfile', action="store_true",
             help='genefate a c++ source file (in addition to the header)')
 
+        self.parser.add_argument('-n', '--namespace', action="store",
+            help='namespace name.' +
+                '  If this argument is provided,' +
+                ' the created class definitions will be wrapped in ' +
+                ' the given namespace.')
+
         self.parser.add_argument('classname',
             help='the name of the class.' +
                 '  This name will also be used for the output file' +
