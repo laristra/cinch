@@ -42,9 +42,32 @@ function(cinch_add_doxygen)
 
             set(${PROJECT_NAME}_DOXYGEN_TARGET ${PROJECT_NAME}/doxygen)
 
+            #------------------------------------------------------------------#
+            # Install under the main project name in its own directory
+            #------------------------------------------------------------------#
+
+            set(_install ${CMAKE_PROJECT_NAME}/${PROJECT_NAME})
+
         else()
+
+            #------------------------------------------------------------------#
+            # Output target is in 'doc'
+            #------------------------------------------------------------------#
+
             set(_directory ${CMAKE_BINARY_DIR}/doc)
+
+            #------------------------------------------------------------------#
+            # This variable is used in the doxygen configuration file.  It
+            # will be used in the configure_file call below.
+            #------------------------------------------------------------------#
+
             set(${PROJECT_NAME}_DOXYGEN_TARGET doxygen)
+
+            #------------------------------------------------------------------#
+            # Install in its own directory
+            #------------------------------------------------------------------#
+
+            set(_install ${CMAKE_PROJECT_NAME})
         endif(CINCH_CONFIG_INFOTAG)
 
         #----------------------------------------------------------------------#
@@ -56,12 +79,14 @@ function(cinch_add_doxygen)
         endif(NOT EXISTS ${_directory}/.doxygen)
 
         #----------------------------------------------------------------------#
+        # Generate doxygen configuration file
         #----------------------------------------------------------------------#
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in
             ${_directory}/.doxygen/doxygen.conf)
 
         #----------------------------------------------------------------------#
+        # Add the doxygen target
         #----------------------------------------------------------------------#
 
         add_custom_target(${CINCH_CONFIG_INFOTAG}doxygen ALL
@@ -69,10 +94,11 @@ function(cinch_add_doxygen)
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in)
 
         #----------------------------------------------------------------------#
+        # Add install target
         #----------------------------------------------------------------------#
 
         install(DIRECTORY ${_directory}/doxygen
-            DESTINATION share/${CMAKE_PROJECT_NAME})
+            DESTINATION share/${_install})
 
     endif(ENABLE_DOXYGEN)
 
