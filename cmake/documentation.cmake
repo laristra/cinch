@@ -164,7 +164,7 @@ function(cinch_add_doc target config directory output)
         #----------------------------------------------------------------------#
         
         install(FILES ${CMAKE_BINARY_DIR}/doc/${output}
-            DESTINATION share/cinch)
+            DESTINATION share/${CMAKE_PROJECT_NAME})
 
     endif(ENABLE_DOCUMENTATION)
 
