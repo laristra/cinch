@@ -45,6 +45,26 @@ include(doxygen)
 include(version)
 
 #------------------------------------------------------------------------------#
+# Print useful information
+#------------------------------------------------------------------------------#
+
+if(CMAKE_INSTALL_PREFIX)
+    message(STATUS "Install prefix set to ${CMAKE_INSTALL_PREFIX}")
+endif(CMAKE_INSTALL_PREFIX)
+
+if(CMAKE_CXX_FLAGS)
+    message(STATUS "C++ compiler flags set to ${CMAKE_CXX_FLAGS}")
+endif(CMAKE_CXX_FLAGS)
+
+if(CMAKE_C_FLAGS)
+    message(STATUS "C compiler flags set to ${CMAKE_C_FLAGS}")
+endif(CMAKE_C_FLAGS)
+
+if(CMAKE_FORTRAN_FLAGS)
+    message(STATUS "Fortran compiler flags set to ${CMAKE_FORTRAN_FLAGS}")
+endif(CMAKE_FORTRAN_FLAGS)
+
+#------------------------------------------------------------------------------#
 # Include project configuration
 #------------------------------------------------------------------------------#
 
