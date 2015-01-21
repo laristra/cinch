@@ -125,7 +125,7 @@ else()
     #--------------------------------------------------------------------------#
 
     set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
-    set(CINCH_CONFIG_INSTTAG "${PROJECT_NAME}/")
+    set(CINCH_CONFIG_INSTTAG "/${PROJECT_NAME}")
 
 endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -194,7 +194,7 @@ if(CINCH_LIBRARY_TARGET)
 
     install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
     install(FILES ${${CINCH_LIBRARY_TARGET}_HEADERS}
-        DESTINATION ${CINCH_CONFIG_INSTTAG}include)
+        DESTINATION include${CINCH_CONFIG_INSTTAG})
 
 endif(CINCH_LIBRARY_TARGET)
 
