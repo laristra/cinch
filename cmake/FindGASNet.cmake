@@ -3,19 +3,28 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+
 option(GASNET_ROOT "Root directory of GASNet installation" OFF)
 option(GASNET_CONDUIT "GASNet conduit to use" OFF)
+
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
 find_path(GASNET_INCLUDE_DIR gasnet.h
     HINTS ENV GASNET_ROOT
     PATHS ${GASNET_ROOT}
     PATH_SUFFIXES include)
 
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+
 set(GASNET_LIBRARY_FOUND False)
 
 if(NOT GASNET_CONDUIT)
-    foreach(conduit udp smp mpi)
-        foreach(model seq par parsync)
+    foreach(conduit aries gemini ibv mpi mxm pami portals4 shmem smp udp)
+        foreach(model seq parsync par)
             find_library(GASNET_${conduit}_${model} gasnet-${conduit}-${model}
                 HINTS ENV GASNET_ROOT
                 PATHS ${GASNET_ROOT}
@@ -38,6 +47,9 @@ else()
         set(GASNET_LIBRARY_FOUND ${GASNET_${GASNET_CONDUIT}})
     endif()
 endif(NOT GASNET_CONDUIT)
+
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GASNET
