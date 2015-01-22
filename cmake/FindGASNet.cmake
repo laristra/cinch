@@ -6,8 +6,8 @@
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-option(GASNET_ROOT "Root directory of GASNet installation" OFF)
-option(GASNET_CONDUIT "GASNet conduit to use" OFF)
+set(GASNET_ROOT "" CACHE PATH "Root directory of GASNet installation")
+set(GASNET_CONDUIT FALSE CACHE STRING "GASNet conduit to use")
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
