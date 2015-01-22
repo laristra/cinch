@@ -12,5 +12,5 @@ project=`echo $1 | sed 's,^.*:,,;s,.git,,'`
 # Checkout master in each submodule.  The default behavior leaves
 # the submodules headless, which can be disturbing to the average user...
 cd $project && git submodule foreach --recursive "
-	git chekcout master
+	git checkout master
 ";
