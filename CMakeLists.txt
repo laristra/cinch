@@ -5,7 +5,7 @@
 
 project(cinch)
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8)
 
 #------------------------------------------------------------------------------#
 # Cinch cmake search path and includes
