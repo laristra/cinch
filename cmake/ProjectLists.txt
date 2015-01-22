@@ -205,14 +205,18 @@ if(CINCH_LIBRARY_TARGET)
     # Add a rule to build the library
     #--------------------------------------------------------------------------#
 
-    add_library(${CINCH_LIBRARY_TARGET} ${${CINCH_LIBRARY_TARGET}_SOURCES}
-        ${${CINCH_LIBRARY_TARGET}_HEADERS})
+    if(NOT "${${CINCH_LIBRARY_TARGET}_SOURCES}" STREQUAL "")
+        add_library(${CINCH_LIBRARY_TARGET} ${${CINCH_LIBRARY_TARGET}_SOURCES})
+    endif()
+
 
     #--------------------------------------------------------------------------#
     # Add install targets
     #--------------------------------------------------------------------------#
 
-    install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
+    if(NOT "${${CINCH_LIBRARY_TARGET}_SOURCES}" STREQUAL "")
+         install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
+    endif()
     install(FILES ${${CINCH_LIBRARY_TARGET}_HEADERS}
         DESTINATION include${CINCH_CONFIG_INSTTAG})
 
