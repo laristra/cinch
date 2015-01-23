@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 # Add bin directory to path
-export PATH=$PATH:@CMAKE_INSTALL_PREFIX@/bin
+export PATH="@CMAKE_INSTALL_PREFIX@/bin${PATH:+:}${PATH}"
 
 # Add python module directory to path
-export PYTHONPATH=$PYTHONPATH:@PYTHON_INSTDIR@
+export PYTHONPATH="@PYTHON_INSTDIR@${PYTHONPATH:+:}${PYTHONPATH}"

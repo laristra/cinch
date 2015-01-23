@@ -5,14 +5,14 @@
 
 # Add bin directory to path
 if ! $?PATH then
-	setenv PATH @CMAKE_INSTALL_PREFIX@/bin
+	setenv PATH "@CMAKE_INSTALL_PREFIX@/bin"
 else
-	setenv PATH ${PATH}:@CMAKE_INSTALL_PREFIX@/bin
+	setenv PATH "@CMAKE_INSTALL_PREFIX@/bin:${PATH}"
 endif
 
 # Add python module directory to path
 if ! $?PYTHONPATH then
-	setenv PYTHONPATH @PYTHON_INSTDIR@
+	setenv PYTHONPATH "@PYTHON_INSTDIR@"
 else
-	setenv PYTHONPATH ${PYTHONPATH}:@PYTHON_INSTDIR@
+	setenv PYTHONPATH "@PYTHON_INSTDIR@:${PYTHONPATH}"
 endif
