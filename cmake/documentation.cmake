@@ -25,6 +25,7 @@ function(cinch_add_doc target config directory output)
 
     option(ENABLE_DOCUMENTATION "Enable documentation" OFF)
     option(ENABLE_CINCH_VERBOSE "Enable cinch verbose output" OFF)
+    option(ENABLE_CINCH_DEVELOPMENT "Enable cinch development output" OFF)
 
     if(ENABLE_DOCUMENTATION)
 
@@ -47,6 +48,13 @@ function(cinch_add_doc target config directory output)
             message(STATUS "enabling verbose cinch output")
             set(CINCH_VERBOSE "-v")
         endif(ENABLE_CINCH_VERBOSE)
+
+        set(CINCH_DEVELOPMENT "")
+
+        if(ENABLE_CINCH_DEVELOPMENT)
+            message(STATUS "enabling development cinch output")
+            set(CINCH_DEVELOPMENT "-d")
+        endif(ENABLE_CINCH_DEVELOPMENT)
 
         #----------------------------------------------------------------------#
         # Find pandoc
@@ -132,7 +140,8 @@ function(cinch_add_doc target config directory output)
         #----------------------------------------------------------------------#
 
         add_custom_target(${target}_markdown
-            ${CINCH_EXECUTABLE} doc ${CINCH_VERBOSE} -c ${_config}
+            ${CINCH_EXECUTABLE} doc ${CINCH_VERBOSE} ${CINCH_DEVELOPMENT}
+                -c ${_config}
                 -o ${CMAKE_BINARY_DIR}/doc/.${target}/${target}.md
                 ${_directory}
             DEPENDS ${_DOCFILES})

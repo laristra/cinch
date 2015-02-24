@@ -42,6 +42,9 @@ class CINCHDoc(Service):
         self.parser.add_argument('-v', '--verbose', action="store_true",
             help='verbose output.')
 
+        self.parser.add_argument('-d', '--development', action="store_true",
+            help='development output (inline metadata).')
+
         self.parser.add_argument('directory',
             help='Top-level source directory at which to begin parsing.')
 
@@ -118,7 +121,7 @@ class CINCHDoc(Service):
 
         # Search sub-directories for documentation files
         walk_tree(args.directory, suffixes, documents,
-            opts['document'], args.verbose)
+            opts['document'], args.verbose, args.development)
 
         # Remove the default chapter if chapters were found
         # Because we add a 'header' chapter, there should be

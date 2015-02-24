@@ -17,7 +17,8 @@ symbols = {
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-def walk_tree(directory, suffixes, documents, initial_document, verbose):
+def walk_tree(directory, suffixes, documents, \
+    initial_document, verbose, development):
 
     current_document = documents[initial_document]
     current_chapter = current_document.chapter('Default')
@@ -114,6 +115,14 @@ def walk_tree(directory, suffixes, documents, initial_document, verbose):
                             current_chapter.append('FILE(' + join(root, file) +
                                 ')\n')
                             current_chapter.append('-->\n')
+                            
+                            if(development):
+                                current_chapter.append('\n\color{red}')
+                                current_chapter.append('###############\n\n')
+                                current_chapter.append('\color{blue}CINCH METADATA ')
+                                current_chapter.append('\color{black}FILE:' +
+                                    join(root, file) + '\n')
+                            # if
 
                             # Read the actual content until the end
                             # of the file, or until another CINCHDOC block
