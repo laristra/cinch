@@ -58,6 +58,22 @@ cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf
     PANDOC_OPTIONS ${ug_pandoc_options})
 
 #------------------------------------------------------------------------------#
+# Setup for shell configuration files
+#------------------------------------------------------------------------------#
+
+# bash
+configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.sh.in
+    ${CMAKE_BINARY_DIR}/env/cinchenv.sh @ONLY)
+
+# csh
+configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.csh.in
+    ${CMAKE_BINARY_DIR}/env/cinchenv.csh @ONLY)
+
+file(GLOB ENV_HELPERS ${CMAKE_BINARY_DIR}/env/*)
+
+install(FILES ${ENV_HELPERS} DESTINATION bin)
+
+#------------------------------------------------------------------------------#
 # Install git utilities
 #------------------------------------------------------------------------------#
 
