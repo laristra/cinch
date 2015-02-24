@@ -58,34 +58,6 @@ cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf
     PANDOC_OPTIONS ${ug_pandoc_options})
 
 #------------------------------------------------------------------------------#
-# Setup for command-line interface
-#------------------------------------------------------------------------------#
-
-find_package(PythonInterp 2.7 REQUIRED)
-
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as cg; print cg.get_python_lib(0,0,prefix='${CMAKE_INSTALL_PREFIX}')" OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-install(DIRECTORY cli/cinch DESTINATION ${PYTHON_INSTDIR}
-    FILES_MATCHING PATTERN "*.py")
-install(PROGRAMS cli/bin/cinch DESTINATION bin)
-
-#------------------------------------------------------------------------------#
-# Setup for shell configuration files
-#------------------------------------------------------------------------------#
-
-# bash
-configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.sh.in
-    ${CMAKE_BINARY_DIR}/env/cinchenv.sh @ONLY)
-
-# csh
-configure_file(${CMAKE_SOURCE_DIR}/env/cinchenv.csh.in
-    ${CMAKE_BINARY_DIR}/env/cinchenv.csh @ONLY)
-
-file(GLOB ENV_HELPERS ${CMAKE_BINARY_DIR}/env/*)
-
-install(FILES ${ENV_HELPERS} DESTINATION bin)
-
-#------------------------------------------------------------------------------#
 # Install git utilities
 #------------------------------------------------------------------------------#
 
