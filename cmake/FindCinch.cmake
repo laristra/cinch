@@ -8,7 +8,7 @@
 #------------------------------------------------------------------------------#
 
 find_program(CINCH_EXECUTABLE
-    NAMES cinch
+    NAMES ccli
     DOC "Cinch Command-Line Tool"
 )
 
