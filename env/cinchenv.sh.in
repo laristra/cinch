@@ -1,7 +1,0 @@
-#------------------------------------------------------------------------------#
-# Copyright (c) 2014 Los Alamos National Security, LLC
-# All rights reserved.
-#------------------------------------------------------------------------------#
-
-# Add bin directory to path
-export PATH="@CMAKE_INSTALL_PREFIX@/bin${PATH:+:}${PATH}"
