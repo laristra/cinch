@@ -3,12 +3,12 @@
 # Installation
 
 Cinch uses standard CMake install features. However, because Cinch depends
-on its own command-line tool to build its documentation, it must be
-installed in stages.
+on its own command-line tool (Cinch-Utils) to build its documentation,
+it must be installed in stages.
 
-## Install Command-Line Tool
+## Install the Cinch-Utils Command-Line Tool
 
-To begin, configure Cinch to install without documentation:
+To begin, in the cinch-utils directory:
 
     % mkdir build
     % cd build
@@ -25,10 +25,22 @@ or
 
     % source /path/to/install/bin/cinchenv.csh (csh/tcsh)
 
+The installation also includes an environment module that may be
+used to configure your environment.  This may be installed in an
+appropriate system location, or locally by adding the installation
+bin directory to your MODULEPATH.
+
+**If you prefer, you may also set the required environments variables
+manually:**
+
+***PATH*** add the bin directory of the install path to your PATH
+
+***PYTHONPATH*** add the lib/python*X.X*/site-packages path to your PYTHONPATH
+
 ## Install Documentation
 
-To install the Cinch documentation, you should rerun cmake with
-documentation enabled:
+To install the Cinch documentation, you should run cmake in the Cinch
+build directory with documentation enabled:
 
     % cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DENABLE_DOCUMENTATION=ON ..
     % make install
