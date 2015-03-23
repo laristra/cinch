@@ -26,10 +26,10 @@ def create_cxx_files(args):
     args.namespace + '_' if args.namespace != None else ''
 
   namespace_start = \
-    'namespace ' + args.namespace + ' {\n' if args.namespace != None else ''
+    'namespace ' + args.namespace + ' {\n\n' if args.namespace != None else ''
 
   namespace_end = \
-    '} // namespace ' + args.namespace + '\n' if args.namespace != None else ''
+    '} // namespace ' + args.namespace + '\n\n' if args.namespace != None else ''
 
   # Setup output file names
   hfile = (args.filename if args.filename != None else args.classname) + '.h'

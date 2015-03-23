@@ -15,8 +15,7 @@ cxx_header_template = Template(
 #ifndef ${NAMESPACE_GUARD}${CLASSNAME}_h
 #define ${NAMESPACE_GUARD}${CLASSNAME}_h
 
-${NAMESPACE_START}
-/*!
+${NAMESPACE_START}/*!
     \class $CLASSNAME ${FILENAME}
     \\brief $CLASSNAME provides...
  */
@@ -36,6 +35,12 @@ public:
     //! Destructor
     ${VIRTUAL} ~${CLASSNAME}() {}
 
+#if 0
+    // This is an example of defining a method with Doxygen
+    // documentation.  You should delete this example if
+    // you don't need it.  Please remove or edit this section
+    // before you add the file to a merge request.
+
     /*!
         \\brief This method does...
 
@@ -49,16 +54,20 @@ public:
     int methodA(double arg0, double arg1) {
         return 0;
     } // methodA
+#endif // if 0
 
 ${PROTECTED}private:
 
     // Aggregate data members
+#if 0
+    // This is an example data member.  You should delete
+    // this definition.
     double val_;
+#endif // if 0
 
 }; // class ${CLASSNAME}
 
-${NAMESPACE_END}
-#endif // ${NAMESPACE_GUARD}${CLASSNAME}_h
+${NAMESPACE_END}#endif // ${NAMESPACE_GUARD}${CLASSNAME}_h
 
 /*~-------------------------------------------------------------------------~-*
  * Formatting options for Emacs and vim.
