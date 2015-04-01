@@ -12,7 +12,7 @@ from ccli.services.brand_drivers.walk import *
 # Documentation handler.
 #------------------------------------------------------------------------------#
 
-class CINCHDoc(Service):
+class CINCHBrand(Service):
 
     #--------------------------------------------------------------------------#
     # Initialization.
@@ -82,10 +82,10 @@ class CINCHDoc(Service):
     #--------------------------------------------------------------------------#
 
     class Factory:
-        def create(self, subparsers): return CINCHDoc(subparsers)
+        def create(self, subparsers): return CINCHBrand(subparsers)
     # class Factory
 
-# class CINCHDoc
+# class CINCHBrand
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

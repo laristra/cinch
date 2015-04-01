@@ -4,6 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from ccli.base import Service
+from ccli.services.unit_drivers.default import *
 
 #------------------------------------------------------------------------------#
 # Unit test handler.
@@ -11,40 +12,55 @@ from ccli.base import Service
 
 class CINCHUnitTest(Service):
 
-	#---------------------------------------------------------------------------#
-	# Initialization.
-	#---------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
+    # Initialization.
+    #--------------------------------------------------------------------------#
 
-	def __init__(self, subparsers):
+    def __init__(self, subparsers):
 
-		"""
-		"""
+        """
+        """
 
-		# get a command-line parser
-		self.parser = subparsers.add_parser('unit',
-			help='Service to generate unit-test templates.')
+        # get a command-line parser
+        self.parser = subparsers.add_parser('unit',
+            help='Service to generate unit-test templates.')
 
-		# set the callback for this sub-command
-		self.parser.set_defaults(func=self.main)
+        self.parser.add_argument('unitcase',
+            help='the name of the unit test case.' +
+                '   A unit case may contain several related tests.')
 
-	# __init__
+        self.parser.add_argument('unittest', nargs='?',
+            help='the name of the unit test.' +
+                '   A unit case may contain several related tests.')
 
-	#---------------------------------------------------------------------------#
-	# Main.
-	#---------------------------------------------------------------------------#
+        # set the callback for this sub-command
+        self.parser.set_defaults(func=self.main)
 
-	def main(self, args=None):
+    # __init__
 
-		"""
-		"""
+    #--------------------------------------------------------------------------#
+    # Main.
+    #--------------------------------------------------------------------------#
 
-	# main
+    def main(self, args=None):
 
-	#---------------------------------------------------------------------------#
-	# Object factory for service creation.
-	#---------------------------------------------------------------------------#
+        """
+        """
 
-	class Factory:
-		def create(self, subparsers): return CINCHUnitTest(subparsers)
+        create_unit_files(args)
 
-# class CINCHSource
+    # main
+
+    #--------------------------------------------------------------------------#
+    # Object factory for service creation.
+    #--------------------------------------------------------------------------#
+
+    class Factory:
+        def create(self, subparsers): return CINCHUnitTest(subparsers)
+
+# class CINCHUnitTest
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#
