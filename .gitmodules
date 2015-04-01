@@ -1,4 +1,4 @@
 [submodule "gtest"]
 	path = gtest
-	url = git@ngc.lanl.gov:ngc/gtest.git
+	url = ssh://git@xcp-stash.lanl.gov:7999/ngc/gtest.git
 	branch = master
