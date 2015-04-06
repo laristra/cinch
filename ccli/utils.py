@@ -28,7 +28,6 @@ def create_services(services, subparsers):
     # each using the ServiceFactory class.
     for s in Service.__subclasses__():
 
-        print s
         # This is a little fragile: the name passed to the ServiceFactory
         # create_service method must be qualified relative to the directory
         # in which the utils.py file lives.  The following constructs the

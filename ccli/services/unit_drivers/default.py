@@ -13,9 +13,6 @@ def create_unit_test(args):
     """
     """
 
-    print args.case
-    print args.name
-
     name_a = (args.name if args.name != None else 'testname')
     name_fill = 'testname'
 
