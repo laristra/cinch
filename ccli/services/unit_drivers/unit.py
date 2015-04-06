@@ -39,19 +39,19 @@ TEST(${CASE}, ${NAME_C}) {
  *
  * Basic Assertions:
  *
- *      ==== Fatal ====             ==== Non-Fatal ====
- *      ASSERT_TRUE(condition);     EXPECT_TRUE(condition)
- *      ASSERT_FALSE(condition);    EXPECT_FALSE(condition)
+ *  ==== Fatal ====             ==== Non-Fatal ====
+ *  ASSERT_TRUE(condition);     EXPECT_TRUE(condition)
+ *  ASSERT_FALSE(condition);    EXPECT_FALSE(condition)
  *
  * Binary Comparison:
  *
- *      ==== Fatal ====             ==== Non-Fatal ====
- *      ASSERT_EQ(val1, val2);      EXPECT_EQ(val1, val2)
- *      ASSERT_NE(val1, val2);      EXPECT_NE(val1, val2)
- *      ASSERT_LT(val1, val2);      EXPECT_LT(val1, val2)
- *      ASSERT_LE(val1, val2);      EXPECT_LE(val1, val2)
- *      ASSERT_GT(val1, val2);      EXPECT_GT(val1, val2)
- *      ASSERT_GE(val1, val2);      EXPECT_GE(val1, val2)
+ *  ==== Fatal ====             ==== Non-Fatal ====
+ *  ASSERT_EQ(val1, val2);      EXPECT_EQ(val1, val2)
+ *  ASSERT_NE(val1, val2);      EXPECT_NE(val1, val2)
+ *  ASSERT_LT(val1, val2);      EXPECT_LT(val1, val2)
+ *  ASSERT_LE(val1, val2);      EXPECT_LE(val1, val2)
+ *  ASSERT_GT(val1, val2);      EXPECT_GT(val1, val2)
+ *  ASSERT_GE(val1, val2);      EXPECT_GE(val1, val2)
  *
  * String Comparison:
  *
