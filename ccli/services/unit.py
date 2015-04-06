@@ -25,11 +25,11 @@ class CINCHUnitTest(Service):
         self.parser = subparsers.add_parser('unit',
             help='Service to generate unit-test templates.')
 
-        self.parser.add_argument('unitcase',
+        self.parser.add_argument('case',
             help='the name of the unit test case.' +
                 '   A unit case may contain several related tests.')
 
-        self.parser.add_argument('unittest', nargs='?',
+        self.parser.add_argument('name', nargs='?',
             help='the name of the unit test.' +
                 '   A unit case may contain several related tests.')
 
@@ -47,7 +47,7 @@ class CINCHUnitTest(Service):
         """
         """
 
-        create_unit_files(args)
+        create_unit_test(args)
 
     # main
 
