@@ -12,15 +12,15 @@ cmake_source_template = Template(
 # All rights reserved.
 #-----------------------------------------------------------------------------~#
 
-#set(${PARENT}_HEADERS
-#    ${CMAKE_CURRENT_SOURCE_DIR}/file1.h
-#    PARENT_SCOPE
-#)
-
-set(${PARENT}_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/file1.cc
+set(${PARENT}_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/file1.h
     PARENT_SCOPE
 )
+
+#set(${PARENT}_SOURCES
+#    ${CMAKE_CURRENT_SOURCE_DIR}/file1.cc
+#    PARENT_SCOPE
+#)
 
 #if(ENABLE_UNIT_TESTS)
 #    cinch_add_unit(casename testfile.cc)

@@ -5,6 +5,8 @@
 
 from cxxheader import cxx_header_template
 from cxxsource import cxx_source_template
+import getpass
+import datetime
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -34,8 +36,14 @@ def create_cxx_files(args):
   # Setup output file names
   hfile = (args.filename if args.filename != None else args.classname) + '.h'
 
+  # Get the current user and date
+  author = getpass.getuser()
+  date = datetime.datetime.now().strftime("%b %d, %Y")
+
   # Do substitutions on header template
   header_output = cxx_header_template.substitute(
+    AUTHOR=author,
+    DATE=date,
     CLASSNAME=args.classname,
     VIRTUAL=virtual,
     PROTECTED=protected,
@@ -62,6 +70,8 @@ def create_cxx_files(args):
 
     # Do substitutions on source template
     source_output = cxx_source_template.substitute(
+      AUTHOR=author,
+      DATE=date,
       CLASSNAME=args.classname,
       VIRTUAL=virtual,
       PROTECTED=protected,

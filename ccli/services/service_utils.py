@@ -10,9 +10,11 @@ def overwrite_existing(filename):
     """
     """
 
-    return True if os.path.exists(filename) and \
-        raw_input(filename + ' exists.  Overwrite? [y/N]: ') is 'y' \
-        else False
+    if os.path.exists(filename):
+        return True if raw_input(filename +
+            ' exists.  Overwrite? [y/N]: ') is 'y' else False
+    else:
+        return True
 
 # overwrite_existing
 

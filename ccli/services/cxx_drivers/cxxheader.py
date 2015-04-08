@@ -15,9 +15,15 @@ cxx_header_template = Template(
 #ifndef ${NAMESPACE_GUARD}${CLASSNAME}_h
 #define ${NAMESPACE_GUARD}${CLASSNAME}_h
 
+/*!
+ * \\file ${FILENAME}
+ * \\authors ${AUTHOR}
+ * \date Initial file creation: ${DATE}
+ */
+
 ${NAMESPACE_START}/*!
-    \class $CLASSNAME ${FILENAME}
-    \\brief $CLASSNAME provides...
+    \class ${CLASSNAME} ${FILENAME}
+    \\brief ${CLASSNAME} provides...
  */
 ${TEMPLATE}class ${CLASSNAME}
 {

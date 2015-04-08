@@ -12,8 +12,13 @@ cxx_source_template = Template(
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-#include <${FILENAME}>
+/*!
+ * \\file ${FILENAME}
+ * \\authors ${AUTHOR}
+ * \date Initial file creation: ${DATE}
+ */
 
+#include <${FILENAME}>
 ${NAMESPACE_START}
 /*
 ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
@@ -24,7 +29,6 @@ ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 {
 } // ${CLASSNAME}${TEMPLATE_TYPE}::method
 */
-
 ${NAMESPACE_END}
 /*~------------------------------------------------------------------------~--*
  * Formatting options for Emacs and vim.
