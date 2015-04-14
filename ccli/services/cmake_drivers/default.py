@@ -21,12 +21,12 @@ def create_cmakelists(args):
     if overwrite_existing(filename):
         if args.source:
             cmake_output = cmake_source_template.substitute(
-                PARENT=os.path.basename(os.path.abspath('..')),
+                PARENT=os.path.basename(os.path.abspath('.')),
                 CMAKE_CURRENT_SOURCE_DIR='${CMAKE_CURRENT_SOURCE_DIR}'
             )
         elif args.app:
             cmake_output = cmake_app_template.substitute(
-                PARENT=os.path.basename(os.path.abspath('..')),
+                PARENT=os.path.basename(os.path.abspath('.')),
                 CMAKE_CURRENT_SOURCE_DIR='${CMAKE_CURRENT_SOURCE_DIR}'
             )
         
