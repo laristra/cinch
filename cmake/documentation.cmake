@@ -7,6 +7,8 @@
 # cinch_add_doc
 #
 
+include(CMakeParseArguments)
+
 function(cinch_add_doc target config directory output)
 
     #--------------------------------------------------------------------------#
