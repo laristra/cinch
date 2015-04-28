@@ -24,6 +24,7 @@ def walk_tree(directory, suffixes, documents, \
     current_chapter = current_document.chapter('Default')
 
     if(verbose):
+        print 'ccli: search directory ' + directory
         print 'ccli: initial document ' + \
             current_document.title()
         print 'ccli: initial chapter ' + \
