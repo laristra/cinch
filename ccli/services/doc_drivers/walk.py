@@ -118,7 +118,7 @@ def walk_tree(directory, suffixes, documents, \
                             current_chapter.append('-->\n')
                             
                             if(development):
-                                current_chapter.append('\n\color{red}')
+                                current_chapter.append('\n\color{green}')
                                 current_chapter.append('###############\n\n')
                                 current_chapter.append('\color{blue}CINCH METADATA ')
                                 current_chapter.append('\color{black}FILE:' +
