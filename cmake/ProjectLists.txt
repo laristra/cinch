@@ -173,6 +173,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 if(CINCH_CONFIG_SUBPROJECTS)
     foreach(subproject ${CINCH_CONFIG_SUBPROJECTS})
         add_subdirectory(${subproject})
+        include_directories(${${subproject}_INCDIRS})
     endforeach(subproject)
 endif(CINCH_CONFIG_SUBPROJECTS)
 
@@ -185,6 +186,15 @@ if(CINCH_LIBRARY_TARGET)
     add_subdirectory(src)
 
     include_directories(${${CINCH_LIBRARY_TARGET}_INCDIRS})
+
+    #--------------------------------------------------------------------------#
+    # Set this for parent level build (if it really exists)
+    #--------------------------------------------------------------------------#
+
+    if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        set(${PROJECT_NAME}_INCDIRS ${${CINCH_LIBRARY_TARGET}_INCDIRS}
+            PARENT_SCOPE)
+    endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
     #--------------------------------------------------------------------------#
     # Generate info target
