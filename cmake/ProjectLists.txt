@@ -68,6 +68,11 @@ endif(CMAKE_FORTRAN_FLAGS)
 # Include project configuration
 #------------------------------------------------------------------------------#
 
+# Initialize these to avoid capture of parent state
+unset(CINCH_APPLICATION_DIRECTORY)
+unset(CINCH_LIBRARY_TARGET)
+unset(CINCH_CONFIG_SUBPROJECTS)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
 #------------------------------------------------------------------------------#

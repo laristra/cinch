@@ -16,18 +16,21 @@ function(cinch_make_common_header target headers)
     file(APPEND "${output}" " *--------------------------------------"
         "--------------------------------------*/\n")
 
+    string(REGEX REPLACE "-" "_" guard ${target})
+
     file(APPEND "${output}" "\n")
-    file(APPEND "${output}" "#ifndef ${target}_h\n")
-    file(APPEND "${output}" "#define ${target}_h\n")
+    file(APPEND "${output}" "#ifndef ${guard}_h\n")
+    file(APPEND "${output}" "#define ${guard}_h\n")
     file(APPEND "${output}" "\n")
 
     foreach(hdr ${headers})
-        get_filename_component(_hdr_name ${hdr} NAME)
-        file(APPEND "${output}" "#include <${_hdr_name}>\n")
+#        get_filename_component(_hdr_name ${hdr} NAME)
+#        file(APPEND "${output}" "#include <${_hdr_name}>\n")
+        file(APPEND "${output}" "#include <${hdr}>\n")
     endforeach(hdr)
 
     file(APPEND "${output}" "\n")
-    file(APPEND "${output}" "#endif // ${target}_h\n")
+    file(APPEND "${output}" "#endif // ${guard}_h\n")
 
     include_directories(${CMAKE_BINARY_DIR}/include)
     install(FILES ${output} DESTINATION include${CINCH_CONFIG_INSTTAG})
