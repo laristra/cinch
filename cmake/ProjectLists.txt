@@ -239,13 +239,15 @@ if(CINCH_LIBRARY_TARGET)
     # Add install targets
     #--------------------------------------------------------------------------#
 
-    message(STATUS "${${CINCH_LIBRARY_TARGET}_HEADERS}")
-
     if(NOT "${${CINCH_LIBRARY_TARGET}_SOURCES}" STREQUAL "")
          install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
     endif()
-    install(FILES ${REL_HEADERS}
-        DESTINATION include${CINCH_CONFIG_INSTTAG})
+
+    foreach(FILE ${REL_HEADERS})
+        get_filename_component(DIR ${FILE} DIRECTORY)
+        install(FILES src/${FILE} DESTINATION
+            include${CINCH_CONFIG_INSTTAG}/${DIR})
+    endforeach(_file)
 
 endif(CINCH_LIBRARY_TARGET)
 
