@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_make_common_header target headers libpath)
+function(cinch_make_common_header target headers)
 
     set(output "${CMAKE_BINARY_DIR}/include/${target}.h")
 
@@ -24,8 +24,7 @@ function(cinch_make_common_header target headers libpath)
     file(APPEND "${output}" "\n")
 
     foreach(hdr ${headers})
-        string(REGEX REPLACE "${libpath}/" "" _hdr ${hdr})
-        file(APPEND "${output}" "#include <${_hdr}>\n")
+        file(APPEND "${output}" "#include <${hdr}>\n")
     endforeach(hdr)
 
     file(APPEND "${output}" "\n")
