@@ -247,7 +247,7 @@ if(CINCH_LIBRARY_TARGET)
         get_filename_component(DIR ${FILE} DIRECTORY)
         install(FILES src/${FILE} DESTINATION
             include${CINCH_CONFIG_INSTTAG}/${DIR})
-    endforeach(_file)
+    endforeach(FILE)
 
 endif(CINCH_LIBRARY_TARGET)
 
