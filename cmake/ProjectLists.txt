@@ -214,7 +214,7 @@ if(CINCH_LIBRARY_TARGET)
     #--------------------------------------------------------------------------#
 
     cinch_make_common_header("${CINCH_LIBRARY_TARGET}"
-        "${${CINCH_LIBRARY_TARGET}_HEADERS}")
+        "${${CINCH_LIBRARY_TARGET}_HEADERS}" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
     #--------------------------------------------------------------------------#
     # Add a rule to build the library
