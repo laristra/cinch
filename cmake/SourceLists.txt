@@ -33,6 +33,8 @@ cinch_subdirlist(_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 # Add subdirectory files
 #------------------------------------------------------------------------------#
 
+list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+
 # This loop adds header and source files for each listed sub-directory
 # to the main header and source file lists.  Additionally, it adds the
 # listed sub-directories to the include search path.  Lastly, it creates
@@ -48,11 +50,17 @@ foreach(_SUBDIR ${_SUBDIRECTORIES})
     if("${${_SUBDIR}_HEADERS}${${_SUBDIR}_SOURCES}" STREQUAL "")
         message(FATAL_ERROR "Internal cmake error: subdirectory ${_SUBDIR} set neither ${_SUBDIR}_HEADERS nor ${_SUBDIR}_SOURCES")
     endif()
-    list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR})
-    list(APPEND HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR}/${${_SUBDIR}_HEADERS})
-    list(APPEND SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR}/${${_SUBDIR}_SOURCES})
+
+    foreach(_HEADER ${${_SUBDIR}_HEADERS})
+        list(APPEND HEADERS
+            ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR}/${_HEADER})
+    endforeach(_HEADER)
+
+    foreach(_SOURCE ${${_SUBDIR}_SOURCES})
+        list(APPEND SOURCES
+            ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR}/${_SOURCE})
+    endforeach(_SOURCE)
+
     cinch_make_info("${CINCH_CONFIG_INFOTAG}${_SUBDIR}"
         "${${_SUBDIR}_HEADERS}" "${${_SUBDIR}_SOURCES}")
 endforeach(_SUBDIR)
