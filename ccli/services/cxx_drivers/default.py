@@ -27,11 +27,13 @@ def create_cxx_files(args):
   namespace_guard = \
     args.namespace + '_' if args.namespace != None else ''
 
-  namespace_start = \
-    'namespace ' + args.namespace + ' {\n\n' if args.namespace != None else ''
+  namespace_start = "namespace " + \
+    args.namespace.replace("::", " { namespace ") + \
+    " {\n\n" if args.namespace != None else ''
 
-  namespace_end = \
-    '} // namespace ' + args.namespace + '\n\n' if args.namespace != None else ''
+  namespace_end = "} // namespace " + \
+    "\n} // namespace ".join(args.namespace.split("::")[::-1]) + "\n\n" \
+    if args.namespace != None else ''
 
   # Setup output file names
   hfile = (args.filename if args.filename != None else args.classname) + '.h'
@@ -94,5 +96,5 @@ def create_cxx_files(args):
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 #
-# vim: set expandtab :
+# vim: set tabstop=2 shiftwidth=2 expandtab :
 #------------------------------------------------------------------------------#
