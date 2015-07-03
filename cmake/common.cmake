@@ -24,8 +24,6 @@ function(cinch_make_common_header target headers)
     file(APPEND "${output}" "\n")
 
     foreach(hdr ${headers})
-#        get_filename_component(_hdr_name ${hdr} NAME)
-#        file(APPEND "${output}" "#include <${_hdr_name}>\n")
         file(APPEND "${output}" "#include <${hdr}>\n")
     endforeach(hdr)
 

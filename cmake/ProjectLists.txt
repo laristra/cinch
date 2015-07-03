@@ -210,11 +210,21 @@ if(CINCH_LIBRARY_TARGET)
         "${${CINCH_LIBRARY_TARGET}_SOURCES}")
 
     #--------------------------------------------------------------------------#
+    # Create relative paths for headers
+    #--------------------------------------------------------------------------#
+
+    unset(REL_HEADERS)
+    foreach(_HEADER ${${CINCH_LIBRARY_TARGET}_HEADERS})
+        string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/src/" ""
+            _REL_HEADER ${_HEADER})
+        list(APPEND REL_HEADERS ${_REL_HEADER})
+    endforeach(_HEADER)
+
+    #--------------------------------------------------------------------------#
     # Generate common header
     #--------------------------------------------------------------------------#
 
-    cinch_make_common_header("${CINCH_LIBRARY_TARGET}"
-        "${${CINCH_LIBRARY_TARGET}_HEADERS}")
+    cinch_make_common_header("${CINCH_LIBRARY_TARGET}" "${REL_HEADERS}")
 
     #--------------------------------------------------------------------------#
     # Add a rule to build the library
@@ -232,8 +242,12 @@ if(CINCH_LIBRARY_TARGET)
     if(NOT "${${CINCH_LIBRARY_TARGET}_SOURCES}" STREQUAL "")
          install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
     endif()
-    install(FILES ${${CINCH_LIBRARY_TARGET}_HEADERS}
-        DESTINATION include${CINCH_CONFIG_INSTTAG})
+
+    foreach(FILE ${REL_HEADERS})
+        get_filename_component(DIR ${FILE} DIRECTORY)
+        install(FILES src/${FILE} DESTINATION
+            include${CINCH_CONFIG_INSTTAG}/${DIR})
+    endforeach(FILE)
 
 endif(CINCH_LIBRARY_TARGET)
 
