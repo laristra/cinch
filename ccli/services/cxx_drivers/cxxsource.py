@@ -18,7 +18,7 @@ cxx_source_template = Template(
  * \date Initial file creation: ${DATE}
  */
 
-#include <${FILENAME}>
+#include "${FILENAME}"
 ${NAMESPACE_START}
 /*
 ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
