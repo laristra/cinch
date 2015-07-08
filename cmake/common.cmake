@@ -3,14 +3,14 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_make_common_header headers)
+function(cinch_make_common_header target headers)
 
     set(COMMON_HEADER "" CACHE STRING
         "Set common header name (implies common header creation)")
 
-    if(ENABLE_COMMON_HEADER)
-        set(target ${COMMON_HEADER})
-        set(output "${CMAKE_BINARY_DIR}/include/${target}.h")
+    if(COMMON_HEADER)
+        set(target_h ${COMMON_HEADER})
+        set(output "${CMAKE_BINARY_DIR}/include/${target_h}")
 
         file(WRITE "${output}" "/*--------------------------------------"
                  "--------------------------------------* \n")
@@ -37,7 +37,7 @@ function(cinch_make_common_header headers)
 
         include_directories(${CMAKE_BINARY_DIR}/include)
         install(FILES ${output} DESTINATION include${CINCH_CONFIG_INSTTAG})
-    endif(ENABLE_COMMON_HEADER)
+    endif(COMMON_HEADER)
 
 endfunction(cinch_make_common_header)
 
