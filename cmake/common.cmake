@@ -5,8 +5,8 @@
 
 function(cinch_make_common_header headers)
 
-    option(COMMON_HEADER
-        "Set common header name (implies common header creation)" OFF)
+    set(COMMON_HEADER "" CACHE STRING
+        "Set common header name (implies common header creation)")
 
     if(ENABLE_COMMON_HEADER)
         set(target ${COMMON_HEADER})

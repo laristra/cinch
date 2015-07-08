@@ -79,8 +79,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 # Create a version for the project
 #------------------------------------------------------------------------------#
 
-option(STATIC_VERSION
-    "Set a static version (don't use 'git describe')" OFF)
+set(STATIC_VERSION "git describe" CACHE STRING "Set a static version")
 
 if(STATIC_VERSION)
     set(${PROJECT_NAME}_VERSION ${STATIC_VERSION})
