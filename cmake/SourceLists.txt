@@ -43,9 +43,12 @@ endif(ENABLE_COMMON_HEADER)
 # a catalog for each sub-directory with information on the source and
 # headers files from the directory using the 'info.cmake' script that is
 # located in the top-level 'cmake' directory.
+
 #foreach(_SUBDIR ${CINCH_CONFIG_SUBDIRECTORIES})
+
 foreach(_SUBDIR ${_SUBDIRECTORIES})
-    message(STATUS "Adding source subdirectory '${_SUBDIR}' to ${CINCH_LIBRARY_TARGET}")
+    message(STATUS
+        "Adding source subdirectory '${_SUBDIR}' to ${library_target_name}")
     unset(${_SUBDIR}_HEADERS)
     unset(${_SUBDIR}_SOURCES)
     add_subdirectory(${_SUBDIR})
@@ -71,9 +74,9 @@ foreach(_SUBDIR ${_SUBDIRECTORIES})
         "${${_SUBDIR}_HEADERS}" "${${_SUBDIR}_SOURCES}")
 endforeach(_SUBDIR)
 
-set(${CINCH_LIBRARY_TARGET}_HEADERS ${HEADERS} PARENT_SCOPE)
-set(${CINCH_LIBRARY_TARGET}_SOURCES ${SOURCES} PARENT_SCOPE)
-set(${CINCH_LIBRARY_TARGET}_INCDIRS ${INCDIRS} PARENT_SCOPE)
+set(${library_target_name}_HEADERS ${HEADERS} PARENT_SCOPE)
+set(${library_target_name}_SOURCES ${SOURCES} PARENT_SCOPE)
+set(${library_target_name}_INCDIRS ${INCDIRS} PARENT_SCOPE)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

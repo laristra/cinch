@@ -195,7 +195,17 @@ if(CINCH_LIBRARY_TARGETS)
         list(GET library_target_list 0 library_target_name)
         list(GET library_target_list 1 library_target_directory)
 
+        #----------------------------------------------------------------------#
+        # Add the subdirectory
+        #----------------------------------------------------------------------#
+
         add_subdirectory(${library_target_directory})
+
+        #----------------------------------------------------------------------#
+        # Add target include directories to include path
+        #----------------------------------------------------------------------#
+
+        include_directories(${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
         # Set this for parent level build (if it really exists)
