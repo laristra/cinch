@@ -41,6 +41,7 @@ include(insource)
 include(subdirlist)
 include(unit)
 include(documentation)
+include(library)
 include(doxygen)
 include(version)
 
@@ -185,77 +186,84 @@ endif(CINCH_CONFIG_SUBPROJECTS)
 # Library target
 #------------------------------------------------------------------------------#
 
-if(CINCH_LIBRARY_TARGET)
+if(CINCH_LIBRARY_TARGETS)
 
-    add_subdirectory(src)
+    foreach(library_target ${CINCH_LIBRARY_TARGETS})
 
-    include_directories(${${CINCH_LIBRARY_TARGET}_INCDIRS})
+        string(REPLACE ":" ";" library_target_list ${library_target})
 
-    #--------------------------------------------------------------------------#
-    # Set this for parent level build (if it really exists)
-    #--------------------------------------------------------------------------#
+        list(GET library_target_list 0 library_target_name)
+        list(GET library_target_list 1 library_target_directory)
 
-    if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-        set(${PROJECT_NAME}_INCDIRS ${${CINCH_LIBRARY_TARGET}_INCDIRS}
-            PARENT_SCOPE)
-    endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        add_subdirectory(${library_target_directory})
 
-    #--------------------------------------------------------------------------#
-    # Generate info target
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Set this for parent level build (if it really exists)
+        #----------------------------------------------------------------------#
 
-    cinch_make_info("${CINCH_CONFIG_INFOTAG}main"
-        "${${CINCH_LIBRARY_TARGET}_HEADERS}"
-        "${${CINCH_LIBRARY_TARGET}_SOURCES}")
+        if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+            set(${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS}
+                PARENT_SCOPE)
+        endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
-    #--------------------------------------------------------------------------#
-    # Create relative paths for headers
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Generate info target
+        #----------------------------------------------------------------------#
 
-    unset(REL_HEADERS)
-    foreach(_HEADER ${${CINCH_LIBRARY_TARGET}_HEADERS})
-        string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/src/" ""
-            _REL_HEADER ${_HEADER})
-        list(APPEND REL_HEADERS ${_REL_HEADER})
-    endforeach(_HEADER)
+        cinch_make_info("${CINCH_CONFIG_INFOTAG}main"
+            "${${library_target_name}_HEADERS}"
+            "${${library_target_name}_SOURCES}")
 
-    #--------------------------------------------------------------------------#
-    # Generate common header
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Create relative paths for headers
+        #----------------------------------------------------------------------#
 
-    cinch_make_common_header("${CINCH_LIBRARY_TARGET}" "${REL_HEADERS}")
+        unset(REL_HEADERS)
+        foreach(_HEADER ${${library_target_name}_HEADERS})
+            string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/src/" ""
+                _REL_HEADER ${_HEADER})
+            list(APPEND REL_HEADERS ${_REL_HEADER})
+        endforeach(_HEADER)
 
-    #--------------------------------------------------------------------------#
-    # Add a rule to build the library
-    #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+        # Generate common header
+        #----------------------------------------------------------------------#
 
-    if(NOT "${${CINCH_LIBRARY_TARGET}_SOURCES}" STREQUAL "")
-        add_library(${CINCH_LIBRARY_TARGET} ${${CINCH_LIBRARY_TARGET}_SOURCES})
-    endif()
+        cinch_make_common_header("${library_target_name}" "${REL_HEADERS}")
 
+        #----------------------------------------------------------------------#
+        # Add a rule to build the library
+        #----------------------------------------------------------------------#
 
-    #--------------------------------------------------------------------------#
-    # Add install targets
-    #--------------------------------------------------------------------------#
+        if(NOT "${${library_target_name}_SOURCES}" STREQUAL "")
+            add_library(${library_target_name}
+                ${${library_target_name}_SOURCES})
+        endif()
 
-    if(NOT "${${CINCH_LIBRARY_TARGET}_SOURCES}" STREQUAL "")
-         install(TARGETS ${CINCH_LIBRARY_TARGET} DESTINATION lib)
-    endif()
+        #----------------------------------------------------------------------#
+        # Add install targets
+        #----------------------------------------------------------------------#
 
-    foreach(FILE ${REL_HEADERS})
-        get_filename_component(DIR ${FILE} DIRECTORY)
-        install(FILES src/${FILE} DESTINATION
-            include${CINCH_CONFIG_INSTTAG}/${DIR})
-    endforeach(FILE)
+        if(NOT "${${library_target_name}_SOURCES}" STREQUAL "")
+             install(TARGETS ${library_target_name} DESTINATION lib)
+        endif()
 
-endif(CINCH_LIBRARY_TARGET)
+        foreach(FILE ${REL_HEADERS})
+            get_filename_component(DIR ${FILE} DIRECTORY)
+            install(FILES src/${FILE} DESTINATION
+                include${CINCH_CONFIG_INSTTAG}/${DIR})
+        endforeach(FILE)
+
+    endforeach(library_target)
+
+endif(CINCH_LIBRARY_TARGETS)
 
 #------------------------------------------------------------------------------#
 # Application targets
 #------------------------------------------------------------------------------#
 
 if(CINCH_APPLICATION_DIRECTORY)
-    add_subdirectory(${CINCH_APPLICATION_DIRECTORY})
+	add_subdirectory(${CINCH_APPLICATION_DIRECTORY})
 endif(CINCH_APPLICATION_DIRECTORY)
 
 #------------------------------------------------------------------------------#
