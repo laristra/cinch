@@ -208,13 +208,16 @@ if(CINCH_LIBRARY_TARGETS)
         include_directories(${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
-        # Set this for parent level build (if it really exists)
+        # Add target includes to global include directories
         #----------------------------------------------------------------------#
 
-        if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-            set(${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS}
-                PARENT_SCOPE)
-        endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        list(APPEND ${PROJECT_NAME}_INCDIRS ${library_target_name}_INCDIRS)
+
+        #----------------------------------------------------------------------#
+        # Add target to global link libraries
+        #----------------------------------------------------------------------#
+
+        list(APPEND ${PROJECT_NAME}_LINKLIBS ${library_target_name})
 
         #----------------------------------------------------------------------#
         # Generate info target
@@ -265,6 +268,18 @@ if(CINCH_LIBRARY_TARGETS)
         endforeach(FILE)
 
     endforeach(library_target)
+
+    #--------------------------------------------------------------------------#
+    # Set these for parent level build
+    #--------------------------------------------------------------------------#
+
+    if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        set(${PROJECT_NAME}_INCDIRS ${${PROJECT_NAME}_INCDIRS} PARENT_SCOPE)
+        set(${PROJECT_NAME}_LINKLIBS ${${PROJECT_NAME}_LINKLIBS} PARENT_SCOPE)
+    else()
+        set(CINCH_LINK_LIBRARIES ${${PROJECT_NAME}_LINKLIBS})
+    endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 endif(CINCH_LIBRARY_TARGETS)
 
