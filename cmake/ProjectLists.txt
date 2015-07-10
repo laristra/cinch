@@ -179,8 +179,18 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 if(CINCH_SUBPROJECTS)
     foreach(subproject ${CINCH_SUBPROJECTS})
-        add_subdirectory(${subproject})
-        include_directories(${${subproject}_INCDIRS})
+        string(REPLACE ":" ";" subproject_data ${subproject})
+
+        list(GET subproject_data 0 subproject_name)
+        list(GET subproject_data 1 subproject_libraries)
+
+        add_subdirectory(${subproject_name})
+
+        foreach(subproject_library ${subproject_libraries})
+            message(STATUS "Processing subproject ${subproject_library}")
+            include_directories(${${subproject_library}_INCDIRS})
+            message(STATUS "Adding include directories ${${subproject_library}_INCDIRS}")
+        endforeach(subproject_library)
     endforeach(subproject)
 endif(CINCH_SUBPROJECTS)
 

@@ -7,7 +7,7 @@
 # cinch_add_subproject
 #
 
-function(cinch_add_subproject subproject)
+function(cinch_add_subproject subproject libraries)
 
     #--------------------------------------------------------------------------#
     #
@@ -15,7 +15,7 @@ function(cinch_add_subproject subproject)
 
     message(STATUS "Adding subproject ${subproject}")
 
-    list(APPEND CINCH_SUBPROJECTS "${subproject}")
+    list(APPEND CINCH_SUBPROJECTS "${subproject}:${libraries}")
     set(CINCH_SUBPROJECTS ${CINCH_SUBPROJECTS} PARENT_SCOPE)
 
 endfunction(cinch_add_subproject)
