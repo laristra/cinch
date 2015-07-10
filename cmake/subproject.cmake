@@ -4,22 +4,21 @@
 #------------------------------------------------------------------------------#
 
 #
-# cinch_add_library
+# cinch_add_subproject
 #
 
-function(cinch_add_library_target target directory)
+function(cinch_add_subproject subproject libraries)
 
     #--------------------------------------------------------------------------#
     #
     #--------------------------------------------------------------------------#
 
-    message(STATUS
-        "Adding library target ${target} with source directory ${directory}")
+    message(STATUS "Adding subproject ${subproject}")
 
-    list(APPEND CINCH_LIBRARY_TARGETS "${target}:${directory}")
-    set(CINCH_LIBRARY_TARGETS ${CINCH_LIBRARY_TARGETS} PARENT_SCOPE)
+    list(APPEND CINCH_SUBPROJECTS "${subproject}:${libraries}")
+    set(CINCH_SUBPROJECTS ${CINCH_SUBPROJECTS} PARENT_SCOPE)
 
-endfunction(cinch_add_library_target)
+endfunction(cinch_add_subproject)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
