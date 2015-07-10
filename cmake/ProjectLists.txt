@@ -42,6 +42,8 @@ include(subdirlist)
 include(unit)
 include(documentation)
 include(library)
+include(application)
+include(subproject)
 include(doxygen)
 include(version)
 
@@ -175,12 +177,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Add sub-projects
 #------------------------------------------------------------------------------#
 
-if(CINCH_CONFIG_SUBPROJECTS)
-    foreach(subproject ${CINCH_CONFIG_SUBPROJECTS})
+if(CINCH_SUBPROJECTS)
+    foreach(subproject ${CINCH_SUBPROJECTS})
         add_subdirectory(${subproject})
         include_directories(${${subproject}_INCDIRS})
     endforeach(subproject)
-endif(CINCH_CONFIG_SUBPROJECTS)
+endif(CINCH_SUBPROJECTS)
 
 #------------------------------------------------------------------------------#
 # Library target
@@ -284,12 +286,17 @@ if(CINCH_LIBRARY_TARGETS)
 endif(CINCH_LIBRARY_TARGETS)
 
 #------------------------------------------------------------------------------#
-# Application targets
+# Application directories
 #------------------------------------------------------------------------------#
 
-if(CINCH_APPLICATION_DIRECTORY)
-	add_subdirectory(${CINCH_APPLICATION_DIRECTORY})
-endif(CINCH_APPLICATION_DIRECTORY)
+if(CINCH_APPLICATION_DIRECTORIES)
+    foreach(application_directory ${CINCH_APPLICATION_DIRECTORIES})
+
+        add_subdirectory(${application_directory})
+
+    endforeach(application_directory)
+
+endif(CINCH_APPLICATION_DIRECTORIES)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
