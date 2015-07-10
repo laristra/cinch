@@ -225,7 +225,7 @@ if(CINCH_LIBRARY_TARGETS)
         # Generate info target
         #----------------------------------------------------------------------#
 
-        cinch_make_info("${CINCH_CONFIG_INFOTAG}main"
+        cinch_make_info("${CINCH_CONFIG_INFOTAG}${library_target_name}"
             "${${library_target_name}_HEADERS}"
             "${${library_target_name}_SOURCES}")
 
