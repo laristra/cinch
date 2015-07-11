@@ -185,7 +185,11 @@ if(CINCH_SUBPROJECTS)
         list(GET subproject_data 1 subproject_libraries)
 
         add_subdirectory(${subproject_name})
-        include_directories(${${subproject_name}_INCDIRS})
+
+        # add includes for individual subproject libraries
+        foreach(subproject_library ${subproject_libraries})
+            include_directories(${${subproject_library}_INCDIRS})
+        endforeach(subproject_library)
 
     endforeach(subproject)
 endif(CINCH_SUBPROJECTS)
