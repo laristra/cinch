@@ -186,10 +186,17 @@ if(CINCH_SUBPROJECTS)
 
         add_subdirectory(${subproject_name})
 
-        # add includes for individual subproject libraries
-        foreach(subproject_library ${subproject_libraries})
-            include_directories(${${subproject_library}_INCDIRS})
-        endforeach(subproject_library)
+        #----------------------------------------------------------------------#
+        # If the user has specified individual libraries, go through
+        # and include them.  Otherwise, include all subproject includes.
+        #----------------------------------------------------------------------#
+        if(NOT ${subproject_libraries} STREQUAL "ALL")
+            foreach(subproject_library ${subproject_libraries})
+                include_directories(${${subproject_library}_INCDIRS})
+            endforeach(subproject_library)
+        else()
+            include_directories(${${subproject_name}_INCDIRS})
+        endif(NOT ${subproject_libraries} STREQUAL "ALL")
 
     endforeach(subproject)
 endif(CINCH_SUBPROJECTS)
