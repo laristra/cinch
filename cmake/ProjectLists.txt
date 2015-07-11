@@ -223,7 +223,7 @@ if(CINCH_LIBRARY_TARGETS)
         # Add target includes to global include directories
         #----------------------------------------------------------------------#
 
-        list(APPEND ${PROJECT_NAME}_INCDIRS ${library_target_name}_INCDIRS)
+        list(APPEND ${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
         # Add target to global link libraries
