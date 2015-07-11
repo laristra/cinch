@@ -185,12 +185,8 @@ if(CINCH_SUBPROJECTS)
         list(GET subproject_data 1 subproject_libraries)
 
         add_subdirectory(${subproject_name})
+        include_directories(${${subproject_name}_INCDIRS})
 
-        foreach(subproject_library ${subproject_libraries})
-            message(STATUS "Processing subproject ${subproject_library}")
-            include_directories(${${subproject_library}_INCDIRS})
-            message(STATUS "Adding include directories ${${subproject_library}_INCDIRS}")
-        endforeach(subproject_library)
     endforeach(subproject)
 endif(CINCH_SUBPROJECTS)
 
@@ -220,13 +216,43 @@ if(CINCH_LIBRARY_TARGETS)
         include_directories(${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
+        # Set individual library includes for parent
+        #
+        # This allows users to select individual libraries from a submodule
+        # without including the entire submodule.
+        #----------------------------------------------------------------------#
+
+        if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+            set(${library_target_name}_INCDIRS
+                ${${library_target_name}_INCDIRS} PARENT_SCOPE)
+        endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+
+        #----------------------------------------------------------------------#
         # Add target includes to global include directories
+        #
+        # This adds the current library target includes to a global
+        # include variable.
         #----------------------------------------------------------------------#
 
         list(APPEND ${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
+        # Set individual library links for parent
+        #
+        # This allows users to select individual libraries from a submodule
+        # without including the entire submodule.
+        #----------------------------------------------------------------------#
+
+        if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+            set(${library_target_name}_LINKLIBS ${library_target_name}
+                PARENT_SCOPE)
+        endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+
+        #----------------------------------------------------------------------#
         # Add target to global link libraries
+        #
+        # This adds the current library target to the global link
+        # libraries.
         #----------------------------------------------------------------------#
 
         list(APPEND ${PROJECT_NAME}_LINKLIBS ${library_target_name})
