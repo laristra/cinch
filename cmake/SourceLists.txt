@@ -33,9 +33,10 @@ cinch_subdirlist(_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 # Add subdirectory files
 #------------------------------------------------------------------------------#
 
-if(ENABLE_COMMON_HEADER)
-    list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
-endif(ENABLE_COMMON_HEADER)
+# May need to move this up...
+#if(ENABLE_COMMON_HEADER)
+list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+#endif(ENABLE_COMMON_HEADER)
 
 # This loop adds header and source files for each listed sub-directory
 # to the main header and source file lists.  Additionally, it adds the
@@ -56,9 +57,9 @@ foreach(_SUBDIR ${_SUBDIRECTORIES})
         message(FATAL_ERROR "Internal cmake error: subdirectory ${_SUBDIR} set neither ${_SUBDIR}_HEADERS nor ${_SUBDIR}_SOURCES")
     endif()
 
-    if(NOT ENABLE_COMMON_HEADER)
-        list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR})
-    endif(NOT ENABLE_COMMON_HEADER)
+#    if(NOT ENABLE_COMMON_HEADER)
+#        list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR})
+#    endif(NOT ENABLE_COMMON_HEADER)
 
     foreach(_HEADER ${${_SUBDIR}_HEADERS})
         list(APPEND HEADERS
