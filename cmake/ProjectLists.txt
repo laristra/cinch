@@ -124,7 +124,6 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
     add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
     set(CINCH_CONFIG_INFOTAG)
-    set(CINCH_CONFIG_INSTTAG)
 
     #--------------------------------------------------------------------------#
     # Remove include links
@@ -161,7 +160,6 @@ else()
     #--------------------------------------------------------------------------#
 
     set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
-    set(CINCH_CONFIG_INSTTAG "/${PROJECT_NAME}")
 
 endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -182,11 +180,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+#------------------------------------------------------------------------------#
+# Add local include subdirectory.
+#
+# This is populated by calls to cinch_make_include_links below.
+#------------------------------------------------------------------------------#
 
-
-
-
-    include_directories(${CMAKE_BINARY_DIR}/include)
+include_directories(${CMAKE_BINARY_DIR}/include)
 
 #------------------------------------------------------------------------------#
 # Add sub-projects
@@ -197,22 +197,11 @@ if(CINCH_SUBPROJECTS)
         string(REPLACE ":" ";" subproject_data ${subproject})
 
         list(GET subproject_data 0 subproject_name)
-        list(GET subproject_data 1 subproject_libraries)
+
+        # This value is currently unused
+        #list(GET subproject_data 1 subproject_libraries)
 
         add_subdirectory(${subproject_name})
-
-        #----------------------------------------------------------------------#
-        # If the user has specified individual libraries, go through
-        # and include them.  Otherwise, include all subproject includes.
-        #----------------------------------------------------------------------#
-
-#        if(NOT ${subproject_libraries} STREQUAL "ALL")
-#            foreach(subproject_library ${subproject_libraries})
-#                include_directories(${${subproject_library}_INCDIRS})
-#            endforeach(subproject_library)
-#        else()
-#            include_directories(${${subproject_name}_INCDIRS})
-#        endif(NOT ${subproject_libraries} STREQUAL "ALL")
 
     endforeach(subproject)
 endif(CINCH_SUBPROJECTS)
@@ -247,22 +236,19 @@ if(CINCH_LIBRARY_TARGETS)
             ${CMAKE_CURRENT_SOURCE_DIR}/${library_target_directory})
 
         #----------------------------------------------------------------------#
-        # Add target include directories to include path
-        #----------------------------------------------------------------------#
-
-#        include_directories(${${library_target_name}_INCDIRS})
-
-        #----------------------------------------------------------------------#
         # Set individual library includes for parent
         #
         # This allows users to select individual libraries from a submodule
         # without including the entire submodule.
         #----------------------------------------------------------------------#
 
-        if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-            set(${library_target_name}_INCDIRS
-                ${${library_target_name}_INCDIRS} PARENT_SCOPE)
-        endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        # DEPRECATED
+        # This is deprecated by the above install links
+
+        #if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        #    set(${library_target_name}_INCDIRS
+        #        ${${library_target_name}_INCDIRS} PARENT_SCOPE)
+        #endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
         #----------------------------------------------------------------------#
         # Add target includes to global include directories
@@ -271,7 +257,10 @@ if(CINCH_LIBRARY_TARGETS)
         # include variable.
         #----------------------------------------------------------------------#
 
-        list(APPEND ${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS})
+        # DEPRECATED
+        # This is deprecated by the above install links
+
+        #list(APPEND ${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
         # Set individual library links for parent
@@ -339,7 +328,7 @@ if(CINCH_LIBRARY_TARGETS)
         foreach(FILE ${REL_HEADERS})
             get_filename_component(DIR ${FILE} DIRECTORY)
             install(FILES src/${FILE} DESTINATION
-                include${CINCH_CONFIG_INSTTAG}/${DIR})
+                include/${library_target_name}/${DIR})
         endforeach(FILE)
 
     endforeach(library_target)
@@ -349,7 +338,8 @@ if(CINCH_LIBRARY_TARGETS)
     #--------------------------------------------------------------------------#
 
     if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-        set(${PROJECT_NAME}_INCDIRS ${${PROJECT_NAME}_INCDIRS} PARENT_SCOPE)
+        # DEPRECATED
+        #set(${PROJECT_NAME}_INCDIRS ${${PROJECT_NAME}_INCDIRS} PARENT_SCOPE)
         set(${PROJECT_NAME}_LINKLIBS ${${PROJECT_NAME}_LINKLIBS} PARENT_SCOPE)
     else()
         set(CINCH_LINK_LIBRARIES ${${PROJECT_NAME}_LINKLIBS})
