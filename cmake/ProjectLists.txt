@@ -127,6 +127,14 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     set(CINCH_CONFIG_INSTTAG)
 
     #--------------------------------------------------------------------------#
+    # Remove include links
+    #--------------------------------------------------------------------------#
+
+    if(EXISTS ${CMAKE_BINARY_DIR}/include)
+        file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/include)
+    endif(EXISTS ${CMAKE_BINARY_DIR}/include)
+
+    #--------------------------------------------------------------------------#
     # Add support for ctest and GTest
     #--------------------------------------------------------------------------#
 
@@ -214,14 +222,6 @@ endif(CINCH_SUBPROJECTS)
 #------------------------------------------------------------------------------#
 
 if(CINCH_LIBRARY_TARGETS)
-
-    #--------------------------------------------------------------------------#
-    # Remove include links
-    #--------------------------------------------------------------------------#
-
-    if(EXISTS ${CMAKE_BINARY_DIR}/include)
-        file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/include)
-    endif(EXISTS ${CMAKE_BINARY_DIR}/include)
 
     #--------------------------------------------------------------------------#
     # Process library targets
