@@ -37,6 +37,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cinch/cmake)
 
 include(info)
 include(common)
+include(include_links)
 include(insource)
 include(subdirlist)
 include(unit)
@@ -173,6 +174,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+
+
+
+
+    include_directories(${CMAKE_BINARY_DIR}/include)
+
 #------------------------------------------------------------------------------#
 # Add sub-projects
 #------------------------------------------------------------------------------#
@@ -190,13 +197,14 @@ if(CINCH_SUBPROJECTS)
         # If the user has specified individual libraries, go through
         # and include them.  Otherwise, include all subproject includes.
         #----------------------------------------------------------------------#
-        if(NOT ${subproject_libraries} STREQUAL "ALL")
-            foreach(subproject_library ${subproject_libraries})
-                include_directories(${${subproject_library}_INCDIRS})
-            endforeach(subproject_library)
-        else()
-            include_directories(${${subproject_name}_INCDIRS})
-        endif(NOT ${subproject_libraries} STREQUAL "ALL")
+
+#        if(NOT ${subproject_libraries} STREQUAL "ALL")
+#            foreach(subproject_library ${subproject_libraries})
+#                include_directories(${${subproject_library}_INCDIRS})
+#            endforeach(subproject_library)
+#        else()
+#            include_directories(${${subproject_name}_INCDIRS})
+#        endif(NOT ${subproject_libraries} STREQUAL "ALL")
 
     endforeach(subproject)
 endif(CINCH_SUBPROJECTS)
@@ -206,6 +214,18 @@ endif(CINCH_SUBPROJECTS)
 #------------------------------------------------------------------------------#
 
 if(CINCH_LIBRARY_TARGETS)
+
+    #--------------------------------------------------------------------------#
+    # Remove include links
+    #--------------------------------------------------------------------------#
+
+    if(EXISTS ${CMAKE_BINARY_DIR}/include)
+        file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/include)
+    endif(EXISTS ${CMAKE_BINARY_DIR}/include)
+
+    #--------------------------------------------------------------------------#
+    # Process library targets
+    #--------------------------------------------------------------------------#
 
     foreach(library_target ${CINCH_LIBRARY_TARGETS})
 
@@ -221,10 +241,16 @@ if(CINCH_LIBRARY_TARGETS)
         add_subdirectory(${library_target_directory})
 
         #----------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
+
+        cinch_make_include_links(${library_target_name}
+            ${CMAKE_CURRENT_SOURCE_DIR}/${library_target_directory})
+
+        #----------------------------------------------------------------------#
         # Add target include directories to include path
         #----------------------------------------------------------------------#
 
-        include_directories(${${library_target_name}_INCDIRS})
+#        include_directories(${${library_target_name}_INCDIRS})
 
         #----------------------------------------------------------------------#
         # Set individual library includes for parent
