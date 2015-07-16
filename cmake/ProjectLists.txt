@@ -297,7 +297,8 @@ if(CINCH_LIBRARY_TARGETS)
 
         unset(REL_HEADERS)
         foreach(_HEADER ${${library_target_name}_HEADERS})
-            string(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/src/" ""
+            string(REGEX REPLACE
+                "${CMAKE_CURRENT_SOURCE_DIR}/${library_target_directory}" ""
                 _REL_HEADER ${_HEADER})
             list(APPEND REL_HEADERS ${_REL_HEADER})
         endforeach(_HEADER)
@@ -327,7 +328,7 @@ if(CINCH_LIBRARY_TARGETS)
 
         foreach(FILE ${REL_HEADERS})
             get_filename_component(DIR ${FILE} DIRECTORY)
-            install(FILES src/${FILE} DESTINATION
+            install(FILES ${library_target_directory}/${FILE} DESTINATION
                 include/${library_target_name}/${DIR})
         endforeach(FILE)
 
