@@ -25,7 +25,7 @@ def create_cxx_files(args):
 
   # Setup namespace keywords if a namespace was given.
   namespace_guard = \
-    args.namespace + '_' if args.namespace != None else ''
+    args.namespace.replace("::", "_") + '_' if args.namespace != None else ''
 
   namespace_start = "namespace " + \
     args.namespace.replace("::", " { namespace ") + \
@@ -69,6 +69,14 @@ def create_cxx_files(args):
 
     cfile = (args.filename if args.filename != None
       else args.classname) + '.cc'
+
+    namespace_start = "\nnamespace " + \
+      args.namespace.replace("::", " { namespace ") + \
+      " {\n" if args.namespace != None else ''
+
+    namespace_end = "\n} // namespace " + \
+      "\n} // namespace ".join(args.namespace.split("::")[::-1]) + "\n" \
+      if args.namespace != None else ''
 
     # Do substitutions on source template
     source_output = cxx_source_template.substitute(
