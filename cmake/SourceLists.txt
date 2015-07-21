@@ -20,6 +20,14 @@
 ################################################################################
 
 #------------------------------------------------------------------------------#
+# Add public headers
+#------------------------------------------------------------------------------#
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/library.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/library.cmake)
+endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/library.cmake)
+
+#------------------------------------------------------------------------------#
 # Add subdirectories
 #
 # This uses a glob, i.e., all sub-directories will be added at this level.

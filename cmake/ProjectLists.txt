@@ -295,19 +295,19 @@ if(CINCH_LIBRARY_TARGETS)
         # Create relative paths for headers
         #----------------------------------------------------------------------#
 
-        unset(REL_HEADERS)
-        foreach(_HEADER ${${library_target_name}_HEADERS})
+        unset(relative_headers)
+        foreach(header ${${library_target_name}_HEADERS})
             string(REGEX REPLACE
                 "${CMAKE_CURRENT_SOURCE_DIR}/${library_target_directory}" ""
-                _REL_HEADER ${_HEADER})
-            list(APPEND REL_HEADERS ${_REL_HEADER})
-        endforeach(_HEADER)
+                relative_header ${header})
+            list(APPEND relative_headers ${relative_header})
+        endforeach(header)
 
         #----------------------------------------------------------------------#
         # Generate common header
         #----------------------------------------------------------------------#
 
-        cinch_make_common_header("${library_target_name}" "${REL_HEADERS}")
+        cinch_make_common_header("${library_target_name}" "${relative_headers}")
 
         #----------------------------------------------------------------------#
         # Add a rule to build the library
@@ -326,11 +326,18 @@ if(CINCH_LIBRARY_TARGETS)
              install(TARGETS ${library_target_name} DESTINATION lib)
         endif()
 
-        foreach(FILE ${REL_HEADERS})
-            get_filename_component(DIR ${FILE} DIRECTORY)
-            install(FILES ${library_target_directory}/${FILE} DESTINATION
+        if(${library_target_name}_PUBLIC_HEADERS)
+            foreach(file ${${library_target_name}_PUBLIC_HEADERS})
+                install(FILES ${library_target_directory}/${file} DESTINATION
+                    include/${library_target_name})
+            endforeach(file ${${library_target_name}_PUBLIC_HEADERS})
+        endif(${library_target_name}_PUBLIC_HEADERS)
+
+        foreach(file ${relative_headers})
+            get_filename_component(DIR ${file} DIRECTORY)
+            install(FILES ${library_target_directory}/${file} DESTINATION
                 include/${library_target_name}/${DIR})
-        endforeach(FILE)
+        endforeach(file)
 
     endforeach(library_target)
 

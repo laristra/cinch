@@ -8,6 +8,12 @@ include(subfilelist)
 
 function(cinch_make_include_links target src)
 
+    if(NOT CINCH_HEADER_SUFFIXES)
+        message(WARNING "Header suffix not set (CINCH_HEADER_SUFFIXES)"
+            ": using .h")
+        set(CINCH_HEADER_SUFFIXES "\\.h")
+    endif(NOT CINCH_HEADER_SUFFIXES)
+
     # Find all of the subdirectories of the tree
     cinch_subdirlist(dir_list ${src})
 
@@ -22,14 +28,25 @@ function(cinch_make_include_links target src)
 
         # Create symbolic links to headers
         foreach(file ${file_list})
-            if(${file} MATCHES ".h")
+            if(${file} MATCHES ${CINCH_HEADER_SUFFIXES})
                 execute_process(COMMAND
                     ln -s ${src}/${dir}/${file}
-                        ${CMAKE_BINARY_DIR}/include/${target}/${dir})
-            endif(${file} MATCHES ".h")
+                        ${CMAKE_BINARY_DIR}/include/${target}/${dir}/${file})
+            endif(${file} MATCHES ${CINCH_HEADER_SUFFIXES})
         endforeach(file)
 
     endforeach(dir)
+
+    # Create public header links
+    cinch_subfilelist(file_list ${src})
+
+    foreach(file ${file_list})
+        if(${file} MATCHES ${CINCH_HEADER_SUFFIXES})
+            execute_process(COMMAND
+                ln -s ${src}/${file}
+                    ${CMAKE_BINARY_DIR}/include/${target}/${file})
+        endif(${file} MATCHES ${CINCH_HEADER_SUFFIXES})
+    endforeach(file)
 
 endfunction(cinch_make_include_links)
 
