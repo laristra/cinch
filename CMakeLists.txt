@@ -30,11 +30,11 @@ add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
 set(VERSION_CREATION "git describe" CACHE STRING
     "Set a static version instead of using git describe")
 
-if(VERSION_CREATION)
+if(NOT ${VERSION_CREATION} STREQUAL "git describe")
     set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
 else()
     cinch_make_version()
-endif(VERSION_CREATION)
+endif(NOT ${VERSION_CREATION} STREQUAL "git describe")
 
 #------------------------------------------------------------------------------#
 # Add documentation target
