@@ -307,7 +307,8 @@ if(CINCH_LIBRARY_TARGETS)
         # Generate common header
         #----------------------------------------------------------------------#
 
-        cinch_make_common_header("${library_target_name}" "${relative_headers}")
+        # DEPRECATED
+        #cinch_make_common_header("${library_target_name}" "${relative_headers}")
 
         #----------------------------------------------------------------------#
         # Add a rule to build the library
