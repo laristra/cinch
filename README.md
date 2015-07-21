@@ -5,6 +5,8 @@
 Cinch is a set of utilities and configuration options designed to make
 cmake builds easy to use and manage.
 
+[Installation](INSTALL.md)
+
 # General Features
 
 ## Recursive Sub-Project Structure
