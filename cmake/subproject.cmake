@@ -7,7 +7,7 @@
 # cinch_add_subproject
 #
 
-function(cinch_add_subproject subproject)
+function(cinch_add_subproject directory)
 
     #--------------------------------------------------------------------------#
     #
@@ -19,7 +19,7 @@ function(cinch_add_subproject subproject)
     cmake_parse_arguments(extra "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
-    message(STATUS "Adding subproject ${subproject}")
+    message(STATUS "Adding subproject in ${directory}")
 
     if(extra_LIBRARIES)
         set(libraries ${extra_LIBRARIES})
@@ -27,7 +27,7 @@ function(cinch_add_subproject subproject)
         set(libraries "ALL")
     endif(extra_LIBRARIES)
 
-    list(APPEND CINCH_SUBPROJECTS "${subproject}:${libraries}")
+    list(APPEND CINCH_SUBPROJECTS "${directory}:${libraries}")
     set(CINCH_SUBPROJECTS ${CINCH_SUBPROJECTS} PARENT_SCOPE)
 
 endfunction(cinch_add_subproject)

@@ -42,13 +42,15 @@ endif(VERSION_CREATION)
 
 configure_file(${CMAKE_SOURCE_DIR}/doc/cinchheader.tex.in
     ${CMAKE_BINARY_DIR}/doc/cinchheader.tex)
+configure_file(${CMAKE_SOURCE_DIR}/doc/cinchtitle.tex.in
+    ${CMAKE_BINARY_DIR}/doc/cinchtitle.tex)
 
 set(ug_pandoc_options
     "--toc"
     "--toc-depth=2"
     "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex"
     "--include-in-header=${CMAKE_BINARY_DIR}/doc/cinchheader.tex"
-    "--include-in-header=${CMAKE_SOURCE_DIR}/doc/cinchtitle.tex"
+    "--include-in-header=${CMAKE_BINARY_DIR}/doc/cinchtitle.tex"
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/maketitle.tex"
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/firstpageempty.tex"
     "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"

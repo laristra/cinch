@@ -2,6 +2,6 @@
 % NGC User Guide Header
 %------------------------------------------------------------------------------%
 
-\title{Cinch User Guide}
+\title{Cinch ${${PROJECT_NAME}_VERSION} User Guide}
 \date{\today}
 \author{NGC Project Team}
