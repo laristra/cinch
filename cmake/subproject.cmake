@@ -7,7 +7,6 @@
 # cinch_add_subproject
 #
 
-#function(cinch_add_subproject subproject libraries)
 function(cinch_add_subproject subproject)
 
     #--------------------------------------------------------------------------#

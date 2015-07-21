@@ -13,7 +13,7 @@ it must be installed in stages.
 
 ## Install the Cinch-Utils Command-Line Tool
 
-Directions for installing cinch-utils are [here](http://gitlab.lanl.gov/ngc-utils/cinch-utils#installation)
+Directions for installing cinch-utils are [here](http://gitlab.lanl.gov/ngc-utils/cinch-utils#installation).
 
 ## Install Documentation
 
