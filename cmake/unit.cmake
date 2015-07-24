@@ -3,9 +3,20 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_add_unit target sources)
+function(cinch_add_unit target)
 
-    add_executable(${target} ${sources})
+    set(options)
+    set(one_value_args)
+    set(multi_value_args SOURCES)
+    cmake_parse_arguments(unit "${options}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
+
+    if(NOT unit_SOURCES)
+        message(FATAL_ERROR
+            "You must specify unit test source files using SOURCES")
+    endif(NOT unit_SOURCES)
+
+    add_executable(${target} ${unit_SOURCES})
     target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES})
     set_target_properties(${target}
         PROPERTIES
