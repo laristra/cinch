@@ -76,6 +76,7 @@ endif(CMAKE_FORTRAN_FLAGS)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
 unset(CINCH_SUBPROJECTS)
+unset(CINCH_UNIT_TEST_TARGETS CACHE)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
@@ -356,6 +357,55 @@ if(CINCH_LIBRARY_TARGETS)
 
 
 endif(CINCH_LIBRARY_TARGETS)
+
+#------------------------------------------------------------------------------#
+# Add unit tests.
+#------------------------------------------------------------------------------#
+
+foreach(unit ${CINCH_UNIT_TEST_TARGETS})
+    
+    string(REPLACE ":" ";" unit_target_list ${unit})
+
+    list(GET unit_target_list 0 unit_target_name)
+    list(GET unit_target_list 1 unit_target_directory)
+    list(GET unit_target_list 2 unit_target_sources)
+    list(GET unit_target_list 3 unit_target_libraries)
+
+    set(_UNIT_SOURCES)
+
+    # Create the full path to the source files
+    foreach(source ${unit_target_sources})
+        list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
+    endforeach(source)
+
+    # Add the executable
+    add_executable(${unit_target_name} ${_UNIT_SOURCES})
+
+    # Add GTest libraries
+    target_link_libraries(${unit_target_name} ${GTEST_BOTH_LIBRARIES})
+
+    # Add user-specified library dependencies
+    if(NOT ${unit_target_libraries} STREQUAL "NONE")
+        foreach(library ${unit_target_libraries})
+            target_link_libraries(${unit_target_name} ${library})
+        endforeach(library)
+    endif(NOT ${unit_target_libraries} STREQUAL "NONE")
+
+    # Change the output directory to the test subdirectory
+    set_target_properties(${unit_target_name}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+    if(ENABLE_JENKINS_OUTPUT)
+        add_test(${unit_target_name}
+            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+            --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml
+            --gtest_color=yes)
+    else()
+        add_test(${unit_target_name}
+            ${CMAKE_BINARY_DIR}/test/${unit_target_name})
+    endif()
+
+endforeach(unit)
 
 #------------------------------------------------------------------------------#
 # Application directories

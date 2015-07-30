@@ -5,29 +5,41 @@
 
 function(cinch_add_unit target)
 
+    #--------------------------------------------------------------------------#
+    # Setup argument options.
+    #--------------------------------------------------------------------------#
+
     set(options)
     set(one_value_args)
-    set(multi_value_args SOURCES)
+    set(multi_value_args SOURCES LIBRARIES)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
+    # Make sure that the user specified sources.
+    #--------------------------------------------------------------------------#
 
     if(NOT unit_SOURCES)
         message(FATAL_ERROR
             "You must specify unit test source files using SOURCES")
     endif(NOT unit_SOURCES)
 
-    add_executable(${target} ${unit_SOURCES})
-    target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES})
-    set_target_properties(${target}
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-    if(ENABLE_JENKINS_OUTPUT)
-        add_test(${target} ${CMAKE_BINARY_DIR}/test/${target}
-            --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${target}.xml
-            --gtest_color=yes)
-    else()
-        add_test(${target} ${CMAKE_BINARY_DIR}/test/${target})
-    endif()
+    #--------------------------------------------------------------------------#
+    # Check for library dependencies.
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_LIBRARIES)
+        set(unit_LIBRARIES "NONE")
+    endif(NOT unit_LIBRARIES)
+
+    #--------------------------------------------------------------------------#
+    # Add information to unit test targets.
+    #--------------------------------------------------------------------------#
+
+    list(APPEND CINCH_UNIT_TEST_TARGETS
+        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_LIBRARIES}")
+    set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
+        CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
 
 endfunction(cinch_add_unit)
 
