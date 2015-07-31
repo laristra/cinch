@@ -11,7 +11,7 @@ function(cinch_add_unit target)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args SOURCES LIBRARIES)
+    set(multi_value_args SOURCES LIBRARIES POLICY THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -29,16 +29,37 @@ function(cinch_add_unit target)
     #--------------------------------------------------------------------------#
 
     if(NOT unit_LIBRARIES)
-        set(unit_LIBRARIES "NONE")
+        set(unit_LIBRARIES "None")
     endif(NOT unit_LIBRARIES)
+
+    #--------------------------------------------------------------------------#
+    # Check for policy.
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_POLICY)
+        set(unit_POLICY "Serial")
+    endif(NOT unit_POLICY)
+
+    #--------------------------------------------------------------------------#
+    # Check for threads.
+    #
+    # If found, replace the semi-colons with pipes to avoid list
+    # interpretation.
+    #--------------------------------------------------------------------------#
+
+    set(thread_instances)
+    if(NOT unit_THREADS)
+        set(thread_instances 1)
+    else()
+        string(REPLACE ";" "|" thread_instances "${unit_THREADS}")
+    endif(NOT unit_THREADS)
 
     #--------------------------------------------------------------------------#
     # Add information to unit test targets.
     #--------------------------------------------------------------------------#
 
-    message(STATUS "DEBUG ${CMAKE_PROJECT} adding unit ${target}")
     list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_LIBRARIES}")
+        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_LIBRARIES}:${unit_POLICY}:${thread_instances}")
     set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
         CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
 

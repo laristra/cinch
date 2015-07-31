@@ -11,9 +11,21 @@ function(cinch_add_unit_execution_policy policy runtime)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args LIBRARIES)
+    set(multi_value_args LIBRARIES EXEC EXEC_THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
+    # Check for execution arguments
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_EXEC)
+        set(unit_EXEC "None")
+    endif(NOT unit_EXEC)
+
+    if(NOT unit_EXEC_THREADS)
+        set(unit_EXEC_THREADS "None")
+    endif(NOT unit_EXEC_THREADS)
 
     #--------------------------------------------------------------------------#
     # Check that the policy runtime is defined
@@ -24,15 +36,13 @@ function(cinch_add_unit_execution_policy policy runtime)
     endif(NOT EXISTS ${runtime})
 
     #--------------------------------------------------------------------------#
-    # Add policy to list
+    # Add policy
     #--------------------------------------------------------------------------#
 
-    list(APPEND CINCH_UNIT_EXECUTION_POLICIES
-        "${policy}:${runtime}:${unit_LIBRARIES}")
-    set(CINCH_UNIT_EXECUTION_POLICIES ${CINCH_UNIT_EXECUTION_POLICIES}
-        PARENT_SCOPE)
+    set(${policy}_UNIT_POLICY_LIST
+        "${policy}:${runtime}:${unit_LIBRARIES}:${unit_EXEC}:${unit_EXEC_THREADS}" PARENT_SCOPE)
 
-endfunction(cinch_add_unit)
+endfunction(cinch_add_unit_execution_policy)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

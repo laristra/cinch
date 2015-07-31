@@ -41,12 +41,14 @@ include(include_links)
 include(insource)
 include(subdirlist)
 include(unit)
+include(unit-execution-policy)
 include(documentation)
 include(library)
 include(application)
 include(subproject)
 include(doxygen)
 include(version)
+include(mpi)
 
 #------------------------------------------------------------------------------#
 # Print useful information
@@ -76,7 +78,10 @@ unset(CINCH_TOP_LEVEL_PROJECT)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
 unset(CINCH_SUBPROJECTS)
-unset(CINCH_UNIT_TEST_TARGETS)
+unset(CINCH_UNIT_EXECUTION_POLICIES)
+
+# This is a cache variable, i.e., global.  DO NOT REMOVE THE CACHE ARGUMENT
+unset(CINCH_UNIT_TEST_TARGETS CACHE)
 
 #------------------------------------------------------------------------------#
 # Set top-level flag
@@ -155,15 +160,31 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         "Generate jenkins xml output for every test" OFF)
 
     if(ENABLE_UNIT_TESTS)
+
         enable_testing()
         find_package(GTest QUIET)
+
         if(GTEST_FOUND)
           include_directories(${GTEST_INCLUDE_DIRS})
         else()
           add_subdirectory(cinch/gtest)
           include_directories(cinch/gtest/include)
-          set(GTEST_BOTH_LIBRARIES gtest gtest_main)
+          set(GTEST_LIBRARIES gtest)
+          set(GTEST_MAIN_LIBRARIES gtest_main)
         endif()
+
+        #----------------------------------------------------------------------#
+        # Add default execution polices
+        #----------------------------------------------------------------------#
+
+        if(${MPI_C_FOUND})
+            cinch_add_unit_execution_policy(MPI
+                ${CMAKE_SOURCE_DIR}/cinch/gtest-runtime/gtest-mpi.cc
+                LIBRARIES ${MPI_C_LIBRARIES}
+                EXEC ${MPIEXEC}
+                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
+        endif(${MPI_C_FOUND})
+
     endif(ENABLE_UNIT_TESTS)
 
 else()
@@ -339,14 +360,21 @@ endif(CINCH_LIBRARY_TARGETS)
 
 if(${CINCH_TOP_LEVEL_PROJECT})
 
+message(STATUS "DEBUG unit targets ${CINCH_UNIT_TEST_TARGETS}")
     foreach(unit ${CINCH_UNIT_TEST_TARGETS})
         
+        #----------------------------------------------------------------------#
+        # Unpack information for this unit test
+        #----------------------------------------------------------------------#
+message(STATUS "DEBUG unit string ${unit}")
         string(REPLACE ":" ";" unit_target_list ${unit})
 
         list(GET unit_target_list 0 unit_target_name)
         list(GET unit_target_list 1 unit_target_directory)
         list(GET unit_target_list 2 unit_target_sources)
         list(GET unit_target_list 3 unit_target_libraries)
+        list(GET unit_target_list 4 unit_target_execution_policy)
+        list(GET unit_target_list 5 unit_target_execution_threads)
 
         set(_UNIT_SOURCES)
 
@@ -355,32 +383,98 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
         endforeach(source)
 
+        #----------------------------------------------------------------------#
+        # Check to see if the user has specified and runtime and
+        # process it
+        #----------------------------------------------------------------------#
+
+        set(unit_policy_runtime)
+
+        # Get policy information
+        if(NOT "${unit_target_execution_policy}" STREQUAL "Serial")
+            string(REPLACE ":" ";" unit_policy_list
+                ${${unit_target_execution_policy}_UNIT_POLICY_LIST})
+
+            list(GET unit_policy_list 0 unit_policy_name)
+            list(GET unit_policy_list 1 unit_policy_runtime)
+            list(GET unit_policy_list 2 unit_policy_libraries)
+            list(GET unit_policy_list 3 unit_policy_exec)
+            list(GET unit_policy_list 4 unit_policy_exec_threads)
+        endif(NOT "${unit_target_execution_policy}" STREQUAL "Serial")
+
+        #----------------------------------------------------------------------#
         # Add the executable
-        add_executable(${unit_target_name} ${_UNIT_SOURCES})
+        #----------------------------------------------------------------------#
 
-        # Add GTest libraries
-        target_link_libraries(${unit_target_name} ${GTEST_BOTH_LIBRARIES})
+        add_executable(${unit_target_name} ${_UNIT_SOURCES}
+            ${unit_policy_runtime})
 
+        #----------------------------------------------------------------------#
         # Add user-specified library dependencies
-        if(NOT ${unit_target_libraries} STREQUAL "NONE")
+        #----------------------------------------------------------------------#
+
+        if(NOT ${unit_target_libraries} STREQUAL "None")
             foreach(library ${unit_target_libraries})
                 target_link_libraries(${unit_target_name} ${library})
             endforeach(library)
-        endif(NOT ${unit_target_libraries} STREQUAL "NONE")
+        endif(NOT ${unit_target_libraries} STREQUAL "None")
 
+        #----------------------------------------------------------------------#
+        # Add GTest libraries
+        #----------------------------------------------------------------------#
+
+        target_link_libraries(${unit_target_name} ${GTEST_LIBRARIES})
+
+        #----------------------------------------------------------------------#
+        # Add library dependecies for policy runtime
+        #----------------------------------------------------------------------#
+
+        if("${unit_target_execution_policy}" STREQUAL "Serial")
+            target_link_libraries(${unit_target_name}
+                ${GTEST_MAIN_LIBRARIES})
+        else()
+            target_link_libraries(${unit_target_name}
+                ${unit_policy_libraries})
+        endif("${unit_target_execution_policy}" STREQUAL "Serial")
+
+        #----------------------------------------------------------------------#
         # Change the output directory to the test subdirectory
+        #----------------------------------------------------------------------#
+
         set_target_properties(${unit_target_name}
             PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+
+        #----------------------------------------------------------------------#
+        # Add Jenkins flags
+        #----------------------------------------------------------------------#
+
         if(ENABLE_JENKINS_OUTPUT)
-    add_test(${unit_target_name}
-        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-        --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml
-        --gtest_color=yes)
+            set(JENKINS_FLAGS "--gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml --gtest_color=yes")
+        endif(ENABLE_JENKINS_OUTPUT)
+
+        #----------------------------------------------------------------------#
+        # Add the test target to CTest
+        #----------------------------------------------------------------------#
+
+        string(REPLACE "|" ";" thread_instance_list
+            ${unit_target_execution_threads})
+
+        list(LENGTH thread_instance_list thread_instances)
+
+        if(${thread_instances} GREATER 1)
+            foreach(instance ${thread_instance_list})
+                add_test(${unit_target_name}_${instance}
+                    ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                    ${JENKINS_FLAGS}
+                    COMMAND ${unit_policy_exec} ${unit_policy_exec_threads}
+                        ${instance})
+            endforeach(instance)
         else()
             add_test(${unit_target_name}
-                ${CMAKE_BINARY_DIR}/test/${unit_target_name})
-        endif()
+                ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                ${JENKINS_FLAGS})
+        endif(${thread_instances} GREATER 1)
 
     endforeach(unit)
 
