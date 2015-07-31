@@ -69,14 +69,28 @@ if(CMAKE_FORTRAN_FLAGS)
 endif(CMAKE_FORTRAN_FLAGS)
 
 #------------------------------------------------------------------------------#
-# Include project configuration
+# Initialize these to avoid capture of parent state
 #------------------------------------------------------------------------------#
 
-# Initialize these to avoid capture of parent state
+unset(CINCH_TOP_LEVEL_PROJECT)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
 unset(CINCH_SUBPROJECTS)
 unset(CINCH_UNIT_TEST_TARGETS)
+
+#------------------------------------------------------------------------------#
+# Set top-level flag
+#------------------------------------------------------------------------------#
+
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    set(CINCH_TOP_LEVEL_PROJECT True)
+endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+
+message(STATUS "DEBUG: ${CINCH_TOP_LEVEL_PROJECT}")
+
+#------------------------------------------------------------------------------#
+# Include project configuration
+#------------------------------------------------------------------------------#
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
@@ -112,14 +126,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/packages.cmake)
 #------------------------------------------------------------------------------#
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
-
-#------------------------------------------------------------------------------#
-# Add top-level targets
-#------------------------------------------------------------------------------#
-
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    set(CINCH_TOP_LEVEL_PROJECT True)
-endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
 #------------------------------------------------------------------------------#
 # Add top-level targets
