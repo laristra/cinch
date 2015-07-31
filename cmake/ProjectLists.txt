@@ -69,14 +69,26 @@ if(CMAKE_FORTRAN_FLAGS)
 endif(CMAKE_FORTRAN_FLAGS)
 
 #------------------------------------------------------------------------------#
-# Include project configuration
+# Initialize these to avoid capture of parent state
 #------------------------------------------------------------------------------#
 
-# Initialize these to avoid capture of parent state
+unset(CINCH_TOP_LEVEL_PROJECT)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
 unset(CINCH_SUBPROJECTS)
-unset(CINCH_UNIT_TEST_TARGETS CACHE)
+unset(CINCH_UNIT_TEST_TARGETS)
+
+#------------------------------------------------------------------------------#
+# Set top-level flag
+#------------------------------------------------------------------------------#
+
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    set(CINCH_TOP_LEVEL_PROJECT True)
+endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+
+#------------------------------------------------------------------------------#
+# Include project configuration
+#------------------------------------------------------------------------------#
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
@@ -117,7 +129,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 # Add top-level targets
 #------------------------------------------------------------------------------#
 
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+if(${CINCH_TOP_LEVEL_PROJECT})
 
     #--------------------------------------------------------------------------#
     # This is a top-level build
@@ -162,7 +174,7 @@ else()
 
     set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
 
-endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+endif(${CINCH_TOP_LEVEL_PROJECT})
 
 #------------------------------------------------------------------------------#
 # Add support for Doxygen documentation
@@ -237,43 +249,16 @@ if(CINCH_LIBRARY_TARGETS)
             ${CMAKE_CURRENT_SOURCE_DIR}/${library_target_directory})
 
         #----------------------------------------------------------------------#
-        # Set individual library includes for parent
-        #
-        # This allows users to select individual libraries from a submodule
-        # without including the entire submodule.
-        #----------------------------------------------------------------------#
-
-        # DEPRECATED
-        # This is deprecated by the above install links
-
-        #if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-        #    set(${library_target_name}_INCDIRS
-        #        ${${library_target_name}_INCDIRS} PARENT_SCOPE)
-        #endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-
-        #----------------------------------------------------------------------#
-        # Add target includes to global include directories
-        #
-        # This adds the current library target includes to a global
-        # include variable.
-        #----------------------------------------------------------------------#
-
-        # DEPRECATED
-        # This is deprecated by the above install links
-
-        #list(APPEND ${PROJECT_NAME}_INCDIRS ${${library_target_name}_INCDIRS})
-
-        #----------------------------------------------------------------------#
         # Set individual library links for parent
         #
         # This allows users to select individual libraries from a submodule
         # without including the entire submodule.
         #----------------------------------------------------------------------#
 
-        if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        if(NOT ${CINCH_TOP_LEVEL_PROJECT})
             set(${library_target_name}_LINKLIBS ${library_target_name}
                 PARENT_SCOPE)
-        endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
 
         #----------------------------------------------------------------------#
         # Add target to global link libraries
@@ -303,13 +288,6 @@ if(CINCH_LIBRARY_TARGETS)
                 relative_header ${header})
             list(APPEND relative_headers ${relative_header})
         endforeach(header)
-
-        #----------------------------------------------------------------------#
-        # Generate common header
-        #----------------------------------------------------------------------#
-
-        # DEPRECATED
-        #cinch_make_common_header("${library_target_name}" "${relative_headers}")
 
         #----------------------------------------------------------------------#
         # Add a rule to build the library
@@ -347,14 +325,11 @@ if(CINCH_LIBRARY_TARGETS)
     # Set these for parent level build
     #--------------------------------------------------------------------------#
 
-    if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-        # DEPRECATED
-        #set(${PROJECT_NAME}_INCDIRS ${${PROJECT_NAME}_INCDIRS} PARENT_SCOPE)
+    if(NOT ${CINCH_TOP_LEVEL_PROJECT})
         set(${PROJECT_NAME}_LINKLIBS ${${PROJECT_NAME}_LINKLIBS} PARENT_SCOPE)
     else()
         set(CINCH_LINK_LIBRARIES ${${PROJECT_NAME}_LINKLIBS})
-    endif(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-
+    endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
 
 endif(CINCH_LIBRARY_TARGETS)
 
@@ -362,50 +337,54 @@ endif(CINCH_LIBRARY_TARGETS)
 # Add unit tests.
 #------------------------------------------------------------------------------#
 
-foreach(unit ${CINCH_UNIT_TEST_TARGETS})
-    
-    string(REPLACE ":" ";" unit_target_list ${unit})
+if(${CINCH_TOP_LEVEL_PROJECT})
 
-    list(GET unit_target_list 0 unit_target_name)
-    list(GET unit_target_list 1 unit_target_directory)
-    list(GET unit_target_list 2 unit_target_sources)
-    list(GET unit_target_list 3 unit_target_libraries)
+    foreach(unit ${CINCH_UNIT_TEST_TARGETS})
+        
+        string(REPLACE ":" ";" unit_target_list ${unit})
 
-    set(_UNIT_SOURCES)
+        list(GET unit_target_list 0 unit_target_name)
+        list(GET unit_target_list 1 unit_target_directory)
+        list(GET unit_target_list 2 unit_target_sources)
+        list(GET unit_target_list 3 unit_target_libraries)
 
-    # Create the full path to the source files
-    foreach(source ${unit_target_sources})
-        list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
-    endforeach(source)
+        set(_UNIT_SOURCES)
 
-    # Add the executable
-    add_executable(${unit_target_name} ${_UNIT_SOURCES})
+        # Create the full path to the source files
+        foreach(source ${unit_target_sources})
+            list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
+        endforeach(source)
 
-    # Add GTest libraries
-    target_link_libraries(${unit_target_name} ${GTEST_BOTH_LIBRARIES})
+        # Add the executable
+        add_executable(${unit_target_name} ${_UNIT_SOURCES})
 
-    # Add user-specified library dependencies
-    if(NOT ${unit_target_libraries} STREQUAL "NONE")
-        foreach(library ${unit_target_libraries})
-            target_link_libraries(${unit_target_name} ${library})
-        endforeach(library)
-    endif(NOT ${unit_target_libraries} STREQUAL "NONE")
+        # Add GTest libraries
+        target_link_libraries(${unit_target_name} ${GTEST_BOTH_LIBRARIES})
 
-    # Change the output directory to the test subdirectory
-    set_target_properties(${unit_target_name}
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-    if(ENABLE_JENKINS_OUTPUT)
-        add_test(${unit_target_name}
-            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-            --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml
-            --gtest_color=yes)
-    else()
-        add_test(${unit_target_name}
-            ${CMAKE_BINARY_DIR}/test/${unit_target_name})
-    endif()
+        # Add user-specified library dependencies
+        if(NOT ${unit_target_libraries} STREQUAL "NONE")
+            foreach(library ${unit_target_libraries})
+                target_link_libraries(${unit_target_name} ${library})
+            endforeach(library)
+        endif(NOT ${unit_target_libraries} STREQUAL "NONE")
 
-endforeach(unit)
+        # Change the output directory to the test subdirectory
+        set_target_properties(${unit_target_name}
+            PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+        if(ENABLE_JENKINS_OUTPUT)
+    add_test(${unit_target_name}
+        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+        --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml
+        --gtest_color=yes)
+        else()
+            add_test(${unit_target_name}
+                ${CMAKE_BINARY_DIR}/test/${unit_target_name})
+        endif()
+
+    endforeach(unit)
+
+endif(${CINCH_TOP_LEVEL_PROJECT})
 
 #------------------------------------------------------------------------------#
 # Application directories

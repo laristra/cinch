@@ -36,6 +36,7 @@ function(cinch_add_unit target)
     # Add information to unit test targets.
     #--------------------------------------------------------------------------#
 
+    message(STATUS "DEBUG ${CMAKE_PROJECT} adding unit ${target}")
     list(APPEND CINCH_UNIT_TEST_TARGETS
         "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_LIBRARIES}")
     set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
