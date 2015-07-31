@@ -467,8 +467,7 @@ message(STATUS "DEBUG unit string ${unit}")
                 add_test(${unit_target_name}_${instance}
                     ${CMAKE_BINARY_DIR}/test/${unit_target_name}
                     ${JENKINS_FLAGS}
-                    COMMAND ${unit_policy_exec} ${unit_policy_exec_threads}
-                        ${instance})
+                    COMMAND "${unit_policy_exec} ${unit_policy_exec_threads} ${instance}")
             endforeach(instance)
         else()
             add_test(${unit_target_name}
