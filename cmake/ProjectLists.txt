@@ -484,10 +484,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     COMMAND ${unit_policy_exec}
                         ${unit_policy_exec_threads} ${instance})
             endforeach(instance)
+
         else()
+
             if(ENABLE_JENKINS_OUTPUT)
                 set(_OUTPUT
-                    ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
+                    ${_OUTPUT_DIR}/${unit_target_name}.xml)
                 set(JENKINS_FLAGS --gtest_output=xml:${_OUTPUT}
                     --gtest_color=yes)
             endif(ENABLE_JENKINS_OUTPUT)
@@ -495,6 +497,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             add_test(${unit_target_name}
                 ${CMAKE_BINARY_DIR}/test/${unit_target_name}
                 ${JENKINS_FLAGS})
+
         endif(${thread_instances} GREATER 1)
 
     endforeach(unit)
