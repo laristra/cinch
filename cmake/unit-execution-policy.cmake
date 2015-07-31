@@ -11,9 +11,31 @@ function(cinch_add_unit_execution_policy policy runtime)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args LIBRARIES EXEC EXEC_THREADS)
+    set(multi_value_args INCLUDES LIBRARIES EXEC EXEC_THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
+    # Check for include arguments
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_INCLUDES)
+        set(unit_INCLUDES "None")
+    else()
+        # Quotes are important here so that list is interpreted as a string
+        string(REPLACE ";" "|" unit_INCLUDES "${unit_INCLUDES}")
+    endif(NOT unit_INCLUDES)
+
+    #--------------------------------------------------------------------------#
+    # Check for library arguments
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_LIBRARIES)
+        set(unit_LIBRARIES "None")
+    else()
+        # Quotes are important here so that list is interpreted as a string
+        string(REPLACE ";" "|" unit_LIBRARIES "${unit_LIBRARIES}")
+    endif(NOT unit_LIBRARIES)
 
     #--------------------------------------------------------------------------#
     # Check for execution arguments
@@ -40,7 +62,7 @@ function(cinch_add_unit_execution_policy policy runtime)
     #--------------------------------------------------------------------------#
 
     set(${policy}_UNIT_POLICY_LIST
-        "${policy}:${runtime}:${unit_LIBRARIES}:${unit_EXEC}:${unit_EXEC_THREADS}" PARENT_SCOPE)
+        "${policy}:${runtime}:${unit_INCLUDES}:${unit_LIBRARIES}:${unit_EXEC}:${unit_EXEC_THREADS}" PARENT_SCOPE)
 
 endfunction(cinch_add_unit_execution_policy)
 

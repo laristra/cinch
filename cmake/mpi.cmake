@@ -10,6 +10,7 @@ include(FindMPI)
 #------------------------------------------------------------------------------#
 
 option(ENABLE_MPI "Enable MPI" OFF)
+option(ENABLE_MPI_CXX_BINDINGS "Enable MPI C++ Bindings" OFF)
 
 if(ENABLE_MPI)
 
@@ -19,16 +20,17 @@ if(ENABLE_MPI)
 
 find_package(MPI REQUIRED)
 
-if(${MPI_C_FOUND})
-    include_directories(${MPI_C_INCLUDE_PATH})
-endif(${MPI_C_FOUND})
-
 #------------------------------------------------------------------------------#
 # Skip C++ linkage of MPI
 #------------------------------------------------------------------------------#
 
-add_definitions(-DOMPI_SKIP_MPICXX)
-add_definitions(-DMPICH_SKIP_MPICXX)
+if(ENABLE_MPI_CXX_BINDINGS)
+    set(MPI_LANGUAGE CXX)
+else()
+    set(MPI_LANGUAGE C)
+    add_definitions(-DOMPI_SKIP_MPICXX)
+    add_definitions(-DMPICH_SKIP_MPICXX)
+endif(ENABLE_MPI_CXX_BINDINGS)
 
 endif(ENABLE_MPI)
 

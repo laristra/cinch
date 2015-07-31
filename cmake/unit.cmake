@@ -37,7 +37,7 @@ function(cinch_add_unit target)
     #--------------------------------------------------------------------------#
 
     if(NOT unit_POLICY)
-        set(unit_POLICY "Serial")
+        set(unit_POLICY "SERIAL")
     endif(NOT unit_POLICY)
 
     #--------------------------------------------------------------------------#
@@ -47,11 +47,10 @@ function(cinch_add_unit target)
     # interpretation.
     #--------------------------------------------------------------------------#
 
-    set(thread_instances)
     if(NOT unit_THREADS)
-        set(thread_instances 1)
+        set(unit_THREADS 1)
     else()
-        string(REPLACE ";" "|" thread_instances "${unit_THREADS}")
+        string(REPLACE ";" "|" unit_THREADS "${unit_THREADS}")
     endif(NOT unit_THREADS)
 
     #--------------------------------------------------------------------------#
@@ -59,7 +58,7 @@ function(cinch_add_unit target)
     #--------------------------------------------------------------------------#
 
     list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_LIBRARIES}:${unit_POLICY}:${thread_instances}")
+        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_LIBRARIES}:${unit_POLICY}:${unit_THREADS}")
     set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
         CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
 
