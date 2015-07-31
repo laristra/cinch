@@ -369,10 +369,10 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
         if(ENABLE_JENKINS_OUTPUT)
-            add_test(${unit_target_name}
-                ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml
-                --gtest_color=yes)
+    add_test(${unit_target_name}
+        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+        --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${unit_target_name}.xml
+        --gtest_color=yes)
         else()
             add_test(${unit_target_name}
                 ${CMAKE_BINARY_DIR}/test/${unit_target_name})
