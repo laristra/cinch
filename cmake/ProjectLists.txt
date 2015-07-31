@@ -86,8 +86,6 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     set(CINCH_TOP_LEVEL_PROJECT True)
 endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
-message(STATUS "DEBUG: ${CINCH_TOP_LEVEL_PROJECT}")
-
 #------------------------------------------------------------------------------#
 # Include project configuration
 #------------------------------------------------------------------------------#
