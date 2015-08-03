@@ -183,6 +183,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         if(${MPI_${MPI_LANGUAGE}_FOUND})
             cinch_add_unit_execution_policy(MPI
                 ${CMAKE_SOURCE_DIR}/cinch/gtest-runtime/gtest-mpi.cc
+                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
                 LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
                 EXEC ${MPIEXEC}
@@ -405,12 +406,15 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         list(GET unit_policy_list 0 unit_policy_name)
         list(GET unit_policy_list 1 unit_policy_runtime)
-        list(GET unit_policy_list 2 unit_policy_includes)
-        list(GET unit_policy_list 3 unit_policy_libraries)
-        list(GET unit_policy_list 4 unit_policy_exec)
-        list(GET unit_policy_list 5 unit_policy_exec_threads)
+        list(GET unit_policy_list 2 unit_policy_flags)
+        list(GET unit_policy_list 3 unit_policy_includes)
+        list(GET unit_policy_list 4 unit_policy_libraries)
+        list(GET unit_policy_list 5 unit_policy_exec)
+        list(GET unit_policy_list 6 unit_policy_exec_threads)
 
         # Convert stored values back into lists
+        string(REPLACE "|" ";" unit_policy_flags
+            "${unit_policy_flags}")
         string(REPLACE "|" ";" unit_policy_includes
             "${unit_policy_includes}")
         string(REPLACE "|" ";" unit_policy_libraries
@@ -422,6 +426,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         add_executable(${unit_target_name} ${_UNIT_SOURCES}
             ${unit_policy_runtime})
+
+        if(NOT "${unit_policy_flags}" STREQUAL "None")
+            target_compile_options(${unit_target_name}
+                PRIVATE ${unit_policy_flags})
+        endif(NOT "${unit_policy_flags}" STREQUAL "None")
 
         #----------------------------------------------------------------------#
         # Add user-specified library dependencies
