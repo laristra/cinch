@@ -22,6 +22,8 @@ function(cinch_add_unit target)
     if(NOT unit_SOURCES)
         message(FATAL_ERROR
             "You must specify unit test source files using SOURCES")
+    else()
+        string(REPLACE ";" "|" unit_SOURCES "${unit_SOURCES}")
     endif(NOT unit_SOURCES)
 
     #--------------------------------------------------------------------------#
@@ -30,6 +32,8 @@ function(cinch_add_unit target)
 
     if(NOT unit_LIBRARIES)
         set(unit_LIBRARIES "None")
+    else()
+        string(REPLACE ";" "|" unit_LIBRARIES "${unit_LIBRARIES}")
     endif(NOT unit_LIBRARIES)
 
     #--------------------------------------------------------------------------#

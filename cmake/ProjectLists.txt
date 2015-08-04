@@ -118,11 +118,11 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
 set(VERSION_CREATION "git describe" CACHE STRING "Set a static version")
 
-if(NOT ${VERSION_CREATION} STREQUAL "git describe")
+if(NOT "${VERSION_CREATION}" STREQUAL "git describe")
     set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
 else()
     cinch_make_version()
-endif(NOT ${VERSION_CREATION} STREQUAL "git describe")
+endif(NOT "${VERSION_CREATION}" STREQUAL "git describe")
 
 message(STATUS "Creating build for version "
     "${PROJECT_NAME}-${${PROJECT_NAME}_VERSION}")
@@ -393,6 +393,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 4 unit_target_execution_policy)
         list(GET unit_target_list 5 unit_target_execution_threads)
 
+        # Convert stored values back into lists
+        string(REPLACE "|" ";" unit_target_sources
+            "${unit_target_sources}")
+        string(REPLACE "|" ";" unit_target_libraries
+            "${unit_target_libraries}")
+
         #----------------------------------------------------------------------#
         # Don't create the unit test if its policy is not defined
         #----------------------------------------------------------------------#
@@ -451,11 +457,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Add user-specified library dependencies
         #----------------------------------------------------------------------#
 
-        if(NOT ${unit_target_libraries} STREQUAL "None")
+        if(NOT "${unit_target_libraries}" STREQUAL "None")
             foreach(library ${unit_target_libraries})
                 target_link_libraries(${unit_target_name} ${library})
             endforeach(library)
-        endif(NOT ${unit_target_libraries} STREQUAL "None")
+        endif(NOT "${unit_target_libraries}" STREQUAL "None")
 
         #----------------------------------------------------------------------#
         # Add include and link options
