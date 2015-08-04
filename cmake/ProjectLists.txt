@@ -51,6 +51,21 @@ include(version)
 include(mpi)
 
 #------------------------------------------------------------------------------#
+# Set to release if no build type has been specified
+#------------------------------------------------------------------------------#
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING
+        "CMake build type <Debug|Release|RelWithDebInfo|MinSizeRel>" FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    add_definitions(-DDEBUG)
+endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+
+#------------------------------------------------------------------------------#
 # Print useful information
 #------------------------------------------------------------------------------#
 
