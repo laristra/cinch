@@ -79,7 +79,7 @@ foreach(_SUBDIR ${_SUBDIRECTORIES})
             ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR}/${_SOURCE})
     endforeach(_SOURCE)
 
-    cinch_make_info("${CINCH_CONFIG_INFOTAG}${_SUBDIR}"
+    cinch_make_info("${library_target_name}.${CINCH_CONFIG_INFOTAG}${_SUBDIR}"
         "${${_SUBDIR}_HEADERS}" "${${_SUBDIR}_SOURCES}")
 endforeach(_SUBDIR)
 

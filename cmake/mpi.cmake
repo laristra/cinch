@@ -32,6 +32,10 @@ else()
     add_definitions(-DMPICH_SKIP_MPICXX)
 endif(ENABLE_MPI_CXX_BINDINGS)
 
+if(MPI_${MPI_LANGUAGE}_FOUND)
+    include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
+endif(MPI_${MPI_LANGUAGE}_FOUND)
+
 endif(ENABLE_MPI)
 
 #------------------------------------------------------------------------------#
