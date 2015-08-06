@@ -273,7 +273,6 @@ if(CINCH_LIBRARY_TARGETS)
 
         list(GET library_target_list 0 library_target_name)
         list(GET library_target_list 1 library_target_directory)
-message(STATUS "DEBUG target name ${library_target_name}")
 
         #----------------------------------------------------------------------#
         # Add the subdirectory

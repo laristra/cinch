@@ -5,7 +5,6 @@
 
 function(cinch_make_info target headers sources)
 
-message(STATUS "DEBUG Info ${target}")
     set(output "${CMAKE_BINARY_DIR}/.${target}.buildinfo")
 
     file(WRITE "${output}" "#---------------------------------------"
