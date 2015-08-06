@@ -335,6 +335,8 @@ if(CINCH_LIBRARY_TARGETS)
         if(NOT "${${library_target_name}_SOURCES}" STREQUAL "")
             add_library(${library_target_name}
                 ${${library_target_name}_SOURCES})
+            target_include_directories(${library_target_name} PRIVATE
+                ${CMAKE_BINARY_DIR}/include/${library_target_name})
         endif()
 
         #----------------------------------------------------------------------#
@@ -348,7 +350,7 @@ if(CINCH_LIBRARY_TARGETS)
         if(${library_target_name}_PUBLIC_HEADERS)
             foreach(file ${${library_target_name}_PUBLIC_HEADERS})
                 install(FILES ${library_target_directory}/${file} DESTINATION
-                    include/${library_target_name})
+                    include)
             endforeach(file ${${library_target_name}_PUBLIC_HEADERS})
         endif(${library_target_name}_PUBLIC_HEADERS)
 

@@ -15,7 +15,7 @@ function(cinch_make_include_links target src)
     endif(NOT CINCH_HEADER_SUFFIXES)
 
     # Find all of the subdirectories of the tree
-    cinch_subdirlist(dir_list ${src})
+    cinch_subdirlist(dir_list ${src} True)
 
     # Recurse the tree
     foreach(dir ${dir_list})
@@ -38,14 +38,10 @@ function(cinch_make_include_links target src)
     endforeach(dir)
 
     # Create public header links
-    cinch_subfilelist(file_list ${src})
-
-    foreach(file ${file_list})
-        if(${file} MATCHES ${CINCH_HEADER_SUFFIXES})
+    foreach(file ${${target}_PUBLIC_HEADERS})
             execute_process(COMMAND
                 ln -s ${src}/${file}
-                    ${CMAKE_BINARY_DIR}/include/${target}/${file})
-        endif(${file} MATCHES ${CINCH_HEADER_SUFFIXES})
+                    ${CMAKE_BINARY_DIR}/include/${file})
     endforeach(file)
 
 endfunction(cinch_make_include_links)

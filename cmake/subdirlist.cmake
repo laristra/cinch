@@ -3,19 +3,29 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-macro(cinch_subdirlist result directory)
+macro(cinch_subdirlist result directory recursive)
 
-    file(GLOB children RELATIVE ${directory} ${directory}/*)
+    if(${recursive})
+        file(GLOB_RECURSE children RELATIVE ${directory} ${directory}/*)
+    else()         
+        file(GLOB children RELATIVE ${directory} ${directory}/*)
+    endif(${recursive})
 
-    set(dirlist "")
+    set(dir_list "")
 
     foreach(child ${children})
-        if(IS_DIRECTORY ${directory}/${child})
-            list(APPEND dirlist ${child})
-        endif()
+        if(NOT IS_DIRECTORY ${directory}/${child})
+            get_filename_component(dir ${child} PATH) 
+        else()
+            set(dir ${child})
+        endif(NOT IS_DIRECTORY ${directory}/${child})
+
+        set(dir_list ${dir_list} ${dir})
     endforeach()
 
-    set(${result} ${dirlist})
+    list(REMOVE_DUPLICATES dir_list)    
+
+    set(${result} ${dir_list})
 endmacro(cinch_subdirlist)
 
 #------------------------------------------------------------------------------#

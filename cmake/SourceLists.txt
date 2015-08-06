@@ -35,7 +35,7 @@ endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/library.cmake)
 # while keeping the generic case as simple as possible.
 #------------------------------------------------------------------------------#
 
-cinch_subdirlist(_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+cinch_subdirlist(_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} False)
 
 #------------------------------------------------------------------------------#
 # Add subdirectory files
