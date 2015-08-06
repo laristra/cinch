@@ -403,132 +403,132 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Don't create the unit test if its policy is not defined
         #----------------------------------------------------------------------#
 
-        if(NOT ${unit_target_execution_policy}_UNIT_POLICY_LIST)
-            continue()
-        endif(NOT ${unit_target_execution_policy}_UNIT_POLICY_LIST)
+        if(${unit_target_execution_policy}_UNIT_POLICY_LIST)
 
-        #----------------------------------------------------------------------#
-        # Create the full path to the source files
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Create the full path to the source files
+            #------------------------------------------------------------------#
 
-        set(_UNIT_SOURCES)
-        foreach(source ${unit_target_sources})
-            list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
-        endforeach(source)
+            set(_UNIT_SOURCES)
+            foreach(source ${unit_target_sources})
+                list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
+            endforeach(source)
 
-        #----------------------------------------------------------------------#
-        # Check to see if the user has specified and runtime and
-        # process it
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Check to see if the user has specified and runtime and
+            # process it
+            #------------------------------------------------------------------#
 
-        # Get policy information
-        string(REPLACE ":" ";" unit_policy_list
-            "${${unit_target_execution_policy}_UNIT_POLICY_LIST}")
+            # Get policy information
+            string(REPLACE ":" ";" unit_policy_list
+                "${${unit_target_execution_policy}_UNIT_POLICY_LIST}")
 
-        list(GET unit_policy_list 0 unit_policy_name)
-        list(GET unit_policy_list 1 unit_policy_runtime)
-        list(GET unit_policy_list 2 unit_policy_flags)
-        list(GET unit_policy_list 3 unit_policy_includes)
-        list(GET unit_policy_list 4 unit_policy_libraries)
-        list(GET unit_policy_list 5 unit_policy_exec)
-        list(GET unit_policy_list 6 unit_policy_exec_threads)
+            list(GET unit_policy_list 0 unit_policy_name)
+            list(GET unit_policy_list 1 unit_policy_runtime)
+            list(GET unit_policy_list 2 unit_policy_flags)
+            list(GET unit_policy_list 3 unit_policy_includes)
+            list(GET unit_policy_list 4 unit_policy_libraries)
+            list(GET unit_policy_list 5 unit_policy_exec)
+            list(GET unit_policy_list 6 unit_policy_exec_threads)
 
-        # Convert stored values back into lists
-        string(REPLACE "|" ";" unit_policy_flags
-            "${unit_policy_flags}")
-        string(REPLACE "|" ";" unit_policy_includes
-            "${unit_policy_includes}")
-        string(REPLACE "|" ";" unit_policy_libraries
-            "${unit_policy_libraries}")
+            # Convert stored values back into lists
+            string(REPLACE "|" ";" unit_policy_flags
+                "${unit_policy_flags}")
+            string(REPLACE "|" ";" unit_policy_includes
+                "${unit_policy_includes}")
+            string(REPLACE "|" ";" unit_policy_libraries
+                "${unit_policy_libraries}")
 
-        #----------------------------------------------------------------------#
-        # Add the executable
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Add the executable
+            #------------------------------------------------------------------#
 
-        add_executable(${unit_target_name} ${_UNIT_SOURCES}
-            ${unit_policy_runtime})
+            add_executable(${unit_target_name} ${_UNIT_SOURCES}
+                ${unit_policy_runtime})
 
-        if(NOT "${unit_policy_flags}" STREQUAL "None")
-            target_compile_options(${unit_target_name}
-                PRIVATE ${unit_policy_flags})
-        endif(NOT "${unit_policy_flags}" STREQUAL "None")
+            if(NOT "${unit_policy_flags}" STREQUAL "None")
+                target_compile_options(${unit_target_name}
+                    PRIVATE ${unit_policy_flags})
+            endif(NOT "${unit_policy_flags}" STREQUAL "None")
 
-        #----------------------------------------------------------------------#
-        # Add user-specified library dependencies
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Add user-specified library dependencies
+            #------------------------------------------------------------------#
 
-        if(NOT "${unit_target_libraries}" STREQUAL "None")
-            foreach(library ${unit_target_libraries})
-                target_link_libraries(${unit_target_name} ${library})
-            endforeach(library)
-        endif(NOT "${unit_target_libraries}" STREQUAL "None")
+            if(NOT "${unit_target_libraries}" STREQUAL "None")
+                foreach(library ${unit_target_libraries})
+                    target_link_libraries(${unit_target_name} ${library})
+                endforeach(library)
+            endif(NOT "${unit_target_libraries}" STREQUAL "None")
 
-        #----------------------------------------------------------------------#
-        # Add include and link options
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Add include and link options
+            #------------------------------------------------------------------#
 
-        if(NOT "${unit_policy_includes}" STREQUAL "None")
-            target_include_directories(${unit_target_name}
-                PRIVATE ${unit_policy_includes})
-        endif(NOT "${unit_policy_includes}" STREQUAL "None")
+            if(NOT "${unit_policy_includes}" STREQUAL "None")
+                target_include_directories(${unit_target_name}
+                    PRIVATE ${unit_policy_includes})
+            endif(NOT "${unit_policy_includes}" STREQUAL "None")
 
-        target_link_libraries(${unit_target_name} ${GTEST_LIBRARIES})
+            target_link_libraries(${unit_target_name} ${GTEST_LIBRARIES})
 
-        if(NOT "${unit_policy_libraries}" STREQUAL "None")
-            target_link_libraries(${unit_target_name}
-                ${unit_policy_libraries})
-        endif(NOT "${unit_policy_libraries}" STREQUAL "None")
+            if(NOT "${unit_policy_libraries}" STREQUAL "None")
+                target_link_libraries(${unit_target_name}
+                    ${unit_policy_libraries})
+            endif(NOT "${unit_policy_libraries}" STREQUAL "None")
 
-        #----------------------------------------------------------------------#
-        # Change the output directory to the test subdirectory
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Change the output directory to the test subdirectory
+            #------------------------------------------------------------------#
 
-        set_target_properties(${unit_target_name}
-            PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+            set_target_properties(${unit_target_name}
+                PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
 
-        #----------------------------------------------------------------------#
-        # Add the test target to CTest
-        #----------------------------------------------------------------------#
+            #------------------------------------------------------------------#
+            # Add the test target to CTest
+            #------------------------------------------------------------------#
 
-        set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test)
+            set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test)
 
-        string(REPLACE "|" ";" thread_instance_list
-            ${unit_target_execution_threads})
+            string(REPLACE "|" ";" thread_instance_list
+                ${unit_target_execution_threads})
 
-        list(LENGTH thread_instance_list thread_instances)
+            list(LENGTH thread_instance_list thread_instances)
 
-        if(${thread_instances} GREATER 1)
+            if(${thread_instances} GREATER 1)
 
-            foreach(instance ${thread_instance_list})
+                foreach(instance ${thread_instance_list})
+                    if(ENABLE_JENKINS_OUTPUT)
+                        set(_OUTPUT
+                            ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
+                        set(JENKINS_FLAGS --gtest_output=xml:${_OUTPUT}
+                            --gtest_color=yes)
+                    endif(ENABLE_JENKINS_OUTPUT)
+
+                    add_test(${unit_target_name}_${instance}
+                        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                        ${JENKINS_FLAGS}
+                        COMMAND ${unit_policy_exec}
+                            ${unit_policy_exec_threads} ${instance})
+                endforeach(instance)
+
+            else()
+
                 if(ENABLE_JENKINS_OUTPUT)
                     set(_OUTPUT
-                        ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
+                        ${_OUTPUT_DIR}/${unit_target_name}.xml)
                     set(JENKINS_FLAGS --gtest_output=xml:${_OUTPUT}
                         --gtest_color=yes)
                 endif(ENABLE_JENKINS_OUTPUT)
 
-                add_test(${unit_target_name}_${instance}
+                add_test(${unit_target_name}
                     ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                    ${JENKINS_FLAGS}
-                    COMMAND ${unit_policy_exec}
-                        ${unit_policy_exec_threads} ${instance})
-            endforeach(instance)
+                    ${JENKINS_FLAGS})
 
-        else()
+            endif(${thread_instances} GREATER 1)
 
-            if(ENABLE_JENKINS_OUTPUT)
-                set(_OUTPUT
-                    ${_OUTPUT_DIR}/${unit_target_name}.xml)
-                set(JENKINS_FLAGS --gtest_output=xml:${_OUTPUT}
-                    --gtest_color=yes)
-            endif(ENABLE_JENKINS_OUTPUT)
-
-            add_test(${unit_target_name}
-                ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                ${JENKINS_FLAGS})
-
-        endif(${thread_instances} GREATER 1)
+        endif(${unit_target_execution_policy}_UNIT_POLICY_LIST)
 
     endforeach(unit)
 
