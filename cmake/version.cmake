@@ -23,7 +23,11 @@ function(cinch_make_version)
         # Call 'git describe'
         #----------------------------------------------------------------------#
 
-        execute_process(COMMAND ${GIT_EXECUTABLE} describe master
+        execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+            OUTPUT_VARIABLE _branch
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${GIT_EXECUTABLE} describe ${_branch}
             OUTPUT_VARIABLE _version
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
