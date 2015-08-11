@@ -13,22 +13,26 @@ cmake_source_template = Template(
 #-----------------------------------------------------------------------------~#
 
 set(${PARENT}_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/file1.h
-    PARENT_SCOPE
+${HEADERS}${SPACES}PARENT_SCOPE
 )
 
-#set(${PARENT}_SOURCES
-#    ${CMAKE_CURRENT_SOURCE_DIR}/file1.cc
-#    PARENT_SCOPE
-#)
+set(${PARENT}_SOURCES
+${SOURCES}${SPACES}PARENT_SCOPE
+)
 
 #if(ENABLE_UNIT_TESTS)
-#    cinch_add_unit(casename testfile.cc)
+#${SPACES}cinch_add_unit(casename
+#${SPACES}${SPACES}SOURCES testfile.cc
+#${SPACES}${SPACES}LIBRARIES list
+#${SPACES}${SPACES}INCLUDES list
+#${SPACES}${SPACES}POLICY MPI
+#${SPACES}${SPACES}THREADS 1 2 4
+#${SPACES})
 #endif(ENABLE_UNIT_TESTS)
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
-# vim: set tabstop=4 shiftwidth=4 expandtab :
+# vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
 #----------------------------------------------------------------------------~-#
 """)
 

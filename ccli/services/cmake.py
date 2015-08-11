@@ -33,6 +33,9 @@ class CINCHCMake(Service):
             help='create a CMake template suitable for inclusion in ' +
                 'an application source directory.')
 
+        self.parser.add_argument('-t', '--tabstop', action="store",
+            help='set the default tabstop width ')
+
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)
 

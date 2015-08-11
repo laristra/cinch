@@ -138,6 +138,12 @@ def walk_tree(directory, suffixes, documents, \
                                     break
                                 # if
 
+                                # Strip comments (must be done after
+                                # cinch annotations directly above
+                                if begin_comment_identifier(line):
+                                    continue
+                                # if
+
                                 current_chapter.append(line)
                             # while
                         # if

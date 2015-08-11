@@ -49,6 +49,16 @@ end_delimiters = [
     '-->'
 ]
 
+file_types = {
+    '.md' : 'markdown',
+    '.tex' : 'latex'
+}
+
+comment_start_delimiters = [
+    '<!--',
+    '%'
+]
+
 def begin_identifier(line):
     for char in special:
         if char in line:
@@ -63,13 +73,25 @@ def single_line_identifier(line):
     for single in single_line_delimiters:
         if single in line:
             return True
+
+    return False
 # single_line_identifier
 
 def end_identifier(line):
     for end in end_delimiters:
         if end in line:
             return True
+
+    return False
 # end_identifier
+
+def begin_comment_identifier(line):
+    for delimiter in comment_start_delimiters:
+        if line.startswith(delimiter):
+            return True
+
+    return False
+# begin_comment_identifier
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
