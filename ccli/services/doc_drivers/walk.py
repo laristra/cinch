@@ -144,6 +144,19 @@ def walk_tree(directory, suffixes, documents, \
                                     continue
                                 # if
 
+                                if(development):
+                                    if 'CINCHNOTE' in line:
+                                        note = '\color{red}{' + \
+                                            '\small{' + \
+                                            '\emph{' + \
+                                            'NOTE: ' + \
+                                            read_token('CINCHNOTE', line) + \
+                                            '}' + \
+                                            '}' + \
+                                            '}' + '\color{black}  ' # newline
+                                        line = re.sub(r'CINCHNOTE(.*)',
+                                            note, line)
+
                                 current_chapter.append(line)
                             # while
                         # if
