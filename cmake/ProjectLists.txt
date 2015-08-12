@@ -524,9 +524,18 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                         --gtest_color=yes)
                 endif(ENABLE_JENKINS_OUTPUT)
 
-                add_test(${unit_target_name}
-                    ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                    ${JENKINS_FLAGS})
+                if(NOT "${unit_policy_exec}" STREQUAL "None")
+                    add_test(${unit_target_name}
+                        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                        ${JENKINS_FLAGS}
+                        COMMAND ${unit_policy_exec}
+                            ${unit_policy_exec_threads}
+                            ${unit_target_execution_threads})
+                else()
+                    add_test(${unit_target_name}
+                        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                        ${JENKINS_FLAGS})
+                endif(NOT "${unit_policy_exec}" STREQUAL "None")
 
             endif(${thread_instances} GREATER 1)
 
