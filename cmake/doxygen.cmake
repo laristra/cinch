@@ -10,6 +10,7 @@ function(cinch_add_doxygen)
     #--------------------------------------------------------------------------#
 
     option(ENABLE_DOXYGEN "Enable Doxygen documentation" OFF)
+    option(ENABLE_DOXYGEN_WARN "Enable Doxygen warnings" OFF)
 
     if(ENABLE_DOXYGEN)
 
@@ -81,6 +82,12 @@ function(cinch_add_doxygen)
         #----------------------------------------------------------------------#
         # Generate doxygen configuration file
         #----------------------------------------------------------------------#
+
+        if(ENABLE_DOXYGEN_WARN)
+            set(DOXYGEN_WARN YES)
+        else()
+            set(DOXYGEN_WARN NO)
+        endif(ENABLE_DOXYGEN_WARN)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in
             ${_directory}/.doxygen/doxygen.conf)
