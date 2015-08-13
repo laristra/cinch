@@ -508,11 +508,14 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                             --gtest_color=yes)
                     endif(ENABLE_JENKINS_OUTPUT)
 
-                    add_test(${unit_target_name}_${instance}
-                        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                        ${JENKINS_FLAGS}
-                        COMMAND ${unit_policy_exec}
-                            ${unit_policy_exec_threads} ${instance})
+                    add_test(
+                        NAME
+                            ${unit_target_name}_${instance}
+                        COMMAND
+                            ${unit_policy_exec}
+                            ${unit_policy_exec_threads} ${instance}
+                            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                            ${JENKINS_FLAGS})
                 endforeach(instance)
 
             else()
@@ -525,16 +528,22 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 endif(ENABLE_JENKINS_OUTPUT)
 
                 if(NOT "${unit_policy_exec}" STREQUAL "None")
-                    add_test(${unit_target_name}
-                        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                        ${JENKINS_FLAGS}
-                        COMMAND ${unit_policy_exec}
+                    add_test(
+                        NAME
+                            ${unit_target_name}
+                        COMMAND
+                            ${unit_policy_exec}
                             ${unit_policy_exec_threads}
-                            ${unit_target_execution_threads})
+                            ${unit_target_execution_threads}
+                            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                            ${JENKINS_FLAGS})
                 else()
-                    add_test(${unit_target_name}
-                        ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                        ${JENKINS_FLAGS})
+                    add_test(
+                        NAME
+                            ${unit_target_name}
+                        COMMAND
+                            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
+                            ${JENKINS_FLAGS})
                 endif(NOT "${unit_policy_exec}" STREQUAL "None")
 
             endif(${thread_instances} GREATER 1)
