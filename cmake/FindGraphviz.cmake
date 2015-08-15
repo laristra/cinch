@@ -16,7 +16,7 @@
 # GRAPHVIZ_FOUND	- True if GraphViz found.
 
 # Look for the header file.
-FIND_PATH(GRAPHVIZ_INCLUDE_DIR NAMES graphviz/graph.h)
+FIND_PATH(GRAPHVIZ_INCLUDE_DIR NAMES graphviz/cgraph.h)
 
 # Look for the library.
 FIND_LIBRARY(GRAPHVIZ_cdt_LIBRARY NAMES cdt )
