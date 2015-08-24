@@ -31,7 +31,8 @@ def create_cmakelists(args):
     # Setup output file name
     filename = 'CMakeLists.txt'
 
-    spaces = ''.zfill(int(args.tabstop)).replace('0', ' ')
+    # Setup spaces to use for tabs
+    spaces = tab_spaces(args)
 
     if overwrite_existing(filename):
         if args.source:

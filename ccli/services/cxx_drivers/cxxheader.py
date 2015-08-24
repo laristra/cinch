@@ -8,7 +8,7 @@ from string import Template
 cxx_header_template = Template(
 """
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
+ * Copyright (c) 2015 Los Alamos National Security, LLC
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
@@ -22,53 +22,48 @@ cxx_header_template = Template(
  */
 
 ${NAMESPACE_START}/*!
-    \class ${CLASSNAME} ${FILENAME}
-    \\brief ${CLASSNAME} provides...
+${SPACES}\class ${CLASSNAME} ${FILENAME}
+${SPACES}\\brief ${CLASSNAME} provides...
  */
 ${TEMPLATE}class ${CLASSNAME}
 {
 public:
 
-    //! Default constructor
-    ${CLASSNAME}() {}
+${SPACES}//! Default constructor
+${SPACES}${CLASSNAME}() {}
 
-    //! Copy constructor (disabled)
-    ${CLASSNAME}(const ${CLASSNAME} &) = delete;
+${SPACES}//! Copy constructor (disabled)
+${SPACES}${CLASSNAME}(const ${CLASSNAME} &) = delete;
 
-    //! Assignment operator (disabled)
-    ${CLASSNAME} & operator = (const ${CLASSNAME} &) = delete;
+${SPACES}//! Assignment operator (disabled)
+${SPACES}${CLASSNAME} & operator = (const ${CLASSNAME} &) = delete;
 
-    //! Destructor
-    ${VIRTUAL} ~${CLASSNAME}() {}
+${SPACES}//! Destructor
+${SPACES}${VIRTUAL} ~${CLASSNAME}() {}
 
 #if 0
-    // This is an example of defining a method with Doxygen
-    // documentation.  You should delete this example if
-    // you don't need it.  Please remove or edit this section
-    // before you add the file to a merge request.
+${SPACES}/*!
+${SPACES}\\brief This method does...
 
-    /*!
-        \\brief This method does...
+${SPACES}\param arg0 a value that I pass in...
+${SPACES}\param arg1 a value that I pass in...
 
-        \param arg0 a value that I pass in...
-        \param arg1 a value that I pass in...
+${SPACES}\\return an integer with...
 
-        \\return an integer with...
-
-        This method does something useful...
-     */
-    int methodA(double arg0, double arg1) {
-        return 0;
-    } // methodA
+${SPACES}This method does something useful...
+${SPACES}*/
+${SPACES}int methodA(double arg0, double arg1) {
+${SPACES}${SPACES}return 0;
+${SPACES}} // methodA
 #endif // if 0
 
 ${PROTECTED}private:
 
-    // Aggregate data members
+${SPACES}// Aggregate data members
 #if 0
-    // This is an example data member.  You should delete
-    // this definition.
-    double val_;
+${SPACES}// This is an example data member.  You should delete
+${SPACES}// this definition.
+${SPACES}double val_;
 #endif // if 0
 
 }; // class ${CLASSNAME}
@@ -76,12 +71,11 @@ ${PROTECTED}private:
 ${NAMESPACE_END}#endif // ${NAMESPACE_GUARD}${CLASSNAME}_h
 
 /*~-------------------------------------------------------------------------~-*
- * Formatting options for Emacs and vim.
- *
- * mode:c++
- * indent-tabs-mode:t
- * c-basic-offset:4
- * tab-width:4
- * vim: set tabstop=4 shiftwidth=4 expandtab :
+ * Formatting options for vim.
+ * vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
  *~-------------------------------------------------------------------------~-*/
 """)
+
+#------------------------------------------------------------------------------#
+# vim: set tabstop=2 shiftwidth=2 expandtab :
+#------------------------------------------------------------------------------#

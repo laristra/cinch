@@ -53,6 +53,9 @@ class CINCHSource(Service):
                 '  If this argument is not provided,' +
                 ' output file names will be created using the classname.')
 
+        self.parser.add_argument('-ts', '--tabstop', action="store",
+            help='set the default tabstop width ')
+
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)
 

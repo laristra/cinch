@@ -7,6 +7,7 @@ from cxxheader import cxx_header_template
 from cxxsource import cxx_source_template
 import getpass
 import datetime
+from ccli.services.service_utils import *
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -42,10 +43,15 @@ def create_cxx_files(args):
   author = getpass.getuser()
   date = datetime.datetime.now().strftime("%b %d, %Y")
 
+  # Setup up spaces to use for tabs
+  spaces = tab_spaces(args)
+
   # Do substitutions on header template
   header_output = cxx_header_template.substitute(
     AUTHOR=author,
     DATE=date,
+    SPACES=spaces,
+    TABSTOP=args.tabstop,
     CLASSNAME=args.classname,
     VIRTUAL=virtual,
     PROTECTED=protected,
@@ -82,6 +88,8 @@ def create_cxx_files(args):
     source_output = cxx_source_template.substitute(
       AUTHOR=author,
       DATE=date,
+      SPACES=spaces,
+      TABSTOP=args.tabstop,
       CLASSNAME=args.classname,
       VIRTUAL=virtual,
       PROTECTED=protected,
@@ -91,7 +99,7 @@ def create_cxx_files(args):
       NAMESPACE_START=namespace_start,
       NAMESPACE_END=namespace_end,
       NAMESPACE_GUARD=namespace_guard
-    )
+      )
 
     # Output to file (will overwrite if it exists)
     fd = open(cfile, 'w')

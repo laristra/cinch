@@ -18,6 +18,10 @@ def overwrite_existing(filename):
 
 # overwrite_existing
 
+def tab_spaces(args):
+    return ''.zfill(int(args.tabstop)).replace('0', ' ')
+# tab_spaces
+
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 # vim: set tabstop=4 shiftwidth=4 expandtab :
