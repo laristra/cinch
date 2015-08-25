@@ -504,7 +504,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             list(LENGTH thread_instance_list thread_instances)
 
-            set(UNIT_FLAGS)
+            set(UNIT_FLAGS --gtest_color=no)
             if(ENABLE_COLOR_UNIT_TESTS)
                 set(UNIT_FLAGS --gtest_color=yes)
             endif(ENABLE_COLOR_UNIT_TESTS)
