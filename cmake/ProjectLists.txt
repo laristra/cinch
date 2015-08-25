@@ -48,7 +48,6 @@ include(application)
 include(subproject)
 include(doxygen)
 include(version)
-include(mpi)
 
 #------------------------------------------------------------------------------#
 # Set to release if no build type has been specified
@@ -111,6 +110,12 @@ endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 #------------------------------------------------------------------------------#
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
+
+#------------------------------------------------------------------------------#
+# Post-project includes
+#------------------------------------------------------------------------------#
+
+include(mpi)
 
 #------------------------------------------------------------------------------#
 # Create a version for the project
