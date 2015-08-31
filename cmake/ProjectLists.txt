@@ -48,7 +48,6 @@ include(application)
 include(subproject)
 include(doxygen)
 include(version)
-include(mpi)
 
 #------------------------------------------------------------------------------#
 # Set to release if no build type has been specified
@@ -113,6 +112,12 @@ endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
 #------------------------------------------------------------------------------#
+# Post-project includes
+#------------------------------------------------------------------------------#
+
+include(mpi)
+
+#------------------------------------------------------------------------------#
 # Create a version for the project
 #------------------------------------------------------------------------------#
 
@@ -171,6 +176,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     #--------------------------------------------------------------------------#
 
     option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
+    option(ENABLE_COLOR_UNIT_TESTS "Enable colorized unit testing output" OFF)
     option(ENABLE_JENKINS_OUTPUT
         "Generate jenkins xml output for every test" OFF)
 
@@ -498,14 +504,19 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             list(LENGTH thread_instance_list thread_instances)
 
+            set(UNIT_FLAGS --gtest_color=no)
+            if(ENABLE_COLOR_UNIT_TESTS)
+                set(UNIT_FLAGS --gtest_color=yes)
+            endif(ENABLE_COLOR_UNIT_TESTS)
+
             if(${thread_instances} GREATER 1)
 
                 foreach(instance ${thread_instance_list})
                     if(ENABLE_JENKINS_OUTPUT)
                         set(_OUTPUT
                             ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
-                        set(JENKINS_FLAGS --gtest_output=xml:${_OUTPUT}
-                            --gtest_color=yes)
+                        set(UNIT_FLAGS ${UNIT_FLAGS}
+                            --gtest_output=xml:${_OUTPUT})
                     endif(ENABLE_JENKINS_OUTPUT)
 
                     add_test(
@@ -515,7 +526,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                             ${unit_policy_exec}
                             ${unit_policy_exec_threads} ${instance}
                             ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                            ${JENKINS_FLAGS})
+                            ${UNIT_FLAGS})
                 endforeach(instance)
 
             else()
@@ -523,8 +534,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 if(ENABLE_JENKINS_OUTPUT)
                     set(_OUTPUT
                         ${_OUTPUT_DIR}/${unit_target_name}.xml)
-                    set(JENKINS_FLAGS --gtest_output=xml:${_OUTPUT}
-                        --gtest_color=yes)
+                    set(UNIT_FLAGS ${UNIT_FLAGS}
+                        --gtest_output=xml:${_OUTPUT})
                 endif(ENABLE_JENKINS_OUTPUT)
 
                 if(NOT "${unit_policy_exec}" STREQUAL "None")
@@ -536,14 +547,14 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                             ${unit_policy_exec_threads}
                             ${unit_target_execution_threads}
                             ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                            ${JENKINS_FLAGS})
+                            ${UNIT_FLAGS})
                 else()
                     add_test(
                         NAME
                             ${unit_target_name}
                         COMMAND
                             ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                            ${JENKINS_FLAGS})
+                            ${UNIT_FLAGS})
                 endif(NOT "${unit_policy_exec}" STREQUAL "None")
 
             endif(${thread_instances} GREATER 1)
