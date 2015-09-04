@@ -11,7 +11,7 @@ from ccli.services.doc_drivers.document import *
 
 symbols = {
     'document' : 'DOCUMENT',
-    'chapter' : 'CHAPTER',
+    'chapter' : 'SECTION',
 }
 
 #------------------------------------------------------------------------------#

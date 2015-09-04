@@ -1,4 +1,4 @@
-<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(CLI) -->
+<!-- CINCHDOC DOCUMENT(User Guide) SECTION(CLI) -->
 
 ### C++ Source Template
 
