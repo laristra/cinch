@@ -187,18 +187,18 @@ tree that document whichever aspects of the project should be included.  The
 caveat is that these documentation fragments should have a special comment
 header at the beginning of each, of the form:
 
-`<!-- CINCHDOC DOCUMENT(Name of Document) SECTION(Name of Chapter) -->`
+`<!-- CINCHDOC DOCUMENT(Name of Document) SECTION(Name of Section) -->`
 
 This special header indicates for which document the fragment is intended
-and the chapter within which it should appear.  Headers may span
+and the section within which it should appear.  Headers may span
 multiple lines provided that `<!-- CINCHDOC` begins the comment.
 If no attributes
 (DOCUMENT, SECTION, etc.) are specified, the utility will use a
-default document and chapter ('Default' and 'Default').  Multiple
-fragments intended for different documents and chapter may be included
+default document and section ('Default' and 'Default').  Multiple
+fragments intended for different documents and sections may be included
 within a single input file.  For latex fragments, use a header of the form:
 
-`% CINCHDOC DOCUMENT(Name of Document) SECTION(Name of Chapter)`
+`% CINCHDOC DOCUMENT(Name of Document) SECTION(Name of Section)`
 
 Latex-style CINCHDOC headers must be on a single line.
 
