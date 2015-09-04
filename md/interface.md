@@ -1,4 +1,4 @@
-<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(Interface) -->
+<!-- CINCHDOC DOCUMENT(User Guide) SECTION(Interface) -->
 
 # Cinch CMake Interface{#cmake-interface}
 

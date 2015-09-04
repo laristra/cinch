@@ -1,4 +1,4 @@
-<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(Overview) -->
+<!-- CINCHDOC DOCUMENT(User Guide) SECTION(Overview) -->
 
 # Cinch CMake Build Utilities
 
@@ -42,7 +42,7 @@ rooted in the top-level project directory of a Cinch project.  If the user
 attempts to configure such a build, cmake will exit with an error and
 instructions for how to clean up and create an out-of-source build.
 
-<!-- CINCHDOC DOCUMENT(User Guide) CHAPTER(Structure) -->
+<!-- CINCHDOC DOCUMENT(User Guide) SECTION(Structure) -->
 
 # Basic Structure
 
@@ -187,18 +187,18 @@ tree that document whichever aspects of the project should be included.  The
 caveat is that these documentation fragments should have a special comment
 header at the beginning of each, of the form:
 
-`<!-- CINCHDOC DOCUMENT(Name of Document) CHAPTER(Name of Chapter) -->`
+`<!-- CINCHDOC DOCUMENT(Name of Document) SECTION(Name of Chapter) -->`
 
 This special header indicates for which document the fragment is intended
 and the chapter within which it should appear.  Headers may span
 multiple lines provided that `<!-- CINCHDOC` begins the comment.
 If no attributes
-(DOCUMENT, CHAPTER, etc.) are specified, the utility will use a
+(DOCUMENT, SECTION, etc.) are specified, the utility will use a
 default document and chapter ('Default' and 'Default').  Multiple
 fragments intended for different documents and chapter may be included
 within a single input file.  For latex fragments, use a header of the form:
 
-`% CINCHDOC DOCUMENT(Name of Document) CHAPTER(Name of Chapter)`
+`% CINCHDOC DOCUMENT(Name of Document) SECTION(Name of Chapter)`
 
 Latex-style CINCHDOC headers must be on a single line.
 
