@@ -109,39 +109,39 @@ class CINCHDoc(Service):
             documents[opts['document']] = Document(opts['document'])
         doc = documents[opts['document']]
 
-        # Process chapters-prepend option
-        if 'chapters-prepend' in opts:
-            for chapter in opts['chapters-prepend']:
+        # Process sections-prepend option
+        if 'sections-prepend' in opts:
+            for chapter in opts['sections-prepend']:
                 doc.add_chapter(chapter)
 
-        # Process chapters option
-        if 'chapters' in opts:
-            for chapter in opts['chapters']:
+        # Process sections option
+        if 'sections' in opts:
+            for chapter in opts['sections']:
                 doc.add_chapter(chapter)
 
         # Search sub-directories for documentation files
         walk_tree(args.directory, suffixes, documents,
             opts['document'], args.verbose, args.development)
 
-        # Remove the default chapter if chapters were found
+        # Remove the default chapter if sections were found
         # Because we add a 'header' chapter, there should be
-        # two chapters if none were added by the user.
-        if (len(doc.chapters()) > 2) and 'Default' in doc.chapters():
+        # two sections if none were added by the user.
+        if (len(doc.sections()) > 2) and 'Default' in doc.sections():
             doc.delete_chapter('Default')
 
         #----------------------------------------------------------------------#
-        # Process chapters-append
+        # Process sections-append
         # This removes chapter-append keys and then re-adds them, this
         # effectively sorts them to the end in-order because we are using
         # an ordered dict.
         #----------------------------------------------------------------------#
 
-        if 'chapters-append' in opts:
+        if 'sections-append' in opts:
             saved = dict()
-            for chapter in doc.chapters():
-                for key in opts['chapters-append']:
+            for chapter in doc.sections():
+                for key in opts['sections-append']:
                     if key == chapter:
-                        saved[key] = doc.chapters()[key]
+                        saved[key] = doc.sections()[key]
 
             for key in saved:
                 doc.delete_chapter(key)
@@ -150,7 +150,7 @@ class CINCHDoc(Service):
                 doc.add_chapter(key, saved[key])
 
         #----------------------------------------------------------------------#
-        # End Process chapters-append
+        # End Process sections-append
         #----------------------------------------------------------------------#
 
         # For now, just write to the specified output

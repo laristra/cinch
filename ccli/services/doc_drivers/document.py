@@ -84,11 +84,11 @@ class Document():
 		"""
 
 		self._title = title
-		self._chapters = OrderedDict()
+		self._sections = OrderedDict()
 
 		# Add header information
-		self._chapters['header'] = Chapter('Header')
-		self._chapters['header'].append(header)
+		self._sections['header'] = Chapter('Header')
+		self._sections['header'].append(header)
 
 	# __init__
 
@@ -101,35 +101,35 @@ class Document():
 		"""
 		"""
 
-		if not title in self._chapters:
-			self._chapters[title] = Chapter(title)
+		if not title in self._sections:
+			self._sections[title] = Chapter(title)
 
-		return self._chapters[title]
+		return self._sections[title]
 	# chapter
 
-	def chapters(self):
-		return self._chapters
-	# chapters
+	def sections(self):
+		return self._sections
+	# sections
 
 	def add_chapter(self, title, obj=None):
 		if obj:
-			self._chapters[title] = obj
-		elif not title in self._chapters:
-			self._chapters[title] = Chapter(title)
+			self._sections[title] = obj
+		elif not title in self._sections:
+			self._sections[title] = Chapter(title)
 	# add_chapter			
 		
 	def delete_chapter(self, title):
-		del self._chapters[title]
+		del self._sections[title]
 
 	def print_content(self):
-		for chapter in self._chapters:
-			self._chapters[chapter].print_content()
+		for chapter in self._sections:
+			self._sections[chapter].print_content()
 	# print_content
 
 	def write(self, output):
 		with open(output, 'w+') as f:
-			for chapter in self._chapters:
-				f.write(self._chapters[chapter].str_content())
+			for chapter in self._sections:
+				f.write(self._sections[chapter].str_content())
 	# write
 
 # Document
