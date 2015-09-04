@@ -16,24 +16,24 @@ opts = {
     'document' : 'User Guide',
 
     #--------------------------------------------------------------------------#
-    # Chapters Prepend List
+    # Sections Prepend List
     #
-    # This options allows you to specify an order for the first N chapters
+    # This options allows you to specify an order for the first N sections
     # of the document, potentially leaving the overall ordering arbitrary.
     #--------------------------------------------------------------------------#
 
-#    'chapters-prepend' : [
+#    'sections-prepend' : [
 #    'Introduction'
 #    ],
 
     #--------------------------------------------------------------------------#
-    # Chapters List
+    # Sections List
     #
     # This option allows you to specify an order for some or all of the
-    # chapters in the the document.
+    # sections in the the document.
     #--------------------------------------------------------------------------#
 
-    'chapters' : [
+    'sections' : [
     'Overview',
 	 'Structure',
     'CLI',
@@ -41,13 +41,13 @@ opts = {
     ],
 
     #--------------------------------------------------------------------------#
-    # Chapters Append List
+    # Sections Append List
     #
-    # This options allows you to specify an order for the last N chapters
+    # This options allows you to specify an order for the last N sections
     # of the document, potentially leaving the overall ordering arbitrary.
     #--------------------------------------------------------------------------#
 
-#    'chapters-append' : [
+#    'sections-append' : [
 #    'Conclusion'
 #    ]
 }
