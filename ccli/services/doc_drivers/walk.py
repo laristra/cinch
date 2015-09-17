@@ -39,7 +39,7 @@ def walk_tree(directory, suffixes, documents, \
 
                 # Open file to search for symbols
                 with open(join(root,file)) as fd:
-                    if(verbose):
+                    if verbose:
                         print 'ccli: processing ---- ' + file + ' ----'
 
                     # Grab all of the lines
@@ -47,6 +47,9 @@ def walk_tree(directory, suffixes, documents, \
 
                     # Go through the lines
                     for index, line in enumerate(lines):
+
+                        if "CHAPTER" in line:
+                            print 'WARNING: CHAPTER symbol is deprecated'
 
                         # If this is a doc line, parse the symbols
                         #if '<!-- CINCHDOC' in line or '% CINCHDOC' in line:
