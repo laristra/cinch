@@ -399,9 +399,10 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 0 unit_target_name)
         list(GET unit_target_list 1 unit_target_directory)
         list(GET unit_target_list 2 unit_target_sources)
-        list(GET unit_target_list 3 unit_target_libraries)
-        list(GET unit_target_list 4 unit_target_execution_policy)
-        list(GET unit_target_list 5 unit_target_execution_threads)
+        list(GET unit_target_list 3 unit_target_input)
+        list(GET unit_target_list 4 unit_target_libraries)
+        list(GET unit_target_list 5 unit_target_execution_policy)
+        list(GET unit_target_list 6 unit_target_execution_threads)
 
         # Convert stored values back into lists
         string(REPLACE "|" ";" unit_target_sources
@@ -494,6 +495,15 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             set_target_properties(${unit_target_name}
                 PROPERTIES
                 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+
+            #------------------------------------------------------------------#
+            # Copy dependency file to test directory
+            #------------------------------------------------------------------#
+
+            if(NOT "${unit_target_input}" STREQUAL "None")
+                file(COPY ${unit_target_directory}/${unit_target_input}
+                    DESTINATION ${CMAKE_BINARY_DIR}/test)
+            endif(NOT "${unit_target_input}" STREQUAL "None")
 
             #------------------------------------------------------------------#
             # Add the test target to CTest

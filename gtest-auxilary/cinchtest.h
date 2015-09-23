@@ -35,7 +35,9 @@ public:
   } // to_file
 
   bool equal_blessed(const char * filename) {
-    std::ifstream f(filename);
+    std::string testdir_filename("test/");
+    testdir_filename += filename;
+    std::ifstream f(testdir_filename);
     
     if(not f.good()) {
       std::cerr << "Failed to open " << filename << std::endl;
