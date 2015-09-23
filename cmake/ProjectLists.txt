@@ -194,6 +194,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
           set(GTEST_MAIN_LIBRARIES gtest_main)
         endif()
 
+        include_directories(cinch/gtest-auxilary)
+
         #----------------------------------------------------------------------#
         # Add default execution polices
         #----------------------------------------------------------------------#
@@ -203,7 +205,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         if(${MPI_${MPI_LANGUAGE}_FOUND})
             cinch_add_unit_execution_policy(MPI
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-runtime/gtest-mpi.cc
+                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxilary/gtest-mpi.cc
                 FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
                 LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
