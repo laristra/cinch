@@ -65,13 +65,13 @@ private:
 
 }; // class test_output_t
 
-#define CINCH_TEST_STREAM() \
+#define CINCH_CAPTURE() \
   test_output_t::instance().get_stream()
 
-#define CINCH_TEST_EQUAL_BLESSED(f) \
+#define CINCH_EQUAL_BLESSED(f) \
   test_output_t::instance().equal_blessed((f))
 
-#define CINCH_TEST_WRITE(f) \
+#define CINCH_WRITE(f) \
   test_output_t::instance().to_file((f))
 
 #endif // cinchtest_h
