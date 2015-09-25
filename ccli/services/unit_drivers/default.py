@@ -4,6 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from unit import unit_template
+from ccli.services.service_utils import *
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -19,11 +20,16 @@ def create_unit_test(args):
     # Setup output file name
     filename = (args.case if args.case != None else 'unamed') + '.cc'
 
+    # Setup spaces to use for tabs
+    spaces = tab_spaces(args)
+
     unit_output = unit_template.substitute(
         CASE=args.case,
         NAME_A=name_a,
         NAME_B=name_fill,
-        NAME_C=name_fill
+        NAME_C=name_fill,
+        TABSTOP=args.tabstop,
+        SPACES=spaces
     )
     
     # Output to file

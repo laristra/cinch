@@ -34,7 +34,7 @@ class CINCHCMake(Service):
                 'an application source directory.')
 
         self.parser.add_argument('-ts', '--tabstop', action="store",
-            help='set the default tabstop width ')
+            default=2, help='set the default tabstop width ')
 
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)

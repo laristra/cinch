@@ -16,25 +16,40 @@ unit_template = Template(
 
 TEST(${CASE}, ${NAME_A}) {
 
-    /* Test Logic: See 'Google Test Macros' section below. */
+${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
 
 } // TEST
 
 # if 0 /* Remove guards to create more tests */
 TEST(${CASE}, ${NAME_B}) {
 
-    /* Test Logic: See 'Google Test Macros' section below. */
+${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
 
 } // TEST
 
 TEST(${CASE}, ${NAME_C}) {
 
-    /* Test Logic: See 'Google Test Macros' section below. */
+${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
 
 } // TEST
 #endif // if 0
 
 /*----------------------------------------------------------------------------*
+ * Cinch test Macros
+ *
+ *  ==== I/O ====
+ *  CINCH_CAPTURE()              : Insertion stream for capturing output.
+ *                                 Captured output can be written or
+ *                                 compared using the macros below.
+ *
+ *    EXAMPLE:
+ *      CINCH_CAPTURE() << "My value equals: " << myvalue << std::endl;
+ *
+ *  CINCH_COMPARE_BLESSED(file); : Compare captured output with
+ *                                 contents of a blessed file.
+ *
+ *  CINCH_WRITE(file);           : Write captured output to file.
+ *
  * Google Test Macros
  *
  * Basic Assertions:
@@ -60,16 +75,14 @@ TEST(${CASE}, ${NAME_C}) {
  *  ASSERT_STRNE(expected, actual);     EXPECT_STRNE(expected, actual)
  *  ASSERT_STRCASEEQ(expected, actual); EXPECT_STRCASEEQ(expected, actual)
  *  ASSERT_STRCASENE(expected, actual); EXPECT_STRCASENE(expected, actual)
- *
  *----------------------------------------------------------------------------*/
 
 /*~-------------------------------------------------------------------------~-*
- * Formatting options for Emacs and vim.
- *
- * mode:c++
- * indent-tabs-mode:t
- * c-basic-offset:4
- * tab-width:4
- * vim: set tabstop=4 shiftwidth=4 expandtab :
+ * Formatting options for vim.
+ * vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
  *~-------------------------------------------------------------------------~-*/
 """)
+
+#------------------------------------------------------------------------------#
+# vim: set tabstop=2 shiftwidth=2 expandtab :
+#------------------------------------------------------------------------------#

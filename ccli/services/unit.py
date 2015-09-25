@@ -33,6 +33,9 @@ class CINCHUnitTest(Service):
             help='the name of the unit test.' +
                 '   A unit case may contain several related tests.')
 
+        self.parser.add_argument('-ts', '--tabstop', action="store",
+            default=2, help='set the default tabstop width ')
+
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)
 
