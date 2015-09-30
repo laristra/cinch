@@ -11,6 +11,8 @@
 #ifndef cinchtest_h
 #define cinchtest_h
 
+namespace cinch {
+
 class test_output_t
 {
 public:
@@ -66,14 +68,16 @@ private:
 
 }; // class test_output_t
 
+} // namespace cinch
+
 #define CINCH_CAPTURE() \
-  test_output_t::instance().get_stream()
+  cinch::test_output_t::instance().get_stream()
 
 #define CINCH_EQUAL_BLESSED(f) \
-  test_output_t::instance().equal_blessed((f))
+  cinch::test_output_t::instance().equal_blessed((f))
 
 #define CINCH_WRITE(f) \
-  test_output_t::instance().to_file((f))
+  cinch::test_output_t::instance().to_file((f))
 
 #endif // cinchtest_h
 
