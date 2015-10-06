@@ -12,7 +12,7 @@ unit_template = Template(
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#include <gtest/gtest.h>
+#include <cinchtest.h>
 
 TEST(${CASE}, ${NAME_A}) {
 
