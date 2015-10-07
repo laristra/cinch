@@ -56,18 +56,14 @@ list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 #foreach(_SUBDIR ${CINCH_CONFIG_SUBDIRECTORIES})
 
 foreach(_SUBDIR ${_SUBDIRECTORIES})
+
     message(STATUS
         "Adding source subdirectory '${_SUBDIR}' to ${library_target_name}")
+
     unset(${_SUBDIR}_HEADERS)
     unset(${_SUBDIR}_SOURCES)
-    add_subdirectory(${_SUBDIR})
-    if("${${_SUBDIR}_HEADERS}${${_SUBDIR}_SOURCES}" STREQUAL "")
-        message(FATAL_ERROR "Internal cmake error: subdirectory ${_SUBDIR} set neither ${_SUBDIR}_HEADERS nor ${_SUBDIR}_SOURCES")
-    endif()
 
-#    if(NOT ENABLE_COMMON_HEADER)
-#        list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR})
-#    endif(NOT ENABLE_COMMON_HEADER)
+    add_subdirectory(${_SUBDIR})
 
     foreach(_HEADER ${${_SUBDIR}_HEADERS})
         list(APPEND HEADERS
