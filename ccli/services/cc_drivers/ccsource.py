@@ -5,7 +5,7 @@
 
 from string import Template
 
-cxx_source_template = Template(
+cc_source_template = Template(
 """
 /*~-------------------------------------------------------------------------~~*
  * Copyright (c) 2014 Los Alamos National Security, LLC

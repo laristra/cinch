@@ -34,7 +34,7 @@ class CINCHBrand(Service):
                 ' from python module BRAND.')
 
         self.parser.add_argument('syntax',
-            choices=['cxx', 'cmake', 'python'],
+            choices=['cc', 'cmake', 'python'],
             help='Input syntax for search and replacement.')
 
         self.parser.add_argument('directory',

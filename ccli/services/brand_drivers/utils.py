@@ -5,7 +5,7 @@
 
 import re
 
-cxx_syntax = {
+cc_syntax = {
     'begin' : '/*~',
     'bstart' : 10,
     'bend' : 2,
@@ -58,7 +58,7 @@ latex_syntax = {
 }
 
 comment_syntax = {
-    'cxx' : cxx_syntax,
+    'cc' : cc_syntax,
     'cmake' : cmake_syntax,
     'python' : python_syntax,
     'latex' : latex_syntax

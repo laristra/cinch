@@ -5,7 +5,7 @@
 
 from string import Template
 
-cxx_header_template = Template(
+cc_header_template = Template(
 """
 /*~--------------------------------------------------------------------------~*
  * Copyright (c) 2015 Los Alamos National Security, LLC
@@ -41,30 +41,7 @@ ${SPACES}${CLASSNAME} & operator = (const ${CLASSNAME} &) = delete;
 ${SPACES}//! Destructor
 ${SPACES}${VIRTUAL} ~${CLASSNAME}() {}
 
-#if 0
-${SPACES}/*!
-${SPACES}\\brief This method does...
-
-${SPACES}\param arg0 a value that I pass in...
-${SPACES}\param arg1 a value that I pass in...
-
-${SPACES}\\return an integer with...
-
-${SPACES}This method does something useful...
-${SPACES}*/
-${SPACES}int methodA(double arg0, double arg1) {
-${SPACES}${SPACES}return 0;
-${SPACES}} // methodA
-#endif // if 0
-
 ${PROTECTED}private:
-
-${SPACES}// Aggregate data members
-#if 0
-${SPACES}// This is an example data member.  You should delete
-${SPACES}// this definition.
-${SPACES}double val_;
-#endif // if 0
 
 }; // class ${CLASSNAME}
 

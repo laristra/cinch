@@ -3,8 +3,8 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-from cxxheader import cxx_header_template
-from cxxsource import cxx_source_template
+from ccheader import cc_header_template
+from ccsource import cc_source_template
 import getpass
 import datetime
 from ccli.services.service_utils import *
@@ -12,7 +12,7 @@ from ccli.services.service_utils import *
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-def create_cxx_files(args):
+def create_cc_files(args):
 
   """
   """
@@ -47,7 +47,7 @@ def create_cxx_files(args):
   spaces = tab_spaces(args)
 
   # Do substitutions on header template
-  header_output = cxx_header_template.substitute(
+  header_output = cc_header_template.substitute(
     AUTHOR=author,
     DATE=date,
     SPACES=spaces,
@@ -85,7 +85,7 @@ def create_cxx_files(args):
       if args.namespace != None else ''
 
     # Do substitutions on source template
-    source_output = cxx_source_template.substitute(
+    source_output = cc_source_template.substitute(
       AUTHOR=author,
       DATE=date,
       SPACES=spaces,
@@ -107,7 +107,7 @@ def create_cxx_files(args):
     fd.close()
   # if
 
-# create_cxx_files
+# create_cc_files
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

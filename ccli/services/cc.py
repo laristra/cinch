@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from ccli.base import Service
-from ccli.services.cxx_drivers.default import *
+from ccli.services.cc_drivers.default import *
 
 #------------------------------------------------------------------------------#
 # Source handler.
@@ -22,7 +22,7 @@ class CINCHSource(Service):
         """
 
         # get a command-line parser
-        self.parser = subparsers.add_parser('cxx',
+        self.parser = subparsers.add_parser('cc',
             help='Service to generate c++ file templates.')
 
         # add command-line options
@@ -70,7 +70,7 @@ class CINCHSource(Service):
         """
         """
 
-        create_cxx_files(args)
+        create_cc_files(args)
 
     # main
 
