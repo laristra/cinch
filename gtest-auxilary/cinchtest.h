@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <regex>
 #include <iostream>
 #include <fstream>
 
@@ -26,6 +27,10 @@ public:
     return *stream_;
   } // get_stream
 
+  void to_file(const std::string & filename) {
+    to_file(filename.c_str());
+  } // to_file
+
   void to_file(const char * filename) {
     std::ofstream f(filename);
 
@@ -40,6 +45,13 @@ public:
   bool equal_blessed(const char * filename) {
     std::string testdir_filename("test/");
     testdir_filename += filename;
+
+    // save test output to .current for updates
+    std::regex suffix("\\..*");
+    std::string save_output =
+      std::regex_replace(testdir_filename, suffix, ".current");
+    to_file(save_output);
+
     std::ifstream f(testdir_filename);
     
     if(not f.good()) {
