@@ -42,6 +42,10 @@ public:
     f << default_.rdbuf();
   } // to_file
 
+  void fail() {
+    FAIL() << default_.rdbuf();
+  } // fail
+
   bool equal_blessed(const char * filename) {
     std::string testdir_filename("test/");
     testdir_filename += filename;
@@ -90,6 +94,9 @@ private:
 
 #define CINCH_WRITE(f) \
   cinch::test_output_t::instance().to_file((f))
+
+#define CINCH_FAIL() \
+  cinch::test_output_t::instance().fail()
 
 #endif // cinchtest_h
 

@@ -203,7 +203,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         #cinch_add_unit_execution_policy(SERIAL
         #    ${CMAKE_SOURCE_DIR}/cinch/gtest/src/gtest_main.cc)
         cinch_add_unit_execution_policy(SERIAL
-            ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
+            ${CMAKE_SOURCE_DIR}/cinch/gtest-auxilary/gtest-standard.cc)
 
         if(${MPI_${MPI_LANGUAGE}_FOUND})
             cinch_add_unit_execution_policy(MPI

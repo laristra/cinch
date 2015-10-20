@@ -15,16 +15,13 @@ class listener : public ::testing::EmptyTestEventListener
 public:
 
   virtual void OnTestStart(const ::testing::TestInfo& test_info) {
-    std::cout << "custom listner OnTestStart" << std::endl;
   } // OnTestStart
 
   virtual void OnTestPartResult(
     const ::testing::TestPartResult& test_part_result) {
-    std::cout << "custom listner OnTestPartResult" << std::endl;
   } // OnTestPartResult
 
   virtual void OnTestEnd(const ::testing::TestInfo& test_info) {
-    std::cout << "custom listner OnTestEnd" << std::endl;
   } // OnTestEnd
 
 }; // class listener
