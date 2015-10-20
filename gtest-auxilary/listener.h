@@ -7,6 +7,7 @@
 #define cinch_listener_h
 
 #include <gtest/gtest.h>
+#include "output.h"
 
 namespace cinch {
 
