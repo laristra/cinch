@@ -25,6 +25,9 @@
 #define CINCH_WRITE(f) \
   cinch::test_output_t::instance().to_file((f))
 
+#define CINCH_ASSERT(ASSERTION, ...) \
+  ASSERT_ ## ASSERTION(__VA_ARGS__) << CINCH_DUMP()
+
 #endif // cinchtest_h
 
 /*~-------------------------------------------------------------------------~-*
