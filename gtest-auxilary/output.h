@@ -51,6 +51,11 @@ public:
     std::string testdir_filename("test/");
     testdir_filename += filename;
 
+    // backup rdbuffer, because it will get flushed by to_file
+    std::stringstream backup;
+    backup << default_.rdbuf();
+    backup >> default_.rdbuf();
+
     // save test output to .current for updates
     std::regex suffix("\\..*");
     std::string save_output =
@@ -67,7 +72,7 @@ public:
     std::stringstream ss;
     ss << f.rdbuf();
 
-    if(default_.str().compare(ss.str()) == 0) {
+    if(backup.str().compare(ss.str()) == 0) {
       return true;
     } // if
 
