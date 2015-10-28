@@ -401,7 +401,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 0 unit_target_name)
         list(GET unit_target_list 1 unit_target_directory)
         list(GET unit_target_list 2 unit_target_sources)
-        list(GET unit_target_list 3 unit_target_input)
+        list(GET unit_target_list 3 unit_target_inputs)
         list(GET unit_target_list 4 unit_target_libraries)
         list(GET unit_target_list 5 unit_target_execution_policy)
         list(GET unit_target_list 6 unit_target_execution_threads)
@@ -411,6 +411,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             "${unit_target_sources}")
         string(REPLACE "|" ";" unit_target_libraries
             "${unit_target_libraries}")
+        string(REPLACE "|" ";" unit_target_inputs
+            "${unit_target_inputs}")
 
         #----------------------------------------------------------------------#
         # Don't create the unit test if its policy is not defined
@@ -502,10 +504,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             # Copy dependency file to test directory
             #------------------------------------------------------------------#
 
-            if(NOT "${unit_target_input}" STREQUAL "None")
-                file(COPY ${unit_target_directory}/${unit_target_input}
-                    DESTINATION ${CMAKE_BINARY_DIR}/test)
-            endif(NOT "${unit_target_input}" STREQUAL "None")
+            if(NOT "${unit_target_inputs}" STREQUAL "None")
+                foreach(input ${unit_target_inputs})
+                   file(COPY ${unit_target_directory}/${input}
+                        DESTINATION ${CMAKE_BINARY_DIR}/test)                    
+                endforeach()
+            endif()
 
             #------------------------------------------------------------------#
             # Add the test target to CTest
