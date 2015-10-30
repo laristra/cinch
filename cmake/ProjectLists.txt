@@ -402,9 +402,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 1 unit_target_directory)
         list(GET unit_target_list 2 unit_target_sources)
         list(GET unit_target_list 3 unit_target_inputs)
-        list(GET unit_target_list 4 unit_target_libraries)
-        list(GET unit_target_list 5 unit_target_execution_policy)
-        list(GET unit_target_list 6 unit_target_execution_threads)
+        list(GET unit_target_list 4 unit_target_include_dirs)
+        list(GET unit_target_list 5 unit_target_libraries)
+        list(GET unit_target_list 6 unit_target_compile_defs)
+        list(GET unit_target_list 7 unit_target_execution_policy)
+        list(GET unit_target_list 8 unit_target_execution_threads)
 
         # Convert stored values back into lists
         string(REPLACE "|" ";" unit_target_sources
@@ -413,6 +415,10 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             "${unit_target_libraries}")
         string(REPLACE "|" ";" unit_target_inputs
             "${unit_target_inputs}")
+        string(REPLACE "|" ";" unit_target_include_dirs
+            "${unit_target_include_dirs}")
+        string(REPLACE "|" ";" unit_target_compile_defs
+            "${unit_target_compile_defs}")
 
         #----------------------------------------------------------------------#
         # Don't create the unit test if its policy is not defined
@@ -455,6 +461,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 "${unit_policy_libraries}")
 
             #------------------------------------------------------------------#
+            # Add user-specified defines
+            #------------------------------------------------------------------#
+
+            if (NOT "${unit_target_compile_defs}" STREQUAL "None")
+                foreach(def ${unit_target_compile_defs})
+                  add_definitions( -D${def} )
+                endforeach()
+            endif()
+
+            #------------------------------------------------------------------#
             # Add the executable
             #------------------------------------------------------------------#
 
@@ -465,6 +481,15 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 target_compile_options(${unit_target_name}
                     PRIVATE ${unit_policy_flags})
             endif(NOT "${unit_policy_flags}" STREQUAL "None")
+
+            #------------------------------------------------------------------#
+            # Add user-specified include directories
+            #------------------------------------------------------------------#
+
+            if (NOT "${unit_target_include_dirs}" STREQUAL "None")
+                target_include_directories( ${unit_target_name} PRIVATE
+                                            ${unit_target_include_dirs} )
+            endif()
 
             #------------------------------------------------------------------#
             # Add user-specified library dependencies

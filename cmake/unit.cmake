@@ -47,6 +47,32 @@ function(cinch_add_unit target)
     endif(NOT unit_LIBRARIES)
 
     #--------------------------------------------------------------------------#
+    # Capture include directories
+    #--------------------------------------------------------------------------#
+    
+    get_property( unit_INCLUDE_DIRS
+                  DIRECTORY ${PROJECT_SOURCE_DIR}
+                  PROPERTY INCLUDE_DIRECTORIES )
+    if(NOT unit_INCLUDE_DIRS)
+        set(unit_INCLUDE_DIRS "None")
+    else()
+        string(REPLACE ";" "|" unit_INCLUDE_DIRS "${unit_INCLUDE_DIRS}")
+    endif()
+
+    #--------------------------------------------------------------------------#
+    # Capture compile definitions
+    #--------------------------------------------------------------------------#
+    
+    get_property( unit_COMPILE_DEFS
+                  DIRECTORY ${PROJECT_SOURCE_DIR}
+                  PROPERTY COMPILE_DEFINITIONS )
+    if(NOT unit_COMPILE_DEFS)
+        set(unit_COMPILE_DEFS "None")
+    else()
+        string(REPLACE ";" "|" unit_COMPILE_DEFS "${unit_COMPILE_DEFS}")
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Check for policy.
     #--------------------------------------------------------------------------#
 
@@ -72,7 +98,7 @@ function(cinch_add_unit target)
     #--------------------------------------------------------------------------#
 
     list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_INPUTS}:${unit_LIBRARIES}:${unit_POLICY}:${unit_THREADS}")
+        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}")
     set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
         CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
 
