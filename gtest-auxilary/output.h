@@ -57,9 +57,9 @@ public:
     backup >> default_.rdbuf();
 
     // save test output to .current for updates
-    std::regex suffix("\\..*");
+    size_t lastindex = testdir_filename.find_last_of(".");
     std::string save_output =
-      std::regex_replace(testdir_filename, suffix, ".current");
+      testdir_filename.substr(0, lastindex) + ".current";
     to_file(save_output);
 
     std::ifstream f(testdir_filename);
