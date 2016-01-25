@@ -230,7 +230,7 @@ configuration file should be called 'doxygen.conf.in' and should reside
 in the 'doc' subdirectory.  For documentation on using Doxygen, please
 take a look at the [Doxygen Homepage](http://www.doxygen.org).
 
-## Unit Tests{#unit-tests}
+## Unit Tests<a name="unit-tests"></a>
 
 ***CMake Option:*** **ENABLE\_UNIT\_TESTS (default OFF)**
 
