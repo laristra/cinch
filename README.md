@@ -103,7 +103,8 @@ A library target source subdirectory.  Library targets can be added
 using the *cinch\_add\_library\_target* documented
 [below](#cinch-add-library-target).
 
-## Config Subdirectory{#config-subdirectory}
+<a name="config-subdirectory"></a>
+## Config Subdirectory
 
 The config subdirectory must contain the following files
 that provide specialization of the project.  Although all of
@@ -156,7 +157,8 @@ interface (Doxygen documentation is handled separately).
 Cinch provides various command-line options that may be passed on the cmake
 configuration line to affect its behavior.
 
-## Development Mode{#development-mode}
+<a name="development-mode"></a>
+## Development Mode
 
 ***CMake Option:*** **ENABLE\_CINCH\_DEVELOPMENT (default OFF)**
 
@@ -168,7 +170,8 @@ If this option is enabled, it will turn on the following features:
     Documentation targets will have colorized output indicating the source
     inputs for each section of the documentation.
 
-## Verbose Mode{#verbose-mode}
+<a name="verbose-mode"></a>
+## Verbose Mode
 
 ***CMake Option:*** **ENABLE\_CINCH\_VERBOSE (default OFF)**
 
@@ -221,7 +224,8 @@ directory tree within which to search for markdown documentation files.
 
 **output** The name of the output file that should be produced by pandoc.
 
-## Doxygen Documentation{#doxygen-documentation}
+<a name="doxygen-documentation"></a>
+## Doxygen Documentation
 
 ***CMake Option:*** **ENABLE\_DOXYGEN (default OFF)**
 
@@ -230,7 +234,8 @@ configuration file should be called 'doxygen.conf.in' and should reside
 in the 'doc' subdirectory.  For documentation on using Doxygen, please
 take a look at the [Doxygen Homepage](http://www.doxygen.org).
 
-## Unit Tests<a name="unit-tests"></a>
+<a name="unit-tests"></a>
+## Unit Tests
 
 ***CMake Option:*** **ENABLE\_UNIT\_TESTS (default OFF)**
 
@@ -245,7 +250,8 @@ Cinch will check for a local GoogleTest installation on the system during
 the Cmake configuration step.  If GoogleTest is not found, it will be
 built by Cinch (GoogleTest source code is included with Cinch).
 
-## Versioning{#versioning}
+<a name="versioning"></a>
+## Versioning
 
 ***CMake Option:*** **VERSION\_CREATION (default 'git describe')**
 
