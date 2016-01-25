@@ -80,7 +80,7 @@ needed for the specific application.
 ### cinch
 
 The Cinch subdirectory.  This should be checked-out from the Cinch
-git server: 'git clone git@gitlab.lanl.gov:ngc-utils/cinch.git'.
+git server: 'git clone --recursive git@github.com:losalamos/cinch.git'.
 
 ### CMakeLists.txt
 
