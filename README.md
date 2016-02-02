@@ -267,6 +267,10 @@ allows you to override the automatic versioning by specifying a static version
 to cmake via the VERSION\_CREATION option.  Simply set this to the
 desired version and it will be used.
 
+# Release
+
+This software has been approved for open source release and has been assigned **LA-CC-15-070**.
+
 # Copyright
 
 Copyright (c) 2016, Los Alamos National Security, LLC
