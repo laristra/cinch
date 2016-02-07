@@ -13,7 +13,7 @@ it must be installed in the stages documented in this section.
 
 ## Install the Cinch-Utils Command-Line Tool
 
-Directions for installing cinch-utils are [here](https://bitbucket.org/tuxfan/cinch-utils).
+Directions for installing cinch-utils are [here](https://github.com/losalamos/cinch-utils).
 
 ## Install Documentation
 
@@ -80,7 +80,7 @@ needed for the specific application.
 ### cinch
 
 The Cinch subdirectory.  This should be checked-out from the Cinch
-git server: 'git clone --recursive git@bitbucket.org:tuxfan/cinch.git'.
+git server: 'git clone --recursive git@github.com:losalamos/cinch.git'.
 
 ### CMakeLists.txt
 
