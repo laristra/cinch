@@ -5,6 +5,7 @@
 
 from ccheader import cc_header_template
 from ccsource import cc_source_template
+from ccstandalone import cc_stand_alone_template
 import getpass
 import datetime
 from ccli.services.service_utils import *
@@ -63,9 +64,11 @@ def create_cc_files(args):
   )
 
   # Output to file (will overwrite if it exists)
-  fd = open(hfile, 'w')
-  fd.write(header_output[1:-1])
-  fd.close()
+  if not args.source:
+    fd = open(hfile, 'w')
+    fd.write(header_output[1:-1])
+    fd.close()
+  # if
 
   # Write a source file if requested.
   if args.ccfile:
@@ -95,7 +98,7 @@ def create_cc_files(args):
       PROTECTED=protected,
       TEMPLATE=template,
       TEMPLATE_TYPE=template_type,
-      FILENAME=hfile,
+      FILENAME=cfile,
       NAMESPACE_START=namespace_start,
       NAMESPACE_END=namespace_end,
       NAMESPACE_GUARD=namespace_guard
@@ -107,6 +110,37 @@ def create_cc_files(args):
     fd.close()
   # if
 
+  # Write a stand-alone source file if requested.
+  if args.source:
+    # Setup template keywords if the class is templated.
+    cfile = (args.filename if args.filename != None
+      else args.classname) + '.cc'
+
+    namespace_start = "\nnamespace " + \
+      args.namespace.replace("::", " { namespace ") + \
+      " {\n" if args.namespace != None else ''
+
+    namespace_end = "\n} // namespace " + \
+      "\n} // namespace ".join(args.namespace.split("::")[::-1]) + "\n" \
+      if args.namespace != None else ''
+
+    # Do substitutions on source template
+    source_output = cc_stand_alone_template.substitute(
+      AUTHOR=author,
+      DATE=date,
+      SPACES=spaces,
+      TABSTOP=args.tabstop,
+      FILENAME=cfile,
+      NAMESPACE_START=namespace_start,
+      NAMESPACE_END=namespace_end,
+      NAMESPACE_GUARD=namespace_guard
+      )
+
+    # Output to file (will overwrite if it exists)
+    fd = open(cfile, 'w')
+    fd.write(source_output[1:-1])
+    fd.close()
+  # if
 # create_cc_files
 
 #------------------------------------------------------------------------------#

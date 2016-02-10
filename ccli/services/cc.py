@@ -37,6 +37,9 @@ class CINCHSource(Service):
         self.parser.add_argument('-c', '--ccfile', action="store_true",
             help='genefate a c++ source file (in addition to the header)')
 
+        self.parser.add_argument('-s', '--source', action="store_true",
+            help='genefate a c++ source file (no header)')
+
         self.parser.add_argument('-n', '--namespace', action="store",
             help='namespace name.' +
                 '  If this argument is provided,' +
