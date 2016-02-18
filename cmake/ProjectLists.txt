@@ -420,6 +420,9 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         string(REPLACE "|" ";" unit_target_compile_defs
             "${unit_target_compile_defs}")
 
+        # Get relative path
+        get_filename_component(_RELATIVE_PATH ${unit_target_directory} NAME)
+
         #----------------------------------------------------------------------#
         # Don't create the unit test if its policy is not defined
         #----------------------------------------------------------------------#
@@ -523,7 +526,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             set_target_properties(${unit_target_name}
                 PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+                RUNTIME_OUTPUT_DIRECTORY
+                    ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
 
             #------------------------------------------------------------------#
             # Copy dependency file to test directory
@@ -532,7 +536,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(NOT "${unit_target_inputs}" STREQUAL "None")
                 foreach(input ${unit_target_inputs})
                    file(COPY ${unit_target_directory}/${input}
-                        DESTINATION ${CMAKE_BINARY_DIR}/test)                    
+                        DESTINATION ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})                    
                 endforeach()
             endif()
 
@@ -540,7 +544,14 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             # Add the test target to CTest
             #------------------------------------------------------------------#
 
-            set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test)
+            set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
+
+            # Avoid name collisions with sub-projects
+            if(${CINCH_TOP_LEVEL_PROJECT})
+                set(_TEST_PREFIX "")
+            else()
+                set(_TEST_PREFIX "${PROJECT_NAME}:")
+            endif(${CINCH_TOP_LEVEL_PROJECT})
 
             string(REPLACE "|" ";" thread_instance_list
                 ${unit_target_execution_threads})
@@ -564,12 +575,13 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
                     add_test(
                         NAME
-                            ${unit_target_name}_${instance}
+                            "${_TEST_PREFIX}${unit_target_name}_${instance}"
                         COMMAND
                             ${unit_policy_exec}
                             ${unit_policy_exec_threads} ${instance}
-                            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                            ${UNIT_FLAGS})
+                            ${_OUTPUT_DIR}/${unit_target_name}
+                            ${UNIT_FLAGS}
+                        WORKING_DIRECTORY ${_OUTPUT_DIR})
                 endforeach(instance)
 
             else()
@@ -585,19 +597,22 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     add_test(
                         NAME
                             ${unit_target_name}
+                            "${_TEST_PREFIX}${unit_target_name}"
                         COMMAND
                             ${unit_policy_exec}
                             ${unit_policy_exec_threads}
                             ${unit_target_execution_threads}
-                            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                            ${UNIT_FLAGS})
+                            ${_OUTPUT_DIR}/${unit_target_name}
+                            ${UNIT_FLAGS}
+                        WORKING_DIRECTORY ${_OUTPUT_DIR})
                 else()
                     add_test(
                         NAME
-                            ${unit_target_name}
+                            "${_TEST_PREFIX}${unit_target_name}"
                         COMMAND
-                            ${CMAKE_BINARY_DIR}/test/${unit_target_name}
-                            ${UNIT_FLAGS})
+                            ${_OUTPUT_DIR}/${unit_target_name}
+                            ${UNIT_FLAGS}
+                        WORKING_DIRECTORY ${_OUTPUT_DIR})
                 endif(NOT "${unit_policy_exec}" STREQUAL "None")
 
             endif(${thread_instances} GREATER 1)

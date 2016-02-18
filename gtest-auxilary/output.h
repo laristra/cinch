@@ -48,8 +48,7 @@ public:
   } // to_file
 
   bool equal_blessed(const char * filename) {
-    std::string testdir_filename("test/");
-    testdir_filename += filename;
+    std::string testdir_filename(filename);
 
     // backup rdbuffer, because it will get flushed by to_file
     std::stringstream backup;
