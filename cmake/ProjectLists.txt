@@ -545,13 +545,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             #------------------------------------------------------------------#
 
             set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
-
-            # Avoid name collisions with sub-projects
-            if(${CINCH_TOP_LEVEL_PROJECT})
-                set(_TEST_PREFIX "")
-            else()
-                set(_TEST_PREFIX "${PROJECT_NAME}:")
-            endif(${CINCH_TOP_LEVEL_PROJECT})
+            set(_TEST_PREFIX "${PROJECT_NAME}:")
 
             string(REPLACE "|" ";" thread_instance_list
                 ${unit_target_execution_threads})
