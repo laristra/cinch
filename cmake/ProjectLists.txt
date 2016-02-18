@@ -407,6 +407,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 6 unit_target_compile_defs)
         list(GET unit_target_list 7 unit_target_execution_policy)
         list(GET unit_target_list 8 unit_target_execution_threads)
+        list(GET unit_target_list 9 unit_project_name)
 
         # Convert stored values back into lists
         string(REPLACE "|" ";" unit_target_sources
@@ -521,13 +522,23 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             endif(NOT "${unit_policy_libraries}" STREQUAL "None")
 
             #------------------------------------------------------------------#
+            # Set output directory information
+            #------------------------------------------------------------------#
+
+            if("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
+                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
+                set(_TEST_PREFIX)
+            else()
+                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${unit_project_name}/${_RELATIVE_PATH})
+                set(_TEST_PREFIX "${unit_project_name}:")
+            endif("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
+
+            #------------------------------------------------------------------#
             # Change the output directory to the test subdirectory
             #------------------------------------------------------------------#
 
             set_target_properties(${unit_target_name}
-                PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY
-                    ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
+                PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${_OUTPUT_DIR})
 
             #------------------------------------------------------------------#
             # Copy dependency file to test directory
@@ -536,16 +547,13 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(NOT "${unit_target_inputs}" STREQUAL "None")
                 foreach(input ${unit_target_inputs})
                    file(COPY ${unit_target_directory}/${input}
-                        DESTINATION ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})                    
+                        DESTINATION ${_OUTPUT_DIR})                    
                 endforeach()
             endif()
 
             #------------------------------------------------------------------#
             # Add the test target to CTest
             #------------------------------------------------------------------#
-
-            set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
-            set(_TEST_PREFIX "${PROJECT_NAME}:")
 
             string(REPLACE "|" ";" thread_instance_list
                 ${unit_target_execution_threads})
