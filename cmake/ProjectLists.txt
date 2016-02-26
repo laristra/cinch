@@ -215,6 +215,14 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
         endif(${MPI_${MPI_LANGUAGE}_FOUND})
 
+        if (legion_FOUND)
+            cinch_add_unit_execution_policy(LEGION
+               ${CMAKE_SOURCE_DIR}/cinch/gtest-auxilary/gtest-legion.cc
+               FLAGS ${LEGION_CXX_FLAGS}
+               INCLUDES ${LEGION_INCLUDE_DIRS}
+               LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS} )
+        endif (legion_FOUND)
+
     endif(ENABLE_UNIT_TESTS)
 
 else()
