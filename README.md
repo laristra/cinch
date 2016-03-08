@@ -103,8 +103,9 @@ A library target source subdirectory.  Library targets can be added
 using the *cinch\_add\_library\_target* documented
 [below](#cinch-add-library-target).
 
-<a name="config-subdirectory"></a>
 ## Config Subdirectory
+
+<a name="config-subdirectory"></a>
 
 The config subdirectory must contain the following files
 that provide specialization of the project.  Although all of
@@ -157,8 +158,9 @@ interface (Doxygen documentation is handled separately).
 Cinch provides various command-line options that may be passed on the cmake
 configuration line to affect its behavior.
 
-<a name="development-mode"></a>
 ## Development Mode
+
+<a name="development-mode"></a>
 
 ***CMake Option:*** **ENABLE\_CINCH\_DEVELOPMENT (default OFF)**
 
@@ -170,14 +172,17 @@ If this option is enabled, it will turn on the following features:
     Documentation targets will have colorized output indicating the source
     inputs for each section of the documentation.
 
-<a name="verbose-mode"></a>
 ## Verbose Mode
+
+<a name="verbose-mode"></a>
 
 ***CMake Option:*** **ENABLE\_CINCH\_VERBOSE (default OFF)**
 
 Enable more detailed build output.
 
-## Guide Documentation{#guide-documentation}
+## Guide Documentation
+
+<a name="guide-documentation"></a>
 
 ***CMake Option:*** **ENABLE\_DOCUMENTATION (default OFF)**
 
@@ -224,8 +229,9 @@ directory tree within which to search for markdown documentation files.
 
 **output** The name of the output file that should be produced by pandoc.
 
-<a name="doxygen-documentation"></a>
 ## Doxygen Documentation
+
+<a name="doxygen-documentation"></a>
 
 ***CMake Option:*** **ENABLE\_DOXYGEN (default OFF)**
 
@@ -234,8 +240,9 @@ configuration file should be called 'doxygen.conf.in' and should reside
 in the 'doc' subdirectory.  For documentation on using Doxygen, please
 take a look at the [Doxygen Homepage](http://www.doxygen.org).
 
-<a name="unit-tests"></a>
 ## Unit Tests
+
+<a name="unit-tests"></a>
 
 ***CMake Option:*** **ENABLE\_UNIT\_TESTS (default OFF)**
 
@@ -250,8 +257,9 @@ Cinch will check for a local GoogleTest installation on the system during
 the Cmake configuration step.  If GoogleTest is not found, it will be
 built by Cinch (GoogleTest source code is included with Cinch).
 
-<a name="versioning"></a>
 ## Versioning
+
+<a name="versioning"></a>
 
 ***CMake Option:*** **VERSION\_CREATION (default 'git describe')**
 
