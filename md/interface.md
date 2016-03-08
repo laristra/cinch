@@ -14,7 +14,7 @@ and *cinch\_add\_doc*, which may be called from the
 
 ## *cinch\_add\_application\_directory*(directory)
 
-<a name="cinch-add-application-directory"></a>
+<a name="#cinch-add-application-directory"></a>
 
 Add a directory containing an adhoc CMake configuration, i.e., one not
 managed by Cinch.  This function is useful for adding integrated application
