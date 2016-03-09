@@ -187,6 +187,20 @@ def create_project(args):
     fd.close()
 
     #--------------------------------------------------------------------------#
+    # README.md file
+    #--------------------------------------------------------------------------#
+
+    print "Create README.md..."
+
+    readme = cinch_readme.safe_substitute(
+        TABSTOP=args.tabstop
+    )
+    fd = open("README.md", 'w')
+    fd.write(readme[1:-1])
+    fd.close()
+
+
+    #--------------------------------------------------------------------------#
     # Tag project for version creation
     #--------------------------------------------------------------------------#
 
