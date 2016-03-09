@@ -181,7 +181,7 @@ TEST(unit, testname) {
 
 /*~------------------------------------------------------------------------~--*
  * Formatting options for vim.
- * vim: set tabstop=2 shiftwidth=2 expandtab :
+ * vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
  *~------------------------------------------------------------------------~--*/
 """)
 
@@ -209,4 +209,55 @@ This was generated from raw latex:
 # Developer Guide Utils
 
 This is some documentation that should only be in the developer guide.
+""")
+
+cinch_app_cmake = Template(
+"""
+#-----------------------------------------------------------------------------~#
+# Copyright (c) 2014 Los Alamos National Security, LLC
+# All rights reserved.
+#-----------------------------------------------------------------------------~#
+
+#------------------------------------------------------------------------------#
+# Add a rule to build the executable
+#------------------------------------------------------------------------------#
+
+add_executable(app app.cc)
+
+#------------------------------------------------------------------------------#
+# Add link dependencies
+#------------------------------------------------------------------------------#
+
+target_link_libraries(app example)
+
+#~---------------------------------------------------------------------------~-#
+# Formatting options for vim.
+# vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
+#~---------------------------------------------------------------------------~-#
+""")
+
+cinch_app_source = Template(
+"""
+/*~-------------------------------------------------------------------------~~*
+ * Copyright (c) 2014 Los Alamos National Security, LLC
+ * All rights reserved.
+ *~-------------------------------------------------------------------------~~*/
+
+/*!
+ * \\file app.cc
+ * \\authors ${AUTHOR}
+ * \date Initial file creation: ${DATE}
+ */
+
+#include "example/example/utils.h"
+
+int main(int argc, char ** argv) {
+  example::myfunc();
+  return 0;
+} // main
+
+/*~------------------------------------------------------------------------~--*
+ * Formatting options for vim.
+ * vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
+ *~------------------------------------------------------------------------~--*/
 """)

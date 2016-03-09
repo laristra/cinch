@@ -21,26 +21,40 @@ def create_project(args):
     """
     """
 
+    #--------------------------------------------------------------------------#
     # Create a new git project and add cinch submodule
+    #--------------------------------------------------------------------------#
+
     git.init(args.name)
     cd(args.name)
     git.submodule.add("git@github.com:losalamos/cinch.git")
     git.submodule.foreach("git submodule init; git submodule update");
 
+    #--------------------------------------------------------------------------#
     # Create top-level directory structure
+    #--------------------------------------------------------------------------#
+
     os.mkdir("app")
     os.mkdir("config")
     os.mkdir("doc")
+    os.mkdir("doc/doxygen")
+    os.mkdir("doc/doxygen/images")
     os.mkdir("src")
     os.mkdir("src/example")
     os.mkdir("src/example/test")
 
+    #--------------------------------------------------------------------------#
     # Make symobolic links
+    #--------------------------------------------------------------------------#
+
     os.symlink("cinch/cmake/ProjectLists.txt", "CMakeLists.txt")
     os.symlink("../cinch/cmake/SourceLists.txt", "src/CMakeLists.txt")
     os.symlink("../cinch/doxygen/doxygen.conf.in", "doc/doxygen.conf.in")
 
+    #--------------------------------------------------------------------------#
     # Populate config sub-directory
+    #--------------------------------------------------------------------------#
+
     config_project = cinch_config_project.substitute(
         PROJECT=args.name,
         TABSTOP=args.tabstop
@@ -63,11 +77,17 @@ def create_project(args):
     fd.write(config_documentation[1:-1])
     fd.close()
 
+    #--------------------------------------------------------------------------#
     # Get the current user and date
+    #--------------------------------------------------------------------------#
+
     author = getpass.getuser()
     date = datetime.datetime.now().strftime("%b %d, %Y")
 
+    #--------------------------------------------------------------------------#
     # Populate example sub-directory
+    #--------------------------------------------------------------------------#
+
     example_cmake = cinch_example_cmake.substitute(
         TABSTOP=args.tabstop
     )
@@ -107,7 +127,30 @@ def create_project(args):
     fd.write(example_md[1:-1])
     fd.close()
 
+    #--------------------------------------------------------------------------#
+    # Populate app sub-directory
+    #--------------------------------------------------------------------------#
+
+    app_cmake = cinch_app_cmake.substitute(
+        TABSTOP=args.tabstop
+    )
+    fd = open("app/CMakeLists.txt", 'w')
+    fd.write(app_cmake[1:-1])
+    fd.close()
+
+    app_source = cinch_app_source.substitute(
+        AUTHOR=author,
+        DATE=date,
+        TABSTOP=args.tabstop
+    )
+    fd = open("app/app.cc", 'w')
+    fd.write(app_source[1:-1])
+    fd.close()
+
+    #--------------------------------------------------------------------------#
     # Tag project for version creation
+    #--------------------------------------------------------------------------#
+
     git.add("*")
     git.commit("-m", "Initial Check-In")
     master = git("rev-parse", "HEAD").rstrip()
