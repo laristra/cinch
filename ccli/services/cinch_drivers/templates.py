@@ -45,6 +45,10 @@ cinch_config_packages = Template(
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
 
+#------------------------------------------------------------------------------#
+# Check for C++11 compiler.
+#------------------------------------------------------------------------------#
+
 include(cxx11)
 
 check_for_cxx11_compiler(CXX11_COMPILER)
@@ -67,6 +71,39 @@ cinch_config_documentation = Template(
 # Copyright (c) 2014 Los Alamos National Security, LLC
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
+
+#------------------------------------------------------------------------------#
+# Configure header with version information
+#------------------------------------------------------------------------------#
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/header.tex.in
+	${CMAKE_BINARY_DIR}/doc/header.tex)
+
+#------------------------------------------------------------------------------#
+# Pandoc options for user guide
+#------------------------------------------------------------------------------#
+
+set(pandoc_options
+    "--toc"
+    "--include-in-header=${CMAKE_SOURCE_DIR}/cinch/tex/addtolength.tex"
+    "--include-in-header=${CMAKE_BINARY_DIR}/doc/header.tex"
+)
+
+#------------------------------------------------------------------------------#
+# Add user guide target
+#------------------------------------------------------------------------------#
+
+cinch_add_doc(user-guide ugconfig.py src
+    user-guide-${${PROJECT_NAME}_VERSION}.pdf
+    PANDOC_OPTIONS ${pandoc_options} IMAGE_GLOB "*.pdf")
+
+#------------------------------------------------------------------------------#
+# Add developer guide target
+#------------------------------------------------------------------------------#
+
+cinch_add_doc(developer-guide dgconfig.py src
+    developer-guide-${${PROJECT_NAME}_VERSION}.pdf
+    PANDOC_OPTIONS ${pandoc_options} IMAGE_GLOB "*.pdf")
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
@@ -187,6 +224,12 @@ TEST(unit, testname) {
 
 cinch_example_md = Template(
 """
+<!-- CINCHDOC DOCUMENT(User Guide) SECTION(Conclusion) -->
+
+# Conclusion
+
+This is the conclusion
+
 <!-- CINCHDOC DOCUMENT(User Guide) SECTION(Test) -->
 
 # Utils Test
@@ -203,6 +246,12 @@ This was generated from raw latex:
 \\begin{equation}
    \\frac{\partial q}{\partial t} + \\nabla \cdot f(q) = 0
 \end{equation}
+
+<!-- CINCHDOC DOCUMENT(User Guide) SECTION(Introduction) -->
+
+# Introduction
+
+This is the introduction
 
 <!-- CINCHDOC DOCUMENT(Developer Guide) SECTION(Test) -->
 
@@ -260,4 +309,132 @@ int main(int argc, char ** argv) {
  * Formatting options for vim.
  * vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
  *~------------------------------------------------------------------------~--*/
+""")
+
+cinch_doc_ug = Template(
+"""
+#------------------------------------------------------------------------------#
+# Configuration file for user guide.
+#------------------------------------------------------------------------------#
+
+opts = {
+
+   #---------------------------------------------------------------------------#
+   # Document
+   #
+   # The ngc document service supports multiple document targets
+   # from within the distributed documentation tree, potentially within
+   # a single file.  This option specifies which document should be used
+   # to produce the output target of this configuration file.
+   #---------------------------------------------------------------------------#
+
+   'document' : 'User Guide',
+
+   #---------------------------------------------------------------------------#
+   # Sections Prepend List
+   #
+   # This options allows you to specify an order for the first N sections
+   # of the document, potentially leaving the overall ordering arbitrary.
+   #---------------------------------------------------------------------------#
+
+   'sections-prepend' : [
+      'Introduction'
+   ],
+
+   #---------------------------------------------------------------------------#
+   # Sections List
+   #
+   # This option allows you to specify an order for some or all of the
+   # sections in the the document.
+   #---------------------------------------------------------------------------#
+
+   'sections' : [
+      'Test'
+   ],
+
+   #---------------------------------------------------------------------------#
+   # Sections Append List
+   #
+   # This options allows you to specify an order for the last N sections
+   # of the document, potentially leaving the overall ordering arbitrary.
+   #---------------------------------------------------------------------------#
+
+   'sections-append' : [
+      'Conclusion'
+   ]
+}
+""")
+
+cinch_doc_dg = Template(
+"""
+#------------------------------------------------------------------------------#
+# Configuration file for developer guide.
+#------------------------------------------------------------------------------#
+
+opts = {
+
+   #---------------------------------------------------------------------------#
+   # Document
+   #
+   # The ngc document service supports multiple document targets
+   # from within the distributed documentation tree, potentially within
+   # a single file.  This option specifies which document should be used
+   # to produce the output target of this configuration file.
+   #---------------------------------------------------------------------------#
+
+   'document' : 'Developer Guide',
+
+   #---------------------------------------------------------------------------#
+   # Sections Prepend List
+   #
+   # This options allows you to specify an order for the first N sections
+   # of the document, potentially leaving the overall ordering arbitrary.
+   #---------------------------------------------------------------------------#
+
+   #'sections-prepend' : [
+   #   'Introduction'
+   #],
+
+   #---------------------------------------------------------------------------#
+   # Sections List
+   #
+   # This option allows you to specify an order for some or all of the
+   # sections in the the document.
+   #---------------------------------------------------------------------------#
+
+   #'sections' : [
+   #   'Test'
+   #],
+
+   #---------------------------------------------------------------------------#
+   # Sections Append List
+   #
+   # This options allows you to specify an order for the last N sections
+   # of the document, potentially leaving the overall ordering arbitrary.
+   #---------------------------------------------------------------------------#
+
+   #'sections-append' : [
+   #   'Conclusion'
+   #]
+}
+""")
+
+cinch_doc_header = Template(
+"""
+%~----------------------------------------------------------------------------~%
+% Copyright (c) 2014 Los Alamos National Security, LLC
+% All rights reserved.
+%~----------------------------------------------------------------------------~%
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\lhead{${${PROJECT_NAME}_VERSION}}
+\chead{Guide}
+\\rhead{\\today}
+
+%~----------------------------------------------------------------------------~%
+% Formatting for vim.
+% vim: set tabstop=${TABSTOP} shiftwidth=${TABSTOP} expandtab :
+%~----------------------------------------------------------------------------~%
 """)

@@ -25,6 +25,8 @@ def create_project(args):
     # Create a new git project and add cinch submodule
     #--------------------------------------------------------------------------#
 
+    print "Creating new git project " + args.name + "..."
+
     git.init(args.name)
     cd(args.name)
     git.submodule.add("git@github.com:losalamos/cinch.git")
@@ -33,6 +35,8 @@ def create_project(args):
     #--------------------------------------------------------------------------#
     # Create top-level directory structure
     #--------------------------------------------------------------------------#
+
+    print "Creating directory structure..."
 
     os.mkdir("app")
     os.mkdir("config")
@@ -47,6 +51,8 @@ def create_project(args):
     # Make symobolic links
     #--------------------------------------------------------------------------#
 
+    print "Creating symbolic links..."
+
     os.symlink("cinch/cmake/ProjectLists.txt", "CMakeLists.txt")
     os.symlink("../cinch/cmake/SourceLists.txt", "src/CMakeLists.txt")
     os.symlink("../cinch/doxygen/doxygen.conf.in", "doc/doxygen.conf.in")
@@ -55,7 +61,9 @@ def create_project(args):
     # Populate config sub-directory
     #--------------------------------------------------------------------------#
 
-    config_project = cinch_config_project.substitute(
+    print "Populating config subdirectory..."
+
+    config_project = cinch_config_project.safe_substitute(
         PROJECT=args.name,
         TABSTOP=args.tabstop
     )
@@ -63,14 +71,14 @@ def create_project(args):
     fd.write(config_project[1:-1])
     fd.close()
 
-    config_packages = cinch_config_packages.substitute(
+    config_packages = cinch_config_packages.safe_substitute(
         TABSTOP=args.tabstop
     )
     fd = open("config/packages.cmake", 'w')
     fd.write(config_packages[1:-1])
     fd.close()
 
-    config_documentation = cinch_config_documentation.substitute(
+    config_documentation = cinch_config_documentation.safe_substitute(
         TABSTOP=args.tabstop
     )
     fd = open("config/documentation.cmake", 'w')
@@ -88,14 +96,16 @@ def create_project(args):
     # Populate example sub-directory
     #--------------------------------------------------------------------------#
 
-    example_cmake = cinch_example_cmake.substitute(
+    print "Populating example subdirectory..."
+
+    example_cmake = cinch_example_cmake.safe_substitute(
         TABSTOP=args.tabstop
     )
     fd = open("src/example/CMakeLists.txt", 'w')
     fd.write(example_cmake[1:-1])
     fd.close()
 
-    example_header = cinch_example_header.substitute(
+    example_header = cinch_example_header.safe_substitute(
         AUTHOR=author,
         DATE=date,
         TABSTOP=args.tabstop
@@ -104,7 +114,7 @@ def create_project(args):
     fd.write(example_header[1:-1])
     fd.close()
 
-    example_source = cinch_example_source.substitute(
+    example_source = cinch_example_source.safe_substitute(
         AUTHOR=author,
         DATE=date,
         TABSTOP=args.tabstop
@@ -113,14 +123,14 @@ def create_project(args):
     fd.write(example_source[1:-1])
     fd.close()
 
-    example_unit = cinch_example_unit.substitute(
+    example_unit = cinch_example_unit.safe_substitute(
         TABSTOP=args.tabstop
     )
     fd = open("src/example/test/unit.cc", 'w')
     fd.write(example_unit[1:-1])
     fd.close()
 
-    example_md = cinch_example_md.substitute(
+    example_md = cinch_example_md.safe_substitute(
         TABSTOP=args.tabstop
     )
     fd = open("src/example/utils.md", 'w')
@@ -131,14 +141,16 @@ def create_project(args):
     # Populate app sub-directory
     #--------------------------------------------------------------------------#
 
-    app_cmake = cinch_app_cmake.substitute(
+    print "Populating app subdirectory..."
+
+    app_cmake = cinch_app_cmake.safe_substitute(
         TABSTOP=args.tabstop
     )
     fd = open("app/CMakeLists.txt", 'w')
     fd.write(app_cmake[1:-1])
     fd.close()
 
-    app_source = cinch_app_source.substitute(
+    app_source = cinch_app_source.safe_substitute(
         AUTHOR=author,
         DATE=date,
         TABSTOP=args.tabstop
@@ -148,8 +160,37 @@ def create_project(args):
     fd.close()
 
     #--------------------------------------------------------------------------#
+    # Populate doc sub-directory
+    #--------------------------------------------------------------------------#
+
+    print "Populating doc subdirectory..."
+
+    doc_ug = cinch_doc_ug.safe_substitute(
+        TABSTOP=args.tabstop
+    )
+    fd = open("doc/ugconfig.py", 'w')
+    fd.write(doc_ug[1:-1])
+    fd.close()
+
+    doc_dg = cinch_doc_dg.safe_substitute(
+        TABSTOP=args.tabstop
+    )
+    fd = open("doc/dgconfig.py", 'w')
+    fd.write(doc_dg[1:-1])
+    fd.close()
+
+    doc_header = cinch_doc_header.safe_substitute(
+        TABSTOP=args.tabstop
+    )
+    fd = open("doc/header.tex.in", 'w')
+    fd.write(doc_header[1:-1])
+    fd.close()
+
+    #--------------------------------------------------------------------------#
     # Tag project for version creation
     #--------------------------------------------------------------------------#
+
+    print "Adding files to local repository and tagging..."
 
     git.add("*")
     git.commit("-m", "Initial Check-In")
