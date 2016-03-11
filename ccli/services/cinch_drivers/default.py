@@ -7,9 +7,7 @@ import os
 import re
 import getpass
 import datetime
-import shutil
-from sh import git
-from sh import cd
+import subprocess
 from templates import *
 from ccli.services.service_utils import *
 
@@ -27,10 +25,12 @@ def create_project(args):
 
     print "Creating new git project " + args.name + "..."
 
-    git.init(args.name)
-    cd(args.name)
-    git.submodule.add("git@github.com:losalamos/cinch.git")
-    git.submodule.foreach("git submodule init; git submodule update");
+    subprocess.call(["git", "init", "-q", args.name])
+    os.chdir(args.name)
+    subprocess.call(["git", "submodule", "add",
+        "git@github.com:losalamos/cinch.git"])
+    subprocess.call(["git", "submodule", "foreach",
+        "git submodule init; git submodule update"])
 
     #--------------------------------------------------------------------------#
     # Create top-level directory structure
@@ -206,10 +206,11 @@ def create_project(args):
 
     print "Adding files to local repository and tagging..."
 
-    git.add("*")
-    git.commit("-m", "Initial Check-In")
-    master = git("rev-parse", "HEAD").rstrip()
-    git.tag("-a", "-m", "Initial Check-In", "0.0", master)
+    subprocess.call(["git", "add", "*"])
+    subprocess.call(["git", "commit", "-m", "Initial Check-In"])
+    master = subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip()
+    subprocess.call(["git", "tag", "-a", "-m", "Initial Check-In",
+        "0.0", master])
 
 # create_project
 

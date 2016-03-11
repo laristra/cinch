@@ -42,7 +42,7 @@ setup_options = dict(
 	author_email = 'bergen@lanl.gov',
 
 	# scripts to install
-	scripts = ['bin/ccli'],
+	scripts = ['bin/ccli', 'bin/cinch-cli'],
 
 	# packages
 	packages = find_packages(),
