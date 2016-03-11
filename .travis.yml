@@ -1,0 +1,49 @@
+language: cpp
+
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports
+    packages:
+      - ccache
+      - cmake
+      - cmake-data
+      - libopenmpi-dev
+      - openmpi-bin
+      - gcc-4.9
+      - g++-4.9
+      - gcc-5
+      - g++-5
+
+before_install:
+ - git fetch --unshallow && git fetch --tags #for versioning
+
+env: #maybe add mpich later
+  global:
+    - CCACHE_CPP2=yes
+    - GVER=4.9
+  matrix:
+    - MPI=ON  TEST=losalamos/cinch-example
+    - MPI=OFF TEST=losalamos/cinch-example
+    - MPI=ON  TEST=losalamos/cinch-nested-example
+    - MPI=OFF TEST=losalamos/cinch-nested-example
+    - MPI=ON  TEST=flecsi/flecsi GVER=5
+    - MPI=OFF TEST=flecsi/flecsi GVER=5
+
+script:
+  - git checkout -b cinch_current_commit
+  - cd $HOME && git clone --recursive https://github.com/${TEST} ${TEST} && cd ${TEST} &&
+    for i in $(find . -type d -name cinch); do [ -e ${i}/.git ] || continue; git -C ${i} fetch ${HOME}/build/${TRAVIS_REPO_SLUG} cinch_current_commit && git -C ${i} checkout -f FETCH_HEAD; done &&
+    mkdir build && cd build && 
+    PATH="/usr/lib/ccache:$PATH" CC=gcc-${GVER} CXX=g++-${GVER} cmake -DENABLE_MPI=$MPI -DENABLE_UNIT_TESTS=ON .. && 
+    make -j4 && make test ARGS="-V" && make install DESTDIR="${HOME}"
+
+cache:
+  directories:
+    - $HOME/.ccache
+
+compiler:
+  - gcc

@@ -606,7 +606,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 if(NOT "${unit_policy_exec}" STREQUAL "None")
                     add_test(
                         NAME
-                            ${unit_target_name}
                             "${_TEST_PREFIX}${unit_target_name}"
                         COMMAND
                             ${unit_policy_exec}
