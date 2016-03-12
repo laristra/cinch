@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from ccli.base import Service
-from ccli.services.cmake_drivers.default import *
+from ccli.services.cmake_drivers.generate import *
 
 #------------------------------------------------------------------------------#
 # CMake handler.
@@ -50,7 +50,7 @@ class CINCHCMake(Service):
         """
         """
 
-        create_cmakelists(args)
+        generate(args)
 
     # main
 

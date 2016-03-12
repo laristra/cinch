@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from ccli.base import Service
-from ccli.services.cc_drivers.default import *
+from ccli.services.cc_drivers.generate import *
 
 #------------------------------------------------------------------------------#
 # Source handler.
@@ -73,7 +73,7 @@ class CINCHSource(Service):
         """
         """
 
-        create_cc_files(args)
+        generate(args)
 
     # main
 

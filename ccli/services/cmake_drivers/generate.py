@@ -23,7 +23,7 @@ def recursive_glob(treeroot, pattern):
         results.extend(os.path.join(relpath, f) for f in goodfiles)
     return results
 
-def create_cmakelists(args):
+def generate(args):
 
     """
     """
@@ -68,7 +68,7 @@ def create_cmakelists(args):
         fd.write(cmake_output[1:-1])
         fd.close()
 
-# create_cmakelists
+# generate
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

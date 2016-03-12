@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from ccli.base import Service
-from ccli.services.cinch_drivers.default import *
+from ccli.services.cinch_drivers.create_project import *
 
 #------------------------------------------------------------------------------#
 # Cinch handler.
@@ -23,7 +23,7 @@ class CINCHCinch(Service):
 
         # get a command-line parser
         self.parser = subparsers.add_parser('cinch',
-            help='Service to generate cinch templates.')
+            help='Service to generate cinch project skeletons.')
 
         self.parser.add_argument('-ts', '--tabstop', action="store",
             default=2, help='set the default tabstop width ')

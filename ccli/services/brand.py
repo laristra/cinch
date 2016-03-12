@@ -25,7 +25,7 @@ class CINCHBrand(Service):
 
         # get a command-line parser
         self.parser = subparsers.add_parser('brand',
-            help='Service to generate branding information in source files.')
+            help='Service to generate project branding.')
 
         # add command-line options
         self.parser.add_argument('-b', '--brand', action="store",

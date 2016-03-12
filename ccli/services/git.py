@@ -4,13 +4,13 @@
 #------------------------------------------------------------------------------#
 
 from ccli.base import Service
-from ccli.services.unit_drivers.generate import *
+from ccli.services.git_drivers.process import *
 
 #------------------------------------------------------------------------------#
-# Unit test handler.
+# Git handler.
 #------------------------------------------------------------------------------#
 
-class CINCHUnitTest(Service):
+class CINCHGit(Service):
 
     #--------------------------------------------------------------------------#
     # Initialization.
@@ -22,19 +22,19 @@ class CINCHUnitTest(Service):
         """
 
         # get a command-line parser
-        self.parser = subparsers.add_parser('unit',
-            help='Service to generate unit-test templates.')
+        self.parser = subparsers.add_parser('git',
+            help='Service to manage git repositories.')
 
-        self.parser.add_argument('case',
-            help='the name of the unit test case.' +
-                '   A unit case may contain several related tests.')
+        self.parser.add_argument('-d', '--debug', action="store_true",
+            help='Turn on extra debug information and do not clean' +
+                'up temporaries.  Implies --verbose.')
 
-        self.parser.add_argument('name', nargs='?',
-            help='the name of the unit test.' +
-                '   A unit case may contain several related tests.')
+        self.parser.add_argument('-v', '--verbose', action="store_true",
+            help='Turn on verbose output.')
 
-        self.parser.add_argument('-ts', '--tabstop', action="store",
-            default=2, help='set the default tabstop width ')
+        self.parser.add_argument('config',
+            help='The JSON configuration file specifying ' +
+                'the git operations.')
 
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)
@@ -50,7 +50,7 @@ class CINCHUnitTest(Service):
         """
         """
 
-        generate(args)
+        process(args)
 
     # main
 
@@ -59,9 +59,9 @@ class CINCHUnitTest(Service):
     #--------------------------------------------------------------------------#
 
     class Factory:
-        def create(self, subparsers): return CINCHUnitTest(subparsers)
+        def create(self, subparsers): return CINCHGit(subparsers)
 
-# class CINCHUnitTest
+# class CINCHGit
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
