@@ -5,7 +5,6 @@
 
 import os
 import re
-import subprocess
 from ccli.services.service_utils import *
 from ccli.services.git_drivers.utils import *
 
@@ -61,7 +60,7 @@ def process(args):
 
         # Expand an archive
         if(item["operation"] == "expand"):
-            expand_archive(directory, item["filename"], args)
+            expand_archive(directory, item["filename"], item["dest"], args)
         # if
 
         # Push an archive to the red network

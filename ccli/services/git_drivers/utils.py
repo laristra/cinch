@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import argparse
 import json
+import subprocess
 #from sh import cd
 #from sh import git
 #from sh import tar
@@ -18,22 +19,22 @@ from collections import OrderedDict
 # Context manager.
 #------------------------------------------------------------------------------#
 
-class cd:
-    """Context manager for changing the current working directory"""
-
-    def __init__(self, newPath):
-        self.newPath = os.path.expanduser(newPath)
-    # __init__
-
-    def __enter__(self):
-        self.savedPath = os.getcwd()
-        os.chdir(self.newPath)
-    # __enter__
-
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.savedPath)
-    # __exit__
-
+#class cd:
+#    """Context manager for changing the current working directory"""
+#
+#    def __init__(self, newPath):
+#        self.newPath = os.path.expanduser(newPath)
+#    # __init__
+#
+#    def __enter__(self):
+#        self.savedPath = os.getcwd()
+#        os.chdir(self.newPath)
+#    # __enter__
+#
+#    def __exit__(self, etype, value, traceback):
+#        os.chdir(self.savedPath)
+#    # __exit__
+#
 # class cd
 
 #------------------------------------------------------------------------------#
@@ -48,7 +49,6 @@ def clone_mirror(src, directory, args):
     # if
 
     subprocess.call(["git", "clone", "--mirror", src, directory])
-    #git.clone("--mirror", src, directory)
 
 # clone_mirror
 
@@ -62,11 +62,7 @@ def push_mirror(dest, directory, args):
         print "Pushing into", dest, "from", directory
     # if
 
-#   with cd(directory):
-    with os.chdir(directory):
-        #git.push("--mirror", dest)
-        subprocess.call(["git", "push", "--mirror", dest])
-    # with
+    subprocess.call(["git", "push", "--mirror", dest], cwd=directory)
 
 # push_mirror
 
@@ -80,11 +76,11 @@ def create_archive(src, directory, archive_name, args):
         print "Creating tar archive ", archive_name, "from", src
     # if
 
-#   with cd(directory):
-    with os.chdir(directory):
-#       tar("xvjf", archive_name, src)
-        subprocess.call(["tar", "cvjf", archive_name, src])
-    # with
+    # clone the mirror
+    clone_mirror(src, directory, args)
+
+    # create archive
+    subprocess.call(["tar", "cvjf", archive_name, directory])
 
 # create_archive
 
@@ -92,17 +88,16 @@ def create_archive(src, directory, archive_name, args):
 # Expand a tar archive
 #------------------------------------------------------------------------------#
 
-def expand_archive(directory, archive_name, args):
+def expand_archive(directory, archive_name, dest, args):
 
     if(args.debug or args.verbose):
-        print "Expanding tar archive ", archive_name, "to", src
+        print "Expanding tar archive ", archive_name, "to", directory
     # if
 
-#   with cd(directory):
-    with os.chdir(directory):
-#       tar("cvjf", archive_name)
-        subprocess.call(["tar", "xvjf", archive_name])
-    # with
+    subprocess.call(["tar", "xvjf", archive_name, "--strip-components=2"],
+        cwd=directory)
+
+    push_mirror(dest, directory, args)
 
 # expand_archive
 
