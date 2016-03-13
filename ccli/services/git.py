@@ -32,9 +32,12 @@ class CINCHGit(Service):
         self.parser.add_argument('-v', '--verbose', action="store_true",
             help='Turn on verbose output.')
 
-        self.parser.add_argument('config',
+        self.parser.add_argument('-o', '--operations', action="store_true",
+            help='Show a description of the supported operations.')
+
+        self.parser.add_argument('config', nargs='?',
             help='The JSON configuration file specifying ' +
-                'the git operations.')
+                'the operations to perform.')
 
         # set the callback for this sub-command
         self.parser.set_defaults(func=self.main)
@@ -50,7 +53,35 @@ class CINCHGit(Service):
         """
         """
 
-        process(args)
+        if(args.operations):
+            print '\nSupported operations:\n\n' + \
+                '   clone - create a clone with the --mirror option.\n' + \
+                '      parameters:\n' + \
+                '         src - specify the source url.\n' + \
+                '\n' + \
+                '   push - push a mirrored clone.\n' + \
+                '      parameters:\n' + \
+                '         dest - specify the destination url.\n' + \
+                '\n' + \
+                '   mirror - clone and then push a repository.\n' + \
+                '      parameters:\n' + \
+                '         src - specify the source url.\n' + \
+                '         dest - specify the destination url.\n' + \
+                '\n' + \
+                '   archive - create a clone and archive it.\n' + \
+                '      parameters:\n' + \
+                '         src - specify the source url.\n' + \
+                '         filename - specify the archive name to create.\n' + \
+                '\n' + \
+                '   expand - expand an archive.' + \
+                '      parameters:\n' + \
+                '         dest - specify the destination url.\n' + \
+                '         filename - specify the archive name to expand.\n' + \
+                '\n' + \
+                '   transfer - transfer a file using xf.' + \
+                '\n'
+        else:
+            process(args)
 
     # main
 
