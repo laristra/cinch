@@ -7,7 +7,7 @@ build system utilities, such as source file templates, and documentation
 generation.  This utility is written in Python and should be installed
 prior to using the Cinch CMake interface in your project.
 
-Documention on adding new services is [here](ccli/devel.md).
+Documentation on adding new services is [here](ccli/devel.md).
 
 # Features
 
@@ -38,12 +38,12 @@ can be easily updated.  As an example, consider this C++ header comment:
      * C++ Header
      *~-----------------------------------------------------~*/
 ~~~~
-Notice the tilde character used at the beginngin and end of the normal
+Notice the tilde character used at the beginning and end of the normal
 comment delimiters.  The Cinch branding processor interprets these as
 binary strings, taking the last 8 characters before the asterisk on
 the first and last lines of the comment.  In binary, this header is
 interpreted to have id 1 (00000001).  The branding tool uses this
-information (in conjection with an input file that defines replacement
+information (in conjunction with an input file that defines replacement
 policies for each id) to replace the interior text with whatever has
 been specified in the input file for that particular id.  This allows
 easy update of copyright or other header information for all of the
