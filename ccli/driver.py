@@ -60,7 +60,7 @@ class CLIDriver():
         self.services = dict()
 
         # create top-level argument parser
-        self.parser = argparse.ArgumentParser(prog='ccli')
+        self.parser = argparse.ArgumentParser()
 
         # create subparsers object to pass into services
         self.subparsers = self.parser.add_subparsers(help='sub-command help')
