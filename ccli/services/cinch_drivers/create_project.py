@@ -5,6 +5,7 @@
 
 import os
 import re
+import shutil
 import getpass
 import datetime
 import subprocess
@@ -48,14 +49,14 @@ def create_project(args):
     os.mkdir("src/example/test")
 
     #--------------------------------------------------------------------------#
-    # Make symobolic links
+    # Copy configuration files into tree.
     #--------------------------------------------------------------------------#
 
-    print "Creating symbolic links..."
+    print "Copying configuration files..."
 
-    os.symlink("cinch/cmake/ProjectLists.txt", "CMakeLists.txt")
-    os.symlink("../cinch/cmake/SourceLists.txt", "src/CMakeLists.txt")
-    os.symlink("../cinch/doxygen/doxygen.conf.in", "doc/doxygen.conf.in")
+    shutil.copyfile("cinch/bootstrap/top-level.txt", "CMakeLists.txt")
+    shutil.copyfile("cinch/bootstrap/src-level.txt", "src/CMakeLists.txt")
+    shutil.copyfile("cinch/doxygen/doxygen.conf.in", "doc/doxygen.conf.in")
 
     #--------------------------------------------------------------------------#
     # Populate config sub-directory
