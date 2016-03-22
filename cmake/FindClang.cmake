@@ -72,11 +72,12 @@ mark_as_advanced(CLANG_LIBRARIES)
 
 find_package_handle_standard_args(clang
     REQUIRED_VARS
-        CLANG_VERSION
         CLANG_EXEC
         CLANGXX_EXEC
         CLANG_INCLUDE_DIR
         CLANG_LIBRARIES
+    VERSION_VAR
+        CLANG_VERSION
 )
 
 #------------------------------------------------------------------------------#
