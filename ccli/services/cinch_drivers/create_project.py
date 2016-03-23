@@ -29,7 +29,7 @@ def create_project(args):
     subprocess.call(["git", "init", "-q", args.name])
     os.chdir(args.name)
     subprocess.call(["git", "submodule", "add",
-        "git@github.com:losalamos/cinch.git"])
+        "https://github.com/losalamos/cinch.git"])
     subprocess.call(["git", "submodule", "foreach",
         "git submodule init; git submodule update"])
 
