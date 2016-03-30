@@ -647,5 +647,5 @@ endif(CINCH_APPLICATION_DIRECTORIES)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
-# vim: set tabstop=4 shiftwidth=4 expandtab :
+# vim: set tabstop=4 shiftwidth=4 expandtab filetype=cmake :
 #------------------------------------------------------------------------------#

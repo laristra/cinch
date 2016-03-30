@@ -85,5 +85,5 @@ set(${library_target_name}_INCDIRS ${INCDIRS} PARENT_SCOPE)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
-# vim: set tabstop=4 shiftwidth=4 expandtab :
+# vim: set tabstop=4 shiftwidth=4 expandtab filetype=cmake :
 #-----------------------------------------------------------------------------#
