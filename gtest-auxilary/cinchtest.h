@@ -25,8 +25,13 @@
 #define CINCH_WRITE(f) \
   cinch::test_output_t::instance().to_file((f))
 
+// Dump captured output on failure
 #define CINCH_ASSERT(ASSERTION, ...) \
   ASSERT_ ## ASSERTION(__VA_ARGS__) << CINCH_DUMP()
+
+// Dump captured output on failure
+#define CINCH_EXPECT(EXPECTATION, ...) \
+  EXPECT_ ## EXPECTATION(__VA_ARGS__) << CINCH_DUMP()
 
 #endif // cinchtest_h
 
