@@ -50,6 +50,14 @@ ${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
  *
  *  CINCH_WRITE(file);           : Write captured output to file.
  *
+ *  CINCH_ASSERT(ASSERTION, ...) : Call Google test macro and automatically
+ *                                 dump captured output (from CINCH_CAPTURE)
+ *                                 on failure.
+ *
+ *  CINCH_EXPECT(ASSERTION, ...) : Call Google test macro and automatically
+ *                                 dump captured output (from CINCH_CAPTURE)
+ *                                 on failure.
+ *
  * Google Test Macros
  *
  * Basic Assertions:
