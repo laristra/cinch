@@ -4,6 +4,7 @@
  *~--------------------------------------------------------------------------~*/
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <gtest/internal/gtest-internal.h>
 #include <memory>
 #include <regex>
