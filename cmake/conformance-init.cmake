@@ -3,19 +3,39 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
+#------------------------------------------------------------------------------#
+# Set the default language standard for conformance tests
+#------------------------------------------------------------------------------#
+
+set(CXX_CONFORMANCE_STANDARD "c++14"
+    CACHE STRING "Set C++ standard (c++14,c++17, etc...)")
+
+#------------------------------------------------------------------------------#
+# Conformance test initialization
+#
+# Mostly this justs sets up the output file...
+#------------------------------------------------------------------------------#
+
 function(cinch_initialize_conformance_tests)
+
     if(ENABLE_CONFORMANCE_TESTS)
-        set(CXX_CONFORMANCE_STANDARD "c++14"
-            CACHE STRING "Set C++ standard (c++14,c++17, etc...)")
 
         file(WRITE ${CMAKE_BINARY_DIR}/conformance-report.txt
-    "#------------------------------------------------------------------------------#\n"
+    "#-------------------------------------------------------"
+    "-----------------------#\n"
             "# CSSE Conformance Test Report\n"
-    "#------------------------------------------------------------------------------#\n\n"
+    "#-------------------------------------------------------"
+    "-----------------------#\n\n"
         )
+
         file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt
-            "Comipler: ${CMAKE_CXX_COMPILER}\n\n"
+            "Compiler: ${CMAKE_CXX_COMPILER}\n"
+            "Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}\n"
+            "Compiler Flags:${CMAKE_CXX_FLAGS}\n"
         )
+
+        file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt "\n")
+
     endif(ENABLE_CONFORMANCE_TESTS)
 endfunction(cinch_initialize_conformance_tests)
 
