@@ -52,6 +52,10 @@ function(cinch_add_conformance_test target)
             )
             file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt
                 "${_OUTPUT}\n")
+            message(STATUS "${CINCH_BoldRed}"
+                "Conformance test ${target} FAILED!!!"
+                "${CINCH_ColorReset}"
+            )
         else()
             file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt
                 "SUCCESS!!!\n"
