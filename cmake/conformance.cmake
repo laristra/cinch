@@ -37,7 +37,10 @@ function(cinch_add_conformance_test target)
     #--------------------------------------------------------------------------#
 
     file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt
+        "#------------------------------------------------------------------------------#\n"
         "TEST: ${target}\n"
+        "SOURCE: ${full_path_sources}\n"
+        "#------------------------------------------------------------------------------#\n"
     )
 
     if(NOT _RESULT)
@@ -50,6 +53,8 @@ function(cinch_add_conformance_test target)
             "SUCCESS!!!\n"
             )
     endif(NOT _RESULT)
+
+    file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt "\n")
 
 endfunction(cinch_add_conformance_test)
 
