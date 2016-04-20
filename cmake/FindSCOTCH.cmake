@@ -12,10 +12,10 @@
 
 find_package(PkgConfig)
 
-pkg_check_modules(PC_SCOTCH scotchmetis)
+pkg_check_modules(PC_SCOTCH scotch)
 
 # Look for the header file.
-FIND_PATH(SCOTCH_INCLUDE_DIR NAMES scotch.h HINTS ${PC_SCOTCH_INCLUDE_DIRS} )
+FIND_PATH(SCOTCH_INCLUDE_DIR NAMES scotch.h PATH_SUFFIXES scotch HINTS ${PC_SCOTCH_INCLUDE_DIRS} )
 
 # Look for the library.
 FIND_LIBRARY(SCOTCH_LIBRARY NAMES scotch libscotch HINTS ${PC_SCOTCH_LIBRARY_DIRS} )
