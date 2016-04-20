@@ -11,7 +11,7 @@
 #  METIS_FOUND        - True if metis found.
 
 #=============================================================
-# _METIS2_GET_VERSION
+# _METIS_GET_VERSION
 # Internal function to parse the version number in metis.h
 #   _OUT_major = Major version number
 #   _OUT_minor = Minor version number
