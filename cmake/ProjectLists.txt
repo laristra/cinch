@@ -23,7 +23,11 @@
 # Require some version of cmake
 #------------------------------------------------------------------------------#
 
-cmake_minimum_required(VERSION 2.8)
+#we are using target_include_directories, which is a cmake-3.0 feature
+set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
+if(CMAKE_VERSION VERSION_LESS CINCH_REQUIRED_CMAKE_VERSION)
+   message(FATAL_ERROR "Cinch needs at least cmake ${CINCH_REQUIRED_CMAKE_VERSION}")
+endif()
 
 #------------------------------------------------------------------------------#
 # Add path for cinch modules
