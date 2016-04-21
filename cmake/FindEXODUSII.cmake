@@ -7,8 +7,8 @@
 # Find the native EXODUSII headers and libraries.
 #
 #  EXODUSII_INCLUDE_DIRS - where to find exodusII.h, etc.
-#  EXODUSII_LIBRARIES    - List of libraries when using fftw3.
-#  EXODUSII_FOUND        - True if fftw3 found.
+#  EXODUSII_LIBRARIES    - List of libraries when using xoIIv2c.
+#  EXODUSII_FOUND        - True if exodus found.
 #
 
 find_path(EXODUSII_INCLUDE_DIR exodusII.h)
