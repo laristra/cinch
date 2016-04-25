@@ -40,10 +40,10 @@ function(cinch_add_conformance_test target)
         file(APPEND ${CMAKE_BINARY_DIR}/conformance-report.txt
             "#------------------------------------------------"
             "------------------------------#\n"
-            "TEST: ${target}\n"
-            "SOURCE: ${full_path_sources}\n"
+            "# TEST: ${target}\n"
+            "# SOURCE: ${full_path_sources}\n"
             "#------------------------------------------------"
-            "------------------------------#\n"
+            "------------------------------#\n\n"
         )
 
         if(NOT _RESULT)
