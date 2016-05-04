@@ -5,10 +5,12 @@
 #  KOKKOS_FOUND        - True if kokkos found.
 #
 
-set(KOKKOS_ROOT "" CACHE PATH "Root directory of Kokkos installation")
+set(KOKKOS_ROOT "/usr" CACHE PATH "Root directory of Kokkos installation")
 
-find_path(KOKKOS_INCLUDE_DIR Kokkos_Core.hpp)
-find_library(KOKKOS_CORE_LIBRARY NAMES kokkoscore)
+find_path(KOKKOS_INCLUDE_DIR Kokkos_Core.hpp
+   PATHS ${KOKKOS_ROOT}/include)
+find_library(KOKKOS_CORE_LIBRARY NAMES kokkos
+	PATHS ${KOKKOS_ROOT}/lib ${KOKKOS_ROOT}/lib64)
 
 set(KOKKOS_LIBRARIES "${KOKKOS_CORE_LIBRARY}")
 set(KOKKOS_INCLUDE_DIRS "${KOKKOS_INCLUDE_DIR}")
