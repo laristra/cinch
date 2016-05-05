@@ -13,7 +13,10 @@
 
 find_path(EXODUSII_INCLUDE_DIR exodusII.h)
 
-find_library(EXODUSII_LIBRARY NAMES exoIIv2c exodus)
+#v6.09 calls it libexodus
+#debian calls it libexoIIv2
+#other distros libexoIIv2c
+find_library(EXODUSII_LIBRARY NAMES exodus exoIIv2 exoIIv2c)
 
 set(EXODUSII_LIBRARIES ${EXODUSII_LIBRARY} )
 set(EXODUSII_INCLUDE_DIRS ${EXODUSII_INCLUDE_DIR} )
