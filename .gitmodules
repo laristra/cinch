@@ -1,3 +1,7 @@
 [submodule "gtest"]
 	path = gtest
 	url = ../../google/googletest.git
+[submodule "pfunit"]
+	path = pfunit
+	url = git://git.code.sf.net/p/pfunit/code
+	branch = pfunit_2.1.0

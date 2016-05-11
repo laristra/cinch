@@ -25,6 +25,7 @@
 
 #we are using target_include_directories, which is a cmake-3.0 feature
 set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
+
 if(CMAKE_VERSION VERSION_LESS CINCH_REQUIRED_CMAKE_VERSION)
    message(FATAL_ERROR "Cinch needs at least cmake ${CINCH_REQUIRED_CMAKE_VERSION}")
 endif()
@@ -193,7 +194,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     option(BUILD_SHARED_LIBS "Build shared libs" ON)
 
     #--------------------------------------------------------------------------#
-    # Add support for ctest and GTest
+    # Add support for ctest, GTest, and pFUnit
     #--------------------------------------------------------------------------#
 
     option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
@@ -204,6 +205,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     if(ENABLE_UNIT_TESTS)
 
         enable_testing()
+
+        #----------------------------------------------------------------------#
+        # Google Test
+        #----------------------------------------------------------------------#
+
         find_package(GTest QUIET)
 
         if(GTEST_FOUND)
@@ -222,13 +228,47 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         include_directories(cinch/gtest-auxiliary)
 
         #----------------------------------------------------------------------#
+        # pFUnit
+        #----------------------------------------------------------------------#
+
+        get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+        list(FIND LANGUAGES "Fortran" FORTRAN_ENABLED)
+        if(FORTRAN_ENABLED)
+            find_package(PythonInterp QUIET)
+            find_package(pFUnit QUIET)
+
+            if(PFUNIT_FOUND)
+                include_directories(${PFUNIT_INCLUDE_DIR})
+            else()
+                include(ExternalProject)
+                ExternalProject_Add(pfunit
+                    SOURCE_DIR ${CMAKE_SOURCE_DIR}/cinch/pfunit
+                    CMAKE_ARGS
+                        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/pfunit
+                    BUILD_COMMAND ${MAKE}
+                )
+                set(PFUNIT_LIBRARY ${CMAKE_BINARY_DIR}/pfunit/lib/libpfunit.a)
+                set(PFUNIT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/pfunit/include)
+                set(PFUNIT_DRIVER
+                    ${CMAKE_SOURCE_DIR}/cinch/pfunit/include/driver.F90)
+                set(PFUNIT_MODULE_DIR ${CMAKE_BINARY_DIR}/pfunit/mod)
+                set(PFUNIT_PARSER
+                    ${CMAKE_SOURCE_DIR}/cinch/pfunit/bin/pFUnitParser.py)
+                include_directories(${PFUNIT_INCLUDE_DIR})
+            endif()
+        endif()
+
+        #----------------------------------------------------------------------#
         # Add default execution polices
         #----------------------------------------------------------------------#
 
-        #cinch_add_unit_execution_policy(SERIAL
-        #    ${CMAKE_SOURCE_DIR}/cinch/gtest/src/gtest_main.cc)
         cinch_add_unit_execution_policy(SERIAL
             ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
+
+        cinch_add_unit_execution_policy(FORTRAN
+            ${PFUNIT_DRIVER}
+            LIBRARIES ${PFUNIT_LIBRARY})
 
         if(${MPI_${MPI_LANGUAGE}_FOUND})
             cinch_add_unit_execution_policy(MPI
@@ -249,15 +289,18 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         endif (legion_FOUND)
 
         if(${MPI_${MPI_LANGUAGE}_FOUND}) 
-           if(legion_FOUND)
-             cinch_add_unit_execution_policy(MPILEGION
-               ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
-               FLAGS ${LEGION_CXX_FLAGS} ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-               INCLUDES ${LEGION_INCLUDE_DIRS} ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-               LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS} ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-               EXEC ${MPIEXEC}
-               EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}) 
-         endif (legion_FOUND)
+            if(legion_FOUND)
+                cinch_add_unit_execution_policy(MPILEGION
+                    ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
+                    FLAGS ${LEGION_CXX_FLAGS}
+                        ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                    INCLUDES ${LEGION_INCLUDE_DIRS}
+                        ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                    LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS}
+                        ${MPI_${MPI_LANGUAGE}_LIBRARIES}
+                    EXEC ${MPIEXEC}
+                    EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}) 
+            endif (legion_FOUND)
         endif(${MPI_${MPI_LANGUAGE}_FOUND})
 
     endif(ENABLE_UNIT_TESTS)
@@ -502,12 +545,26 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             list(GET unit_policy_list 6 unit_policy_exec_threads)
 
             # Convert stored values back into lists
+            string(REPLACE "|" ";" unit_policy_runtime
+                "${unit_policy_runtime}")
             string(REPLACE "|" ";" unit_policy_flags
                 "${unit_policy_flags}")
             string(REPLACE "|" ";" unit_policy_includes
                 "${unit_policy_includes}")
             string(REPLACE "|" ";" unit_policy_libraries
                 "${unit_policy_libraries}")
+
+            #------------------------------------------------------------------#
+            # Set output directory information
+            #------------------------------------------------------------------#
+
+            if("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
+                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
+                set(_TEST_PREFIX)
+            else()
+                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${unit_project_name}/${_RELATIVE_PATH})
+                set(_TEST_PREFIX "${unit_project_name}:")
+            endif("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
 
             #------------------------------------------------------------------#
             # Add user-specified defines
@@ -523,8 +580,34 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             # Add the executable
             #------------------------------------------------------------------#
 
-            add_executable(${unit_target_name} ${_UNIT_SOURCES}
-                ${unit_policy_runtime})
+            if("${unit_target_execution_policy}" STREQUAL "FORTRAN")
+                set(_FORTRAN_SOURCES)
+
+                # Run pFUnit preprocessor on .pf files
+                foreach(source ${_UNIT_SOURCES})
+                    get_filename_component(_EXT ${source} EXT)
+
+                    if("${_EXT}" STREQUAL ".pf")
+                        get_filename_component(_BASE ${source} NAME_WE)
+                        add_custom_target(${_BASE}_f90
+                            ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
+                            ${_OUTPUT_DIR}/${_BASE}.f90)
+                        list(APPEND _FORTRAN_SOURCES
+                            ${_OUTPUT_DIR}/${_BASE}.f90)
+                    else()
+                        list(APPEND _FORTRAN_SOURCES ${source})
+                    endif()
+                endforeach()
+
+                add_executable(${unit_target_name} ${_FORTRAN_SOURCES}
+                    ${unit_policy_runtime})
+                target_include_directories(${unit_target_name} PRIVATE
+                    ${unit_target_directory})
+                add_dependencies(${unit_target_name} pfunit)
+            else()
+                add_executable(${unit_target_name} ${_UNIT_SOURCES}
+                    ${unit_policy_runtime})
+            endif()
 
             if(NOT "${unit_policy_flags}" STREQUAL "None")
                 target_compile_options(${unit_target_name}
@@ -536,8 +619,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             #------------------------------------------------------------------#
 
             if (NOT "${unit_target_include_dirs}" STREQUAL "None")
-                target_include_directories( ${unit_target_name} PRIVATE
-                                            ${unit_target_include_dirs} )
+                target_include_directories(${unit_target_name} PRIVATE
+                    ${unit_target_include_dirs} )
             endif()
 
             #------------------------------------------------------------------#
@@ -565,18 +648,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 target_link_libraries(${unit_target_name}
                     ${unit_policy_libraries})
             endif(NOT "${unit_policy_libraries}" STREQUAL "None")
-
-            #------------------------------------------------------------------#
-            # Set output directory information
-            #------------------------------------------------------------------#
-
-            if("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
-                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
-                set(_TEST_PREFIX)
-            else()
-                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${unit_project_name}/${_RELATIVE_PATH})
-                set(_TEST_PREFIX "${unit_project_name}:")
-            endif("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
 
             #------------------------------------------------------------------#
             # Change the output directory to the test subdirectory
