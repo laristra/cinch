@@ -234,6 +234,9 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 
         list(FIND LANGUAGES "Fortran" FORTRAN_ENABLED)
+	if(FORTRAN_ENABLED EQUAL -1)
+	    set(FORTRAN_ENABLED FALSE)
+	endif(FORTRAN_ENABLED EQUAL -1)
         if(FORTRAN_ENABLED)
             find_package(PythonInterp QUIET)
             find_package(pFUnit QUIET)
@@ -266,9 +269,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         cinch_add_unit_execution_policy(SERIAL
             ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
 
-        cinch_add_unit_execution_policy(FORTRAN
-            ${PFUNIT_DRIVER}
-            LIBRARIES ${PFUNIT_LIBRARY})
+	if(FORTRAN_ENABLED)
+            cinch_add_unit_execution_policy(FORTRAN
+                ${PFUNIT_DRIVER}
+                LIBRARIES ${PFUNIT_LIBRARY})
+	endif(FORTRAN_ENABLED)
 
         if(${MPI_${MPI_LANGUAGE}_FOUND})
             cinch_add_unit_execution_policy(MPI
