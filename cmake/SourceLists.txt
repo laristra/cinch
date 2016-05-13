@@ -54,9 +54,10 @@ list(APPEND INCDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 # located in the top-level 'cmake' directory.
 
 foreach(_SUBDIR ${_SUBDIRECTORIES})
-    if(NOT EXISTS ${_SUBDIR}/CMakeLists.txt)
+
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_SUBDIR}/CMakeLists.txt)
        continue()
-    endif(NOT EXISTS ${_SUBDIR}/CMakeLists.txt)
+    endif()
 
     message(STATUS
         "Adding source subdirectory '${_SUBDIR}' to ${library_target_name}")
