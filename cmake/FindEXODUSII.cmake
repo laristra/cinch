@@ -21,6 +21,15 @@ find_library(EXODUSII_LIBRARY NAMES exodus exoIIv2 exoIIv2c)
 set(EXODUSII_LIBRARIES ${EXODUSII_LIBRARY} )
 set(EXODUSII_INCLUDE_DIRS ${EXODUSII_INCLUDE_DIR} )
 
+# if you are not using dynamic libraries, you probably need netCDF too
+# fortunately, new versions have a pretty elaborite config file
+find_package(netCDF QUIET)
+if (netCDF_FOUND)
+  include( ${netCDF_CONFIG} )
+  list( APPEND EXODUSII_INCLUDE_DIRS ${netCDF_INCLUDE_DIRS} )
+  list( APPEND EXODUSII_LIBRARIES ${netCDF_LIBRARIES} )
+endif()
+
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set EXODUSII_FOUND to TRUE
 # if all listed variables are TRUE
