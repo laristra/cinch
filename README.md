@@ -84,7 +84,7 @@ git server: 'git clone --recursive git@github.com:losalamos/cinch.git'.
 
 ### CMakeLists.txt
 
-A link to the Cinch ProjectLists.txt file.
+Create a file, whichs sets *cmake_minimum_required()* and includes the Cinch ProjectLists.txt file.
 
 ### config
 
