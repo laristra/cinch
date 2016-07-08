@@ -574,7 +574,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             #------------------------------------------------------------------#
 
             if("${unit_target_execution_policy}" STREQUAL "FORTRAN")
-                set(_FORTRAN_TARGETS)
                 set(_FORTRAN_SOURCES)
                 set(_FORTRAN_SPECIALS)
 
@@ -584,21 +583,21 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
                     if("${_EXT}" STREQUAL ".pf")
                         get_filename_component(_BASE ${source} NAME_WE)
-                        add_custom_target(${_BASE}_F90
-                            ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
-                            ${_OUTPUT_DIR}/${_BASE}.F90)
-                        execute_process(COMMAND
-                            ${CMAKE_COMMAND} -E touch
-                                ${_OUTPUT_DIR}/${_BASE}.F90)
-                        list(APPEND _FORTRAN_TARGETS ${_BASE}_F90)
-                        list(APPEND _FORTRAN_SOURCES
-                            ${_OUTPUT_DIR}/${_BASE}.F90)
+                        add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_BASE}.F90
+                            COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
+                            ${_OUTPUT_DIR}/${_BASE}.F90
+                            DEPENDS ${source}
+                            COMMENT "Generating ${_OUTPUT_DIR}/${_BASE}.F90 using pfunit")
+                        list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}/${_BASE}.F90)
                     elseif("${_EXT}" STREQUAL ".inc")
-                        #file(COPY ${source} DESTINATION ${_OUTPUT_DIR})
-
-                        add_custom_target(${unit_target_name}_inc_file
-                            ${CMAKE_COMMAND} -E copy_if_different ${source}
-                            ${_OUTPUT_DIR})
+                        get_filename_component(_OUTPUT_NAME ${source} NAME)
+                        add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                            COMMAND ${CMAKE_COMMAND} -E copy ${source}
+                            ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                            DEPENDS ${source}
+                            COMMENT "Copying ${source} for ${unit_target_name}")
+                        add_custom_target(${unit_target_name}_inc_file DEPENDS
+                            ${_OUTPUT_DIR}/${_OUTPUT_NAME})
                         list(APPEND _FORTRAN_SPECIALS
                             ${unit_target_name}_inc_file)
                     else()
@@ -615,7 +614,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 target_include_directories(${unit_target_name} PRIVATE
                     ${_OUTPUT_DIR})
                 add_dependencies(${unit_target_name} pfunit)
-                add_dependencies(${unit_target_name} ${_FORTRAN_TARGETS})
                 add_dependencies(${unit_target_name} ${_FORTRAN_SPECIALS})
 
                 set(_PFUNIT_DEFINES)
@@ -681,10 +679,19 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             #------------------------------------------------------------------#
 
             if(NOT "${unit_target_inputs}" STREQUAL "None")
+                set(_OUTPUT_FILES)
                 foreach(input ${unit_target_inputs})
-                   file(COPY ${unit_target_directory}/${input}
-                        DESTINATION ${_OUTPUT_DIR})                    
+                get_filename_component(_OUTPUT_NAME ${input} NAME)
+                    add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                        COMMAND ${CMAKE_COMMAND} -E copy 
+                        ${unit_target_directory}/${input}
+                        ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                        DEPENDS ${unit_target_directory}/${input}
+                        COMMENT "Copying ${input} for ${unit_target_name}")
+                    list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}/${_OUTPUT_NAME})
                 endforeach()
+                add_custom_target(${unit_target_name}_inputs DEPENDS ${_OUTPUT_FILES})
+                add_dependencies(${unit_target_name} ${unit_target_name}_inputs)
             endif()
 
             #------------------------------------------------------------------#
