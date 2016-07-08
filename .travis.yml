@@ -15,8 +15,10 @@ addons:
       - openmpi-bin
       - gcc-4.9
       - g++-4.9
+      - gfortran-4.9
       - gcc-5
       - g++-5
+      - gfortran-5
 
 before_install:
  - git fetch --unshallow && git fetch --tags #for versioning
@@ -40,12 +42,11 @@ script:
   - cd $HOME && git clone --recursive https://github.com/${TEST} ${TEST} && cd ${TEST} &&
     for i in $(find . -type d -name cinch); do [ -e ${i}/.git ] || continue; git -C ${i} fetch ${HOME}/build/${TRAVIS_REPO_SLUG} cinch_current_commit && git -C ${i} checkout -f FETCH_HEAD; done &&
     mkdir build && cd build && 
-    PATH="/usr/lib/ccache:$PATH" CC=gcc-${GVER} CXX=g++-${GVER} cmake -DENABLE_MPI=$MPI -DENABLE_UNIT_TESTS=ON .. && 
+    FC=gfortran-${GVER} CC=gcc-${GVER} CXX=g++-${GVER} cmake -DENABLE_MPI=$MPI -DENABLE_UNIT_TESTS=ON .. && 
     make -j4 && make test ARGS="-V" && make install DESTDIR="${HOME}"
 
 cache:
-  directories:
-    - $HOME/.ccache
+  - ccache
 
 compiler:
   - gcc
