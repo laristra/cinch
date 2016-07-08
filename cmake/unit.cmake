@@ -50,9 +50,9 @@ function(cinch_add_unit target)
     # Capture include directories
     #--------------------------------------------------------------------------#
     
-    get_property( unit_INCLUDE_DIRS
+    get_property(unit_INCLUDE_DIRS
                   DIRECTORY ${PROJECT_SOURCE_DIR}
-                  PROPERTY INCLUDE_DIRECTORIES )
+                  PROPERTY INCLUDE_DIRECTORIES)
     if(NOT unit_INCLUDE_DIRS)
         set(unit_INCLUDE_DIRS "None")
     else()
@@ -63,9 +63,9 @@ function(cinch_add_unit target)
     # Capture compile definitions
     #--------------------------------------------------------------------------#
     
-    get_property( unit_COMPILE_DEFS
+    get_property(unit_COMPILE_DEFS
                   DIRECTORY ${PROJECT_SOURCE_DIR}
-                  PROPERTY COMPILE_DEFINITIONS )
+                  PROPERTY COMPILE_DEFINITIONS)
     if(NOT unit_COMPILE_DEFS)
         set(unit_COMPILE_DEFS "None")
     else()

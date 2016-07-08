@@ -234,9 +234,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 
         list(FIND LANGUAGES "Fortran" FORTRAN_ENABLED)
-	if(FORTRAN_ENABLED EQUAL -1)
-	    set(FORTRAN_ENABLED FALSE)
-	endif(FORTRAN_ENABLED EQUAL -1)
+
+        if(FORTRAN_ENABLED EQUAL -1)
+            set(FORTRAN_ENABLED FALSE)
+        endif(FORTRAN_ENABLED EQUAL -1)
+
         if(FORTRAN_ENABLED)
             find_package(PythonInterp QUIET)
             find_package(pFUnit QUIET)
@@ -244,21 +246,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(PFUNIT_FOUND)
                 include_directories(${PFUNIT_INCLUDE_DIR})
             else()
-                include(ExternalProject)
-                ExternalProject_Add(pfunit
-                    SOURCE_DIR ${CMAKE_SOURCE_DIR}/cinch/pfunit
-                    CMAKE_ARGS
-                        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/pfunit
-                    BUILD_COMMAND ${MAKE}
-                )
-                set(PFUNIT_LIBRARY ${CMAKE_BINARY_DIR}/pfunit/lib/libpfunit.a)
-                set(PFUNIT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/pfunit/include)
-                set(PFUNIT_DRIVER
-                    ${CMAKE_SOURCE_DIR}/cinch/pfunit/include/driver.F90)
-                set(PFUNIT_MODULE_DIR ${CMAKE_BINARY_DIR}/pfunit/mod)
-                set(PFUNIT_PARSER
-                    ${CMAKE_SOURCE_DIR}/cinch/pfunit/bin/pFUnitParser.py)
-                include_directories(${PFUNIT_INCLUDE_DIR})
+                include(cinch/cmake/PFUnitLists.txt)
             endif()
         endif()
 
@@ -269,11 +257,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         cinch_add_unit_execution_policy(SERIAL
             ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
 
-	if(FORTRAN_ENABLED)
+        if(FORTRAN_ENABLED)
             cinch_add_unit_execution_policy(FORTRAN
                 ${PFUNIT_DRIVER}
                 LIBRARIES ${PFUNIT_LIBRARY})
-	endif(FORTRAN_ENABLED)
+        endif(FORTRAN_ENABLED)
 
         if(${MPI_${MPI_LANGUAGE}_FOUND})
             cinch_add_unit_execution_policy(MPI
@@ -533,7 +521,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             endforeach(source)
 
             #------------------------------------------------------------------#
-            # Check to see if the user has specified and runtime and
+            # Check to see if the user has specified a runtime and
             # process it
             #------------------------------------------------------------------#
 
@@ -586,7 +574,9 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             #------------------------------------------------------------------#
 
             if("${unit_target_execution_policy}" STREQUAL "FORTRAN")
+                set(_FORTRAN_TARGETS)
                 set(_FORTRAN_SOURCES)
+                set(_FORTRAN_SPECIALS)
 
                 # Run pFUnit preprocessor on .pf files
                 foreach(source ${_UNIT_SOURCES})
@@ -594,11 +584,23 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
                     if("${_EXT}" STREQUAL ".pf")
                         get_filename_component(_BASE ${source} NAME_WE)
-                        add_custom_target(${_BASE}_f90
+                        add_custom_target(${_BASE}_F90
                             ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
-                            ${_OUTPUT_DIR}/${_BASE}.f90)
+                            ${_OUTPUT_DIR}/${_BASE}.F90)
+                        execute_process(COMMAND
+                            ${CMAKE_COMMAND} -E touch
+                                ${_OUTPUT_DIR}/${_BASE}.F90)
+                        list(APPEND _FORTRAN_TARGETS ${_BASE}_F90)
                         list(APPEND _FORTRAN_SOURCES
-                            ${_OUTPUT_DIR}/${_BASE}.f90)
+                            ${_OUTPUT_DIR}/${_BASE}.F90)
+                    elseif("${_EXT}" STREQUAL ".inc")
+                        #file(COPY ${source} DESTINATION ${_OUTPUT_DIR})
+
+                        add_custom_target(${unit_target_name}_inc_file
+                            ${CMAKE_COMMAND} -E copy_if_different ${source}
+                            ${_OUTPUT_DIR})
+                        list(APPEND _FORTRAN_SPECIALS
+                            ${unit_target_name}_inc_file)
                     else()
                         list(APPEND _FORTRAN_SOURCES ${source})
                     endif()
@@ -608,7 +610,20 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     ${unit_policy_runtime})
                 target_include_directories(${unit_target_name} PRIVATE
                     ${unit_target_directory})
+                target_include_directories(${unit_target_name} PRIVATE
+                    ${CMAKE_BINARY_DIR})
+                target_include_directories(${unit_target_name} PRIVATE
+                    ${_OUTPUT_DIR})
                 add_dependencies(${unit_target_name} pfunit)
+                add_dependencies(${unit_target_name} ${_FORTRAN_TARGETS})
+                add_dependencies(${unit_target_name} ${_FORTRAN_SPECIALS})
+
+                set(_PFUNIT_DEFINES)
+                list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
+                list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
+
+                set_target_properties(${unit_target_name}
+                    PROPERTIES COMPILE_DEFINITIONS "${_PFUNIT_DEFINES}")
             else()
                 add_executable(${unit_target_name} ${_UNIT_SOURCES}
                     ${unit_policy_runtime})
@@ -681,10 +696,14 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             list(LENGTH thread_instance_list thread_instances)
 
-            set(UNIT_FLAGS --gtest_color=no)
-            if(ENABLE_COLOR_UNIT_TESTS)
-                set(UNIT_FLAGS --gtest_color=yes)
-            endif(ENABLE_COLOR_UNIT_TESTS)
+            if(NOT "${unit_target_execution_policy}" STREQUAL "FORTRAN")
+                set(UNIT_FLAGS --gtest_color=no)
+                if(ENABLE_COLOR_UNIT_TESTS)
+                    set(UNIT_FLAGS --gtest_color=yes)
+                endif(ENABLE_COLOR_UNIT_TESTS)
+            else()
+                set(UNIT_FLAGS)
+            endif()
 
             if(${thread_instances} GREATER 1)
 
@@ -760,5 +779,5 @@ endif(CINCH_APPLICATION_DIRECTORIES)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
-# vim: set tabstop=4 shiftwidth=4 expandtab filetype=cmake :
+# vim: set tabstop=4 shiftwidth=4 filetype=cmake expandtab :
 #------------------------------------------------------------------------------#
