@@ -156,7 +156,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/packages.cmake)
 # Include project documentation
 #------------------------------------------------------------------------------#
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
+endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 
 #------------------------------------------------------------------------------#
 # Add top-level targets

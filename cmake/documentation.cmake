@@ -120,10 +120,13 @@ function(cinch_add_doc target config directory output)
             foreach(img ${_IMAGE_FILES})
                 get_filename_component(_img ${img} NAME_WE)
                 get_filename_component(_img_name ${img} NAME)
-                add_custom_target(${target}_private_${_img}
-                    ${CMAKE_COMMAND} -E copy_if_different ${img}
-                        ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
+                add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${img}
+                    ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
                     DEPENDS ${img}
+                    COMMENT "Copying ${img} for ${target}")
+                add_custom_target(${target}_private_${_img} DEPENDS
+                    ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
                     )
                 list(APPEND image_dependencies ${target}_private_${_img})
             endforeach(img ${_IMAGE_FILES})
