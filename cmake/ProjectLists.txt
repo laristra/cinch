@@ -256,16 +256,22 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Add default execution polices
         #----------------------------------------------------------------------#
 
-        cinch_add_unit_execution_policy(SERIAL
-            ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
-
         if(FORTRAN_ENABLED)
+            cinch_add_unit_execution_policy(SERIAL
+                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
+
             cinch_add_unit_execution_policy(FORTRAN
                 ${PFUNIT_DRIVER}
                 LIBRARIES ${PFUNIT_LIBRARY})
         endif(FORTRAN_ENABLED)
 
         if(${MPI_${MPI_LANGUAGE}_FOUND})
+            cinch_add_unit_execution_policy(SERIAL
+                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
+                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES})
+
             cinch_add_unit_execution_policy(MPI
                 ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpi.cc
                 FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
@@ -276,15 +282,30 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         endif(${MPI_${MPI_LANGUAGE}_FOUND})
 
         if (legion_FOUND)
+            cinch_add_unit_execution_policy(SERIAL
+                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
+               FLAGS ${LEGION_CXX_FLAGS}
+               INCLUDES ${LEGION_INCLUDE_DIRS}
+               LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS})
+
             cinch_add_unit_execution_policy(LEGION
                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-legion.cc
                FLAGS ${LEGION_CXX_FLAGS}
                INCLUDES ${LEGION_INCLUDE_DIRS}
-               LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS} )
+               LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS})
         endif (legion_FOUND)
 
-        if(${MPI_${MPI_LANGUAGE}_FOUND}) 
+        if(${MPI_${MPI_LANGUAGE}_FOUND})
             if(legion_FOUND)
+                cinch_add_unit_execution_policy(SERIAL
+                    ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
+                    FLAGS ${LEGION_CXX_FLAGS}
+                        ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                    INCLUDES ${LEGION_INCLUDE_DIRS}
+                        ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                    LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS}
+                        ${MPI_${MPI_LANGUAGE}_LIBRARIES})
+
                 cinch_add_unit_execution_policy(MPILEGION
                     ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
                     FLAGS ${LEGION_CXX_FLAGS}
