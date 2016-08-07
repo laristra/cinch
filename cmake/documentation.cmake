@@ -17,7 +17,7 @@ function(cinch_add_doc target config directory output)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args PANDOC_OPTIONS IMAGE_GLOB)
+    set(multi_value_args PANDOC_OPTIONS IMAGE_GLOB IMAGE_LIST)
     cmake_parse_arguments(extra "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -120,7 +120,10 @@ function(cinch_add_doc target config directory output)
             foreach(img ${_IMAGE_FILES})
                 get_filename_component(_img ${img} NAME_WE)
                 get_filename_component(_img_name ${img} NAME)
-                add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
+
+                set(_output ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name})
+
+                add_custom_command(OUTPUT ${_output}
                     COMMAND ${CMAKE_COMMAND} -E copy ${img}
                     ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
                     DEPENDS ${img}
@@ -131,6 +134,32 @@ function(cinch_add_doc target config directory output)
                 list(APPEND image_dependencies ${target}_private_${_img})
             endforeach(img ${_IMAGE_FILES})
         endif(extra_IMAGE_GLOB)
+
+        #----------------------------------------------------------------------#
+        # Process image args
+        #
+        # If the user has specified a list of images, copy the image files
+        # into the intermediate file directory.
+        #----------------------------------------------------------------------#
+
+        if(extra_IMAGE_LIST)
+            foreach(img ${extra_IMAGE_LIST})
+                get_filename_component(_img ${img} NAME_WE)
+                get_filename_component(_img_name ${img} NAME)
+
+                set(_output ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name})
+
+                add_custom_command(OUTPUT ${_output}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${img}
+                    ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
+                    DEPENDS ${img}
+                    COMMENT "Copying ${img} for ${target}")
+                add_custom_target(${target}_private_${_img} DEPENDS
+                    ${CMAKE_BINARY_DIR}/doc/.${target}/${_img_name}
+                    )
+                list(APPEND image_dependencies ${target}_private_${_img})
+            endforeach()
+        endif()
 
         #----------------------------------------------------------------------#
         # Glob files in search directory to add as dependency information
