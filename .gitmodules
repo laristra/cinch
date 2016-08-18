@@ -3,5 +3,5 @@
 	url = ../../google/googletest.git
 [submodule "pfunit"]
 	path = pfunit
-	url = http://git.code.sf.net/p/pfunit/code
+	url = ../pfunit.git
 	branch = pfunit_2.1.0
