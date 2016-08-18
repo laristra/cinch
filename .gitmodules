@@ -4,4 +4,3 @@
 [submodule "pfunit"]
 	path = pfunit
 	url = ../pfunit.git
-	branch = pfunit_2.1.0
