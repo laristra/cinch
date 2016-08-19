@@ -12,15 +12,15 @@ cc_source_template = Template(
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-/*!
- * \\file ${FILENAME}
- * \\authors ${AUTHOR}
- * \date Initial file creation: ${DATE}
- */
+///
+// \\file ${FILENAME}
+// \\authors ${AUTHOR}
+// \date Initial file creation: ${DATE}
+///
 
-#include "${FILENAME}"
+#include "${HEADER}"
 ${NAMESPACE_START}
-/*
+#if 0
 ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 {
 } // ${CLASSNAME}${TEMPLATE_TYPE}::method
@@ -28,7 +28,7 @@ ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 ${TEMPLATE}void ${CLASSNAME}${TEMPLATE_TYPE}::method(argument_type & t)
 {
 } // ${CLASSNAME}${TEMPLATE_TYPE}::method
-*/
+#endif
 ${NAMESPACE_END}
 /*~------------------------------------------------------------------------~--*
  * Formatting options for vim.

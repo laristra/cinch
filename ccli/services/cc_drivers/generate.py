@@ -8,6 +8,7 @@ from ccsource import cc_source_template
 from ccstandalone import cc_stand_alone_template
 import getpass
 import datetime
+import re
 from ccli.services.service_utils import *
 
 #------------------------------------------------------------------------------#
@@ -30,7 +31,7 @@ def generate(args):
     args.namespace.replace("::", "_") + '_' if args.namespace != None else ''
 
   namespace_start = "namespace " + \
-    args.namespace.replace("::", " { namespace ") + \
+    args.namespace.replace("::", " {\nnamespace ") + \
     " {\n\n" if args.namespace != None else ''
 
   namespace_end = "} // namespace " + \
@@ -38,7 +39,9 @@ def generate(args):
     if args.namespace != None else ''
 
   # Setup output file names
-  hfile = (args.filename if args.filename != None else args.classname) + '.h'
+  filebase = re.sub(r"_t$", "", args.classname)
+  filebase = re.sub(r"__$", "", filebase)
+  hfile = (args.filename if args.filename != None else filebase) + '.h'
 
   # Get the current user and date
   author = getpass.getuser()
@@ -77,10 +80,10 @@ def generate(args):
     template_type = '<T>' if args.template else ''
 
     cfile = (args.filename if args.filename != None
-      else args.classname) + '.cc'
+      else filebase) + '.cc'
 
     namespace_start = "\nnamespace " + \
-      args.namespace.replace("::", " { namespace ") + \
+      args.namespace.replace("::", " {\nnamespace ") + \
       " {\n" if args.namespace != None else ''
 
     namespace_end = "\n} // namespace " + \
@@ -98,6 +101,7 @@ def generate(args):
       PROTECTED=protected,
       TEMPLATE=template,
       TEMPLATE_TYPE=template_type,
+      HEADER=hfile,
       FILENAME=cfile,
       NAMESPACE_START=namespace_start,
       NAMESPACE_END=namespace_end,

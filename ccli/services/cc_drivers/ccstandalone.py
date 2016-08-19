@@ -12,11 +12,11 @@ cc_stand_alone_template = Template(
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-/*!
- * \\file ${FILENAME}
- * \\authors ${AUTHOR}
- * \date Initial file creation: ${DATE}
- */
+///
+// \\file ${FILENAME}
+// \\authors ${AUTHOR}
+// \date Initial file creation: ${DATE}
+///
 ${NAMESPACE_START}
 ${NAMESPACE_END}
 /*~------------------------------------------------------------------------~--*
