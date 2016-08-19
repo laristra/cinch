@@ -5,8 +5,8 @@
 
 if(NOT WIN32)
   string(ASCII 27 Esc)
-  set(CINCH_ColorReset "${Esc}[m")
-  set(CINCH_ColorBold  "${Esc}[1m")
+  set(CINCH_ColorReset  "${Esc}[m")
+  set(CINCH_ColorBold   "${Esc}[1m")
   set(CINCH_Red         "${Esc}[31m")
   set(CINCH_Green       "${Esc}[32m")
   set(CINCH_Yellow      "${Esc}[33m")

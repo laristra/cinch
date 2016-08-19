@@ -191,7 +191,9 @@ function(cinch_add_doc target config directory output)
         #----------------------------------------------------------------------#
 
         add_custom_target(${target} ALL
-            ${PANDOC_EXECUTABLE} ${pandoc_options} ${target}.md
+            ${PANDOC_EXECUTABLE}
+                --include-in-header=${CMAKE_SOURCE_DIR}/cinch/tex/required.tex
+                ${pandoc_options} ${target}.md
                 -o ${CMAKE_BINARY_DIR}/doc/${output}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc/.${target})
 
