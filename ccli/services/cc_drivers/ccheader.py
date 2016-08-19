@@ -12,8 +12,8 @@ cc_header_template = Template(
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#ifndef ${NAMESPACE_GUARD}${CLASSNAME}_h
-#define ${NAMESPACE_GUARD}${CLASSNAME}_h
+#ifndef ${NAMESPACE_GUARD}${BASENAME}_h
+#define ${NAMESPACE_GUARD}${BASENAME}_h
 
 ///
 // \\file ${FILENAME}
@@ -45,7 +45,7 @@ ${PROTECTED}private:
 
 }; // class ${CLASSNAME}
 
-${NAMESPACE_END}#endif // ${NAMESPACE_GUARD}${CLASSNAME}_h
+${NAMESPACE_END}#endif // ${NAMESPACE_GUARD}${BASENAME}_h
 
 /*~-------------------------------------------------------------------------~-*
  * Formatting options for vim.

@@ -12,6 +12,7 @@ import re
 from ccli.services.service_utils import *
 
 #------------------------------------------------------------------------------#
+# Generate C++ header and source files
 #------------------------------------------------------------------------------#
 
 def generate(args):
@@ -38,10 +39,11 @@ def generate(args):
     "\n} // namespace ".join(args.namespace.split("::")[::-1]) + "\n\n" \
     if args.namespace != None else ''
 
+  # Setup the type names    
+  typename = args.basename + '__' if args.template else args.basename + '_t'    
+
   # Setup output file names
-  filebase = re.sub(r"_t$", "", args.classname)
-  filebase = re.sub(r"__$", "", filebase)
-  hfile = (args.filename if args.filename != None else filebase) + '.h'
+  hfile = (args.filename if args.filename != None else args.basename) + '.h'
 
   # Get the current user and date
   author = getpass.getuser()
@@ -50,13 +52,16 @@ def generate(args):
   # Setup up spaces to use for tabs
   spaces = tab_spaces(args)
 
+  #----------------------------------------------------------------------------#
   # Do substitutions on header template
+  #----------------------------------------------------------------------------#
   header_output = cc_header_template.substitute(
     AUTHOR=author,
     DATE=date,
     SPACES=spaces,
     TABSTOP=args.tabstop,
-    CLASSNAME=args.classname,
+    BASENAME=args.basename,
+    CLASSNAME=typename,
     VIRTUAL=virtual,
     PROTECTED=protected,
     TEMPLATE=template,
@@ -80,7 +85,7 @@ def generate(args):
     template_type = '<T>' if args.template else ''
 
     cfile = (args.filename if args.filename != None
-      else filebase) + '.cc'
+      else args.basename) + '.cc'
 
     namespace_start = "\nnamespace " + \
       args.namespace.replace("::", " {\nnamespace ") + \
@@ -90,13 +95,16 @@ def generate(args):
       "\n} // namespace ".join(args.namespace.split("::")[::-1]) + "\n" \
       if args.namespace != None else ''
 
+    #--------------------------------------------------------------------------#
     # Do substitutions on source template
+    #--------------------------------------------------------------------------#
     source_output = cc_source_template.substitute(
       AUTHOR=author,
       DATE=date,
       SPACES=spaces,
       TABSTOP=args.tabstop,
-      CLASSNAME=args.classname,
+      BASENAME=args.basename,
+      CLASSNAME=typename,
       VIRTUAL=virtual,
       PROTECTED=protected,
       TEMPLATE=template,
@@ -118,7 +126,7 @@ def generate(args):
   if args.source:
     # Setup template keywords if the class is templated.
     cfile = (args.filename if args.filename != None
-      else args.classname) + '.cc'
+      else args.basename) + '.cc'
 
     namespace_start = "\nnamespace " + \
       args.namespace.replace("::", " { namespace ") + \
@@ -128,7 +136,9 @@ def generate(args):
       "\n} // namespace ".join(args.namespace.split("::")[::-1]) + "\n" \
       if args.namespace != None else ''
 
-    # Do substitutions on source template
+    #--------------------------------------------------------------------------#
+    # Do substitutions on stand-alone source template
+    #--------------------------------------------------------------------------#
     source_output = cc_stand_alone_template.substitute(
       AUTHOR=author,
       DATE=date,
@@ -148,7 +158,6 @@ def generate(args):
 # create_cc_files
 
 #------------------------------------------------------------------------------#
-# Formatting options for emacs and vim.
-#
+# Formatting options for vim.
 # vim: set tabstop=2 shiftwidth=2 expandtab :
 #------------------------------------------------------------------------------#
