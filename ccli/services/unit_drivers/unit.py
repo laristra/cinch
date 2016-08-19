@@ -16,20 +16,20 @@ unit_template = Template(
 
 TEST(${CASE}, ${NAME_A}) {
 
-${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
+${SPACES}// Test Logic: See 'Google Test Macros' section below.
 
 } // TEST
 
-# if 0 /* Remove guards to create more tests */
+# if 0 // Remove guards to create more tests
 TEST(${CASE}, ${NAME_B}) {
 
-${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
+${SPACES}// Test Logic: See 'Google Test Macros' section below.
 
 } // TEST
 
 TEST(${CASE}, ${NAME_C}) {
 
-${SPACES}/* Test Logic: See 'Google Test Macros' section below. */
+${SPACES}// Test Logic: See 'Google Test Macros' section below.
 
 } // TEST
 #endif // if 0

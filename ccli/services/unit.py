@@ -26,12 +26,16 @@ class CINCHUnitTest(Service):
             help='Service to generate unit-test templates.')
 
         self.parser.add_argument('case',
-            help='the name of the unit test case.' +
-                '   A unit case may contain several related tests.')
+            help='The name of the unit test case. ' +
+                'A unit case may contain several related tests.')
 
         self.parser.add_argument('name', nargs='?',
-            help='the name of the unit test.' +
-                '   A unit case may contain several related tests.')
+            help='The name of the unit test. ' +
+                'A unit case may contain several related tests.')
+
+        self.parser.add_argument('-s', '--simple', action="store_true",
+            help='Generate a unit test skeleton without cinch ' +
+                'documentation or extra tests.')
 
         self.parser.add_argument('-ts', '--tabstop', action="store",
             default=2, help='set the default tabstop width ')

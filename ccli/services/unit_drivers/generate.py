@@ -4,6 +4,7 @@
 #------------------------------------------------------------------------------#
 
 from unit import unit_template
+from simple import simple_unit_template
 from ccli.services.service_utils import *
 
 #------------------------------------------------------------------------------#
@@ -23,14 +24,22 @@ def generate(args):
     # Setup spaces to use for tabs
     spaces = tab_spaces(args)
 
-    unit_output = unit_template.substitute(
-        CASE=args.case,
-        NAME_A=name_a,
-        NAME_B=name_fill,
-        NAME_C=name_fill,
-        TABSTOP=args.tabstop,
-        SPACES=spaces
-    )
+    unit_output = \
+        unit_template.substitute(
+            CASE=args.case,
+            NAME_A=name_a,
+            NAME_B=name_fill,
+            NAME_C=name_fill,
+            TABSTOP=args.tabstop,
+            SPACES=spaces) \
+        if not args.simple else \
+        simple_unit_template.substitute(
+            CASE=args.case,
+            NAME_A=name_a,
+            NAME_B=name_fill,
+            NAME_C=name_fill,
+            TABSTOP=args.tabstop,
+            SPACES=spaces)
     
     # Output to file
     fd = open(filename, 'w')
