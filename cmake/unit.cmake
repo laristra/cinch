@@ -11,7 +11,7 @@ function(cinch_add_unit target)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args SOURCES INPUTS LIBRARIES POLICY THREADS)
+    set(multi_value_args SOURCES DEFINES INPUTS LIBRARIES POLICY THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -25,6 +25,16 @@ function(cinch_add_unit target)
     else()
         string(REPLACE ";" "|" unit_SOURCES "${unit_SOURCES}")
     endif(NOT unit_SOURCES)
+
+    #--------------------------------------------------------------------------#
+    # Check for defines.
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_DEFINES)
+        set(unit_DEFINES "None")
+    else()
+        string(REPLACE ";" "|" unit_DEFINES "${unit_DEFINES}")
+    endif(NOT unit_DEFINES)
 
     #--------------------------------------------------------------------------#
     # Check for files. 
@@ -98,7 +108,7 @@ function(cinch_add_unit target)
     #--------------------------------------------------------------------------#
 
     list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}:${PROJECT_NAME}")
+        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_DEFINES}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}:${PROJECT_NAME}")
     set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
         CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
 

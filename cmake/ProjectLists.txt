@@ -499,17 +499,20 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 0 unit_target_name)
         list(GET unit_target_list 1 unit_target_directory)
         list(GET unit_target_list 2 unit_target_sources)
-        list(GET unit_target_list 3 unit_target_inputs)
-        list(GET unit_target_list 4 unit_target_include_dirs)
-        list(GET unit_target_list 5 unit_target_libraries)
-        list(GET unit_target_list 6 unit_target_compile_defs)
-        list(GET unit_target_list 7 unit_target_execution_policy)
-        list(GET unit_target_list 8 unit_target_execution_threads)
-        list(GET unit_target_list 9 unit_project_name)
+        list(GET unit_target_list 3 unit_target_defines)
+        list(GET unit_target_list 4 unit_target_inputs)
+        list(GET unit_target_list 5 unit_target_include_dirs)
+        list(GET unit_target_list 6 unit_target_libraries)
+        list(GET unit_target_list 7 unit_target_compile_defs)
+        list(GET unit_target_list 8 unit_target_execution_policy)
+        list(GET unit_target_list 9 unit_target_execution_threads)
+        list(GET unit_target_list 10 unit_project_name)
 
         # Convert stored values back into lists
         string(REPLACE "|" ";" unit_target_sources
             "${unit_target_sources}")
+        string(REPLACE "|" ";" unit_target_defines
+            "${unit_target_defines}")
         string(REPLACE "|" ";" unit_target_libraries
             "${unit_target_libraries}")
         string(REPLACE "|" ";" unit_target_inputs
@@ -650,12 +653,28 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             endif(NOT "${unit_policy_flags}" STREQUAL "None")
 
             #------------------------------------------------------------------#
+            # Add compile definitions
+            #------------------------------------------------------------------#
+            
+            if(NOT "${unit_target_defines}" STREQUAL "None")
+                target_compile_definitions(${unit_target_name} PRIVATE
+                    ${unit_target_defines})
+            endif()
+
+            #------------------------------------------------------------------#
+            # Add output directory as inlcude
+            #------------------------------------------------------------------#
+
+            target_include_directories(${unit_target_name} PRIVATE
+                ${_OUTPUT_DIR})
+
+            #------------------------------------------------------------------#
             # Add user-specified include directories
             #------------------------------------------------------------------#
 
             if (NOT "${unit_target_include_dirs}" STREQUAL "None")
                 target_include_directories(${unit_target_name} PRIVATE
-                    ${unit_target_include_dirs} )
+                    ${unit_target_include_dirs})
             endif()
 
             #------------------------------------------------------------------#
