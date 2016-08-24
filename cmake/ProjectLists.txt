@@ -666,7 +666,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             #------------------------------------------------------------------#
 
             target_include_directories(${unit_target_name} PRIVATE
-                ${_OUTPUT_DIR})
+                ${_OUTPUT_DIR} ${unit_target_directory})
 
             #------------------------------------------------------------------#
             # Add user-specified include directories
