@@ -27,7 +27,8 @@
 set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
 
 if(CMAKE_VERSION VERSION_LESS CINCH_REQUIRED_CMAKE_VERSION)
-   message(FATAL_ERROR "Cinch needs at least cmake ${CINCH_REQUIRED_CMAKE_VERSION}")
+    message(FATAL_ERROR
+        "Cinch needs at least cmake ${CINCH_REQUIRED_CMAKE_VERSION}")
 endif()
 
 #------------------------------------------------------------------------------#
@@ -717,7 +718,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(NOT "${unit_target_inputs}" STREQUAL "None")
                 set(_OUTPUT_FILES)
                 foreach(input ${unit_target_inputs})
-                get_filename_component(_OUTPUT_NAME ${input} NAME)
+                    get_filename_component(_OUTPUT_NAME ${input} NAME)
                     add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
                         COMMAND ${CMAKE_COMMAND} -E copy 
                         ${unit_target_directory}/${input}
@@ -726,7 +727,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                         COMMENT "Copying ${input} for ${unit_target_name}")
                     list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}/${_OUTPUT_NAME})
                 endforeach()
-                add_custom_target(${unit_target_name}_inputs DEPENDS ${_OUTPUT_FILES})
+                add_custom_target(${unit_target_name}_inputs
+                    DEPENDS ${_OUTPUT_FILES})
                 add_dependencies(${unit_target_name} ${unit_target_name}_inputs)
             endif()
 
