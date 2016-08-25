@@ -148,11 +148,11 @@ cinch_example_header = Template(
 #ifndef example_utils_h
 #define example_utils_h
 
-/*!
- * \\file utils.h
- * \\authors ${AUTHOR}
- * \date Initial file creation: ${DATE}
- */
+///
+// \\file utils.h
+// \\authors ${AUTHOR}
+// \date Initial file creation: ${DATE}
+///
 
 namespace example {
 
@@ -175,11 +175,11 @@ cinch_example_source = Template(
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-/*!
- * \\file utils.cc
- * \\authors ${AUTHOR}
- * \date Initial file creation: ${DATE}
- */
+///
+// \\file utils.cc
+// \\authors ${AUTHOR}
+// \date Initial file creation: ${DATE}
+///
 
 #include <iostream>
 
