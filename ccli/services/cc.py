@@ -27,34 +27,39 @@ class CINCHSource(Service):
 
         # add command-line options
         self.parser.add_argument('-t', '--template', action="store_true",
-            help='create a templated class prototype')
+            help='Create a templated class prototype')
 
         self.parser.add_argument('-b', '--baseclass', action="store_true",
-            help='create a base class from which other classes can derive. ' +
+            help='Create a base class from which other classes can derive. ' +
                 'In addition to adding a protected section, this flag ' +
                 'causes the desctructor to be virtual.')
 
         self.parser.add_argument('-c', '--ccfile', action="store_true",
-            help='genefate a c++ source file (in addition to the header)')
+            help='Genefate a c++ source file (in addition to the header)')
 
         self.parser.add_argument('-s', '--source', action="store_true",
-            help='genefate a c++ source file (no header)')
+            help='Genefate a c++ source file (no header)')
 
         self.parser.add_argument('-n', '--namespace', action="store",
-            help='namespace name.' +
-                '  If this argument is provided,' +
-                ' the created class definitions will be wrapped in ' +
-                ' the given namespace.')
+            help='Namespace name.' +
+                ' If this argument is provided, the created class ' +
+                'definitions will be wrapped in the given namespace. ' +
+                'Namespace may be nested, e.g., ns1::ns2::ns3 ' +
+                '(These will be expanded to the proper syntax.)')
 
-        self.parser.add_argument('classname',
-            help='the name of the class.' +
-                '  This name will also be used for the output file' +
-                ' unless the -f option is specified explicitly.')
+        self.parser.add_argument('basename',
+            help='A name to use to create the class and output filenames.' +
+                ' This name will be used for the output file' +
+                ' unless the -f option is specified explicitly. Type or ' +
+                'template identifiers will be appended to create the ' +
+                'type name, e.g., my_type -> my_type_t or my_type__ ' +
+                '(Double underscore is used to identify unqualified ' +
+                'template types.)')
 
         self.parser.add_argument('-f', '--filename', action="store",
-            help='output file base name.' +
-                '  If this argument is not provided,' +
-                ' output file names will be created using the classname.')
+            help='The output file base name.' +
+                ' If this argument is not provided,' +
+                ' output file names will be created using the basename.')
 
         self.parser.add_argument('-ts', '--tabstop', action="store",
             default=2, help='set the default tabstop width ')
