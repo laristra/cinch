@@ -18,7 +18,9 @@ macro(check_for_c99_compiler _VAR)
         (CMAKE_C_COMPILER_ID STREQUAL "PGI" AND
             NOT ${CMAKE_C_COMPILER_VERSION} VERSION_LESS 14.3) OR
         (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
-            NOT ${CMAKE_C_COMPILER_VERSION} VERSION_LESS 3.1))
+            NOT ${CMAKE_C_COMPILER_VERSION} VERSION_LESS 3.1) OR
+        (CMAKE_CXX_COMPILER_ID STREQUAL "Cray" AND
+            NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 8.4))
 
         set(${_VAR} 1)
         message(STATUS "Checking for C99 compiler - available")
@@ -33,9 +35,9 @@ endmacro()
 
 # Sets the appropriate flag to enable C++11 support
 macro(enable_c99)
-    if(NOT CMAKE_C_COMPILER_ID STREQUAL "PGI")
+    if(NOT CMAKE_C_COMPILER_ID STREQUAL "PGI" AND NOT CMAKE_C_COMPILER_ID STREQUAL "Cray" )
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-    endif(NOT CMAKE_C_COMPILER_ID STREQUAL "PGI")
+    endif()
 endmacro()
 
 #~---------------------------------------------------------------------------~-#
