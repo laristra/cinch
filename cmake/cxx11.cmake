@@ -35,13 +35,12 @@ endmacro()
 
 # Sets the appropriate flag to enable C++11 support
 macro(enable_cxx11)
-    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "PGI" AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Cray")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    endif()
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Cray")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -h std=c++11")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif()
-      
 endmacro()
 
 #~---------------------------------------------------------------------------~-#
