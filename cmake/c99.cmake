@@ -33,7 +33,7 @@ macro(check_for_c99_compiler _VAR)
 
 endmacro()
 
-# Sets the appropriate flag to enable C++11 support
+# Sets the appropriate flag to enable C99 support
 macro(enable_c99)
     if(NOT CMAKE_C_COMPILER_ID STREQUAL "PGI" AND NOT CMAKE_C_COMPILER_ID STREQUAL "Cray" )
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
