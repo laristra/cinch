@@ -25,7 +25,8 @@ int main(int argc, char ** argv) {
   int result = RUN_ALL_TESTS();
 
   // Shutdown the MPI runtime
-  MPI_Finalize();
+  // GMS: HACK as we are racing with Legion/GASNet 
+  //MPI_Finalize();
 
   return result;
 
