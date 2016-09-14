@@ -18,7 +18,9 @@ macro(check_for_cxx11_compiler _VAR)
         (CMAKE_CXX_COMPILER_ID STREQUAL "PGI" AND
             NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 14.3) OR
         (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-            NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1))
+            NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1) OR
+        (CMAKE_CXX_COMPILER_ID STREQUAL "Cray" AND
+            NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 8.4))
 
         set(${_VAR} 1)
         message(STATUS "Checking for C++11 compiler - available")
@@ -33,9 +35,12 @@ endmacro()
 
 # Sets the appropriate flag to enable C++11 support
 macro(enable_cxx11)
-    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Cray")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -h std=c++11")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+    else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    endif(NOT CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+    endif()
 endmacro()
 
 #~---------------------------------------------------------------------------~-#

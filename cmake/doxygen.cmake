@@ -96,7 +96,7 @@ function(cinch_add_doxygen)
         # Add the doxygen target
         #----------------------------------------------------------------------#
 
-        add_custom_target(${CINCH_CONFIG_INFOTAG}doxygen ALL
+        add_custom_target(${CINCH_CONFIG_INFOTAG}doxygen
             ${DOXYGEN} ${_directory}/.doxygen/doxygen.conf
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in)
 
