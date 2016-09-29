@@ -321,6 +321,18 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 EXEC ${MPIEXEC}
                 EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
 
+                cinch_add_unit_execution_policy(MPI
+                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
+                FLAGS ${LEGION_CXX_FLAGS}
+                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                INCLUDES ${LEGION_INCLUDE_DIRS}
+                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                LIBRARIES ${LEGION_LIBRARIES} ${LEGION_LIB_FLAGS}
+                    ${MPI_${MPI_LANGUAGE}_LIBRARIES}
+                EXEC ${MPIEXEC}
+                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
+
+
         else()
             cinch_add_unit_execution_policy(SERIAL
                 ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
