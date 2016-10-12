@@ -8,14 +8,14 @@
 #------------------------------------------------------------------------------#
 
 set(GASNET_ROOT "" CACHE PATH "Root directory of GASNet installation")
-set(GASNET_CONDUIT FALSE CACHE STRING "GASNet conduit to use")
-set(GASNET_MODEL FALSE CACHE STRING "GASNet model to use")
+set(GASNET_CONDUIT "udp" CACHE STRING "GASNet conduit to use")
+set(GASNET_MODEL "seq" CACHE STRING "GASNet model to use")
 
 #------------------------------------------------------------------------------#
 # Find the header file
 #------------------------------------------------------------------------------#
 
-find_path(GASNET_INCLUDE_DIR gasnet.h
+find_path(GASNET_INCLUDE_DIRS gasnet.h
     HINTS ENV GASNET_ROOT
     PATHS ${GASNET_ROOT}
     PATH_SUFFIXES include)
@@ -124,13 +124,19 @@ else()
 
 endif(NOT GASNET_CONDUIT)
 
+if(GASNET_LIBRARY_FOUND)
+    set(GASNET_LIBRARIES ${GASNET_LIBRARY_FOUND})
+endif()
+
 #------------------------------------------------------------------------------#
 # Set standard args stuff
 #------------------------------------------------------------------------------#
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GASNET
-    REQUIRED_VARS GASNET_LIBRARY_FOUND GASNET_INCLUDE_DIR)
+    REQUIRED_VARS GASNET_INCLUDE_DIRS GASNET_LIBRARIES)
+
+mark_as_advanced(GASNET_INCLUDE_DIRS)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

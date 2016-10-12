@@ -3,14 +3,12 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-
 #------------------------------------------------------------------------------#
 # Try pkg-config
 #------------------------------------------------------------------------------#
 
-find_package(PkgConfig)
-
-pkg_check_modules(PC_LEGION legion)
+#find_package(PkgConfig)
+#pkg_check_modules(PC_LEGION legion)
 
 #------------------------------------------------------------------------------#
 # Options
@@ -22,10 +20,10 @@ set(LEGION_ROOT "" CACHE PATH "Root directory of Legion installation")
 # Find the header file
 #------------------------------------------------------------------------------#
 
-find_path(LEGION_INCLUDE_DIRS legion.h
+find_path(LEGION_INCLUDE_DIRS legion/legion.h
     HINTS ENV LEGION_ROOT
     PATHS ${LEGION_ROOT}
-    PATH_SUFFIXES include/legion)
+    PATH_SUFFIXES include)
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -40,13 +38,20 @@ find_library(REALM_LIBRARY
     PATHS ${LEGION_ROOT}
     PATH_SUFFIXES lib lib64)
 
+if(LEGION_LIBRARY AND REALM_LIBRARY)
+    list(APPEND LEGION_LIBRARIES ${LEGION_LIBRARY} ${REALM_LIBRARY})
+endif()
+
 #------------------------------------------------------------------------------#
 # Set standard args stuff
 #------------------------------------------------------------------------------#
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(LEGION REQUIRED_VARS LEGION_INCLUDE_DIRS)
+find_package_handle_standard_args(LEGION
+    REQUIRED_VARS
+        LEGION_INCLUDE_DIRS
+        LEGION_LIBRARIES)
 
 mark_as_advanced(LEGION_INCLUDE_DIRS)
 
