@@ -20,12 +20,19 @@ set(LEGION_ROOT "" CACHE PATH "Root directory of Legion installation")
 # Find the header file
 #------------------------------------------------------------------------------#
 
-find_path(LEGION_INCLUDE_DIRS legion/legion.h
+find_path(LEGION_INCLUDE_DIR legion/legion.h
     HINTS ENV LEGION_ROOT
     PATHS ${LEGION_ROOT}
     PATH_SUFFIXES include)
 
+set(LEGION_INCLUDE_DIRS
+    ${LEGION_INCLUDE_DIR}
+    ${LEGION_INCLUDE_DIR}/legion
+    ${LEGION_INCLUDE_DIR}/realm
+    ${LEGION_INCLUDE_DIR}/mappers)
+
 #------------------------------------------------------------------------------#
+# Find the legion and realm libraries
 #------------------------------------------------------------------------------#
 
 find_library(LEGION_LIBRARY
@@ -53,7 +60,7 @@ find_package_handle_standard_args(LEGION
         LEGION_INCLUDE_DIRS
         LEGION_LIBRARIES)
 
-mark_as_advanced(LEGION_INCLUDE_DIRS)
+mark_as_advanced(LEGION_INCLUDE_DIR LEGION_INCLUDE_DIRS)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
