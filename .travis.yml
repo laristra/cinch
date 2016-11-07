@@ -12,6 +12,7 @@ addons:
       - cmake
       - cmake-data
       - libopenmpi-dev
+      - libcereal-dev
       - openmpi-bin
       - gcc-4.9
       - g++-4.9
