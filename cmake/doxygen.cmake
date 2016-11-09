@@ -104,8 +104,8 @@ function(cinch_add_doxygen)
         # Add install target
         #----------------------------------------------------------------------#
 
-        install(DIRECTORY ${_directory}/doxygen
-            DESTINATION share/${_install})
+	add_custom_target(install-doxygen COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${_directory}/doxygen $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
 
     endif(ENABLE_DOXYGEN)
 
