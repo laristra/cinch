@@ -196,6 +196,9 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
     endif()
     option(BUILD_SHARED_LIBS "Build shared libs" ON)
+    if (NOT DEFINED LIBDIR)
+        set(LIBDIR "lib")
+    endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
     # Add support for ctest, GTest, and pFUnit
@@ -476,7 +479,7 @@ if(CINCH_LIBRARY_TARGETS)
         #----------------------------------------------------------------------#
 
         if(NOT "${${library_target_name}_SOURCES}" STREQUAL "")
-             install(TARGETS ${library_target_name} DESTINATION lib)
+             install(TARGETS ${library_target_name} DESTINATION ${LIBDIR})
         endif()
 
         if(${library_target_name}_PUBLIC_HEADERS)
