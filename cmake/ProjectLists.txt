@@ -197,7 +197,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     endif()
     option(BUILD_SHARED_LIBS "Build shared libs" ON)
     if (NOT DEFINED LIBDIR)
-        set(LIBDIR "lib")
+        include(GNUInstallDirs)
+        set(LIBDIR "${CMAKE_INSTALL_LIBDIR}")
     endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
