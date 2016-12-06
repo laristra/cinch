@@ -24,6 +24,8 @@ function(cinch_add_unit_execution_policy policy runtime)
     else()
         # Quotes are important here so that list is interpreted as a string
         string(REPLACE ";" "|" unit_FLAGS "${unit_FLAGS}")
+        # Replace leading spaces to avoid overquoting
+        string(STRIP "${unit_FLAGS}" unit_FLAGS)
     endif(NOT unit_FLAGS)
 
     #--------------------------------------------------------------------------#
