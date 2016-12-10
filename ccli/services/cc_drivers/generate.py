@@ -155,7 +155,7 @@ def generate(args):
     fd.write(source_output[1:-1])
     fd.close()
   # if
-# create_cc_files
+# generate
 
 #------------------------------------------------------------------------------#
 # Formatting options for vim.
