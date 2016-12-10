@@ -6,8 +6,9 @@
 #ifndef cinchtest_h
 #define cinchtest_h
 
-#include "output.h"
+#include "../reporting/cinchreporting.h"
 #include "listener.h"
+#include "output.h"
 
 // Provide access to the output stream to allow user to capture output
 #define CINCH_CAPTURE() \

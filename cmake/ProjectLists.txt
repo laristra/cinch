@@ -202,6 +202,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
+    # Add cinch reporting
+    #--------------------------------------------------------------------------#
+
+    include_directories(cinch/reporting)
+    option(ENABLE_COLOR_OUTPUT "Enable colorized cinch reporting" ON)
+    if(ENABLE_COLOR_OUTPUT)
+        add_definitions(-DHAVE_COLOR_OUTPUT)
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Add support for ctest, GTest, and pFUnit
     #--------------------------------------------------------------------------#
 
