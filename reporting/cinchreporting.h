@@ -46,8 +46,8 @@ rstrip(
 // This function prints a colorized message. Colorization is disabled
 // if HAVE_COLOR_OUTPUT is not defined.
 //
-// \param message A std::string containing the message to be printed to
-//                standard output.
+// \param ss A std::stringstream containing the message to be printed to
+//           standard output.
 ///
 template<typename P>
 void
@@ -69,8 +69,8 @@ info_impl(
 //
 // \tparam P The predicate function type.
 //
-// \param message A character string containing the message to be printed to
-//                standard output.
+// \param ss A std::stringstream containing the message to be printed to
+//           standard output.
 // \param file A character string containing the current file (__FILE__).
 // \param line An integer string containing the current line (__LINE__).
 // \param predicate A predicate function to control whether or not output
@@ -79,7 +79,7 @@ info_impl(
 template<typename P>
 void
 warn_impl(
-  const char * message,
+  std::string message,
   const char * file,
   int line,
   P && predicate
@@ -112,8 +112,8 @@ warn_impl(
 //
 // \tparam P The predicate function type.
 //
-// \param message A character string containing the message to be printed to
-//                standard output.
+// \param ss A std::stringstream containing the message to be printed to
+//           standard output.
 // \param file A character string containing the current file (__FILE__).
 // \param line An integer string containing the current line (__LINE__).
 // \param predicate A predicate function to control whether or not output
@@ -122,7 +122,7 @@ warn_impl(
 template<typename P>
 void
 error_impl(
-  const char * message,
+  std::string message,
   const char * file,
   int line,
   P && predicate
@@ -159,11 +159,15 @@ bool noop_bool() { return B; }
 
 /// Print an information message.
 #define cinch_info(message)                                                    \
-  cinch::info_impl((message), cinch::noop_bool<true>)
+  std::stringstream ss;                                                        \
+  ss << message;                                                               \
+  cinch::info_impl(ss.str(), cinch::noop_bool<true>)
 
 /// Print a warning message.
 #define cinch_warn(message)                                                    \
-  cinch::warn_impl((message), __FILE__, __LINE__, cinch::noop_bool<true>)
+  std::stringstream ss;                                                        \
+  ss << message;                                                               \
+  cinch::warn_impl(ss.str(), __FILE__, __LINE__, cinch::noop_bool<true>)
 
 #else
 
@@ -175,7 +179,9 @@ bool noop_bool() { return B; }
 
 /// Print an error message and abort.
 #define cinch_error(message)                                                   \
-  cinch::error_impl((message), __FILE__, __LINE__, cinch::noop_bool<true>)
+  std::stringstream ss;                                                        \
+  ss << message;                                                               \
+  cinch::error_impl(ss.str(), __FILE__, __LINE__, cinch::noop_bool<true>)
 
 /// Assert a test case and abort with an error message if the assertion fails.
 #define cinch_assert(test, message)                                            \
