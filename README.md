@@ -326,8 +326,8 @@ Running this code with no arguments will produce the following output
 
 In addition to this simple macro interface, cinch also provides function
 calls that can be customized to control output, e.g., to a single rank
-or task id. For example, to print output only on rank 0 of an MPI
-program, one could write something like this:
+or task id. To print output only on rank 0 of an MPI program, one could
+write something like this:
 
 ```cpp
 // Define a simple predicate function to select a particular rank
