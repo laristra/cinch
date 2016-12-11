@@ -234,11 +234,15 @@ directory tree within which to search for markdown documentation files.
 <a name="doxygen-documentation"></a>
 
 ***CMake Option:*** **ENABLE\_DOXYGEN (default OFF)**
+***CMake Option:*** **ENABLE\_DOXYGEN\_WARN (default OFF)**
 
 Cinch supports interface documentation using Doxygen.  The doxygen
 configuration file should be called 'doxygen.conf.in' and should reside
 in the 'doc' subdirectory.  For documentation on using Doxygen, please
 take a look at the [Doxygen Homepage](http://www.doxygen.org).
+
+If ENABLE\_DOXYGEN\_WARN is set to ON, normal Doxygen diagnostics and
+warnings will not be suppressed.
 
 ## Unit Tests
 
@@ -256,6 +260,107 @@ test source code and adding a target using the
 Cinch will check for a local GoogleTest installation on the system during
 the Cmake configuration step.  If GoogleTest is not found, it will be
 built by Cinch (GoogleTest source code is included with Cinch).
+
+## Reporting
+
+***CMake Option:*** **ENABLE\_COLOR\_OUTPUT (default ON)**
+
+Cinch has support for information, warning, and error reporting. If
+ENABLE\_COLOR\_OUTPUT is set to ON, the output will be colorized.
+
+* **cinch\_info** Information reporting. This macro is useful for
+  outputting information to standard out. It is disabled if NDEGBUG is
+  not defined.
+
+* **cinch\_warn** Warning output. This macro is useful for
+  outputting non-fatal runtime warnings to standard out. It is disabled
+  if NDEGBUG is not defined.
+
+* **cinch\_error** Error output and abort. This macro is useful for
+  outputting fatal runtime messages to standard error. After writing the
+  message, this macro will call std::abort.
+
+* **cinch\_assert** Execute a runtime assertion and call *cinch\_error*
+  if the assertion fails, thus printing an error message and exiting
+  with abort.
+
+Here is an example of each of these macros:
+
+```cpp
+#include <cinchreporting.h>
+
+int main(int argc, char ** argv) {
+
+  // Print information to standard out
+  cinch_info("Hello World! We got " << argc-1 << " arguments");
+
+  // Print a warning to standard out
+  if(argc < 3) {
+    cinch_warn("Only got " << argc-1 << " arguments");
+  } // if
+
+  // Print an error message to standard error and exit with abort
+  if(argc < 2) {
+    cinch_error("This program requires at least 1 argument");
+  } // if
+
+  // Use an assertion for the above error case
+  cinch_assert(argc >= 1, "This program requires at least 1 argument")
+
+  return 0;
+} // main
+```
+
+Running this code with no arguments will produce the following output
+(markdown is unable to show the colorization):
+
+    % ./example
+    % Info Hello World! We got 0 arguments
+    % !Warning!
+    %      Message: Only got 0 arguments
+    %      [line 10 example.cc]
+    % !!!RUNTIME ERROR: executing std::abort!!!
+    %      Message: This program requires at least 1 argument
+    %      [line 15 example.cc]
+    % Aborted (core dumped)
+
+In addition to this simple macro interface, cinch also provides function
+calls that can be customized to control output, e.g., to a single rank
+or task id. For example, to print output only on rank 0 of an MPI
+program, one could write something like this:
+
+```cpp
+// Define a simple predicate function to select a particular rank
+template<size_t R>
+bool is_part() {
+  int part;
+  MPI_Comm_rank(MPI_COMM_WORLD, &part);
+  return part == R;
+} // is_part
+
+// Define a macro using the predicate to control output
+#define info_one(message, part)             \
+  std::stringstream ss;                     \
+  ss << message;                            \
+  cinch::info_impl(ss.str(), is_part<part>)
+
+int main(int argc, char ** argv) {
+
+  // Initialize the MPI runtime
+  MPI_Init(&argc, &argv);
+
+  // Call the custom macro with a message and rank
+  info_one("This message will only be printed by rank 0", 0);
+
+  // Finalize the MPI runtime
+  MPI_Finalize();
+
+  return 0;
+} // main
+```
+
+It is left to the user to define suitable predicate functions, as it is
+beyond the scope of cinch to handle every possible runtime requirement.
 
 ## Versioning
 
@@ -296,4 +401,4 @@ Additionally, redistribution and use in source and binary forms, with or without
 
 THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-<!-- vim: set tabstop=4 shiftwidth=4 expandtab : -->
+<!-- vim: set tabstop=2 shiftwidth=2 expandtab fo=cqt tw=72 : -->
