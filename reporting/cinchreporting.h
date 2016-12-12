@@ -41,133 +41,72 @@ rstrip(
 } // rstrip
 
 ///
-// Implementation for information output.
+// No-op function to return a boolean value.
 //
-// This function prints a colorized message. Colorization is disabled
-// if HAVE_COLOR_OUTPUT is not defined.
-//
-// \param ss A std::stringstream containing the message to be printed to
-//           standard output.
+// \tparam B The boolean value to return, i.e., true or false.
 ///
-template<typename P>
-void
-info_impl(
-  std::string message,
-  P && predicate
-)
+template<
+  bool B
+>
+bool
+noop_bool()
 {
-  if(predicate()) {
-    std::cout << OUTPUT_GREEN("Info ") << OUTPUT_LTGRAY(message) << std::endl;
-  } // if
-} // info_impl
+  return B;
+} // noop_bool
 
 ///
-// Implementation for warning output.
-//
-// This function prints a colorized warning. Colorization is disabled
-// if HAVE_COLOR_OUTPUT is not defined.
-//
-// \tparam P The predicate function type.
-//
-// \param ss A std::stringstream containing the message to be printed to
-//           standard output.
-// \param file A character string containing the current file (__FILE__).
-// \param line An integer string containing the current line (__LINE__).
-// \param predicate A predicate function to control whether or not output
-//                  is actually produced.
+// Wrapper to execute std::abort as a boolean function.
 ///
-template<typename P>
-void
-warn_impl(
-  std::string message,
-  const char * file,
-  int line,
-  P && predicate
-)
+bool
+abort_bool()
 {
-  if(predicate()) {
-    std::stringstream output;
-
-    // Start error output
-    output << OUTPUT_YELLOW("!Warning!") <<
-      std::endl;
-    output << OUTPUT_YELLOW("\tMessage: ") <<
-      OUTPUT_YELLOW(message) << std::endl;
-
-    // File and line information
-    output << OUTPUT_LTGRAY("\t[") <<
-      OUTPUT_LTGRAY("line ") << OUTPUT_LTGRAY(line) << " " <<
-      OUTPUT_LTGRAY(file) << OUTPUT_LTGRAY("] ") << std::endl;
-
-    // Write the output to std::cerr
-    std::cerr << output.str();
-  } // if
-} // warn_impl
-
-///
-// Implementation for error output.
-//
-// This function prints a colorized warning and call std::abort.
-// Colorization is disabled if HAVE_COLOR_OUTPUT is not defined.
-//
-// \tparam P The predicate function type.
-//
-// \param ss A std::stringstream containing the message to be printed to
-//           standard output.
-// \param file A character string containing the current file (__FILE__).
-// \param line An integer string containing the current line (__LINE__).
-// \param predicate A predicate function to control whether or not output
-//                  is actually produced.
-///
-template<typename P>
-void
-error_impl(
-  std::string message,
-  const char * file,
-  int line,
-  P && predicate
-)
-{
-  if(predicate()) {
-    std::stringstream output;
-
-    // Start error output
-    output << OUTPUT_RED("!!!RUNTIME ERROR: executing std::abort!!!") <<
-      std::endl;
-    output << OUTPUT_RED("\tMessage: ") <<
-      OUTPUT_LTRED(message) << std::endl;
-
-    // File and line information
-    output << OUTPUT_RED("\t[") <<
-      OUTPUT_LTGRAY("line ") << OUTPUT_LTGRAY(line) << " " <<
-      OUTPUT_LTRED(file) << OUTPUT_RED("] ") << std::endl;
-
-    // Write the output to std::cerr
-    std::cerr << output.str();
-  } // if
-
-  // Abort!
   std::abort();
-} // error_impl
-
-template<bool B>
-bool noop_bool() { return B; }
+  return true;
+} // abort_bool
 
 } // namespace cinch
+
+//----------------------------------------------------------------------------//
+// Macro definitions.
+//----------------------------------------------------------------------------//
+
+/// Print an information message if the predicate evaluates to true.
+#define cinch_info_impl(message, predicate)                                    \
+  predicate() &&                                                               \
+    std::cout << OUTPUT_GREEN("Info ") << OUTPUT_LTGRAY(message) << std::endl
+
+/// Print a warning message if the predicate evaluates to true.
+#define cinch_warn_impl(message, predicate)                                    \
+  predicate() &&                                                               \
+    std::cout << OUTPUT_BROWN("!Warning!") << std::endl <<                     \
+    OUTPUT_BROWN("  Message: ") << OUTPUT_YELLOW(message) << std::endl <<      \
+    OUTPUT_LTGRAY("  [") <<                                                    \
+      OUTPUT_LTGRAY("line ") << OUTPUT_LTGRAY(__LINE__) << " " <<              \
+      OUTPUT_LTGRAY(__FILE__) <<                                               \
+    OUTPUT_LTGRAY("] ") << std::endl
+
+/// Print an error message if the predicate evaluates to true and abort.
+/// Regardless of the predicate, std::abort() is executed.
+#define cinch_error_impl(message, predicate)                                   \
+  predicate() &&                                                               \
+    std::cout << OUTPUT_RED("!!!ERROR!!!") << std::endl <<                     \
+    OUTPUT_RED("  Message: ") << OUTPUT_LTRED(message) << std::endl <<         \
+    OUTPUT_RED("  [") <<                                                       \
+      OUTPUT_LTGRAY("line ") << OUTPUT_LTGRAY(__LINE__) << " " <<              \
+      OUTPUT_LTGRAY(__FILE__) <<                                               \
+    OUTPUT_RED("] ") << std::endl <<                                           \
+    OUTPUT_RED("Executing std::abort()...") << std::endl &&                    \
+    cinch::abort_bool()
 
 #ifndef NDEBUG
 
 /// Print an information message.
 #define cinch_info(message)                                                    \
-  std::stringstream ss;                                                        \
-  ss << message;                                                               \
-  cinch::info_impl(ss.str(), cinch::noop_bool<true>)
+  cinch_info_impl(message, cinch::noop_bool<true>)
 
 /// Print a warning message.
 #define cinch_warn(message)                                                    \
-  std::stringstream ss;                                                        \
-  ss << message;                                                               \
-  cinch::warn_impl(ss.str(), __FILE__, __LINE__, cinch::noop_bool<true>)
+  cinch_warn_impl(message, cinch::noop_bool<true>)
 
 #else
 
@@ -179,15 +118,11 @@ bool noop_bool() { return B; }
 
 /// Print an error message and abort.
 #define cinch_error(message)                                                   \
-  std::stringstream ss;                                                        \
-  ss << message;                                                               \
-  cinch::error_impl(ss.str(), __FILE__, __LINE__, cinch::noop_bool<true>)
+  cinch_error_impl(message, cinch::noop_bool<true>)
 
 /// Assert a test case and abort with an error message if the assertion fails.
 #define cinch_assert(test, message)                                            \
-  if(!(test)) {                                                                \
-    cinch_error(message);                                                      \
-  } // if
+  !(test) && cinch_error(message)
 
 #endif // cinch_cinchreporting_h
 
