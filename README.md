@@ -319,12 +319,13 @@ Running this code with no arguments will produce the following output
     % !Warning!
     %      Message: Only got 0 arguments
     %      [line 10 example.cc]
-    % !!!RUNTIME ERROR: executing std::abort!!!
+    % !!!ERROR!!!
     %      Message: This program requires at least 1 argument
     %      [line 15 example.cc]
+    % Executing std::abort()...
     % Aborted (core dumped)
 
-In addition to this simple macro interface, cinch also provides function
+In addition to this simple macro interface, cinch also provides macro
 calls that can be customized to control output, e.g., to a single rank
 or task id. To print output only on rank 0 of an MPI program, one could
 write something like this:
@@ -339,10 +340,8 @@ bool is_part() {
 } // is_part
 
 // Define a macro using the predicate to control output
-#define info_one(message, part)             \
-  std::stringstream ss;                     \
-  ss << message;                            \
-  cinch::info_impl(ss.str(), is_part<part>)
+#define info_one(message, part)           \
+  cinch_info_impl(message, is_part<part>)
 
 int main(int argc, char ** argv) {
 
