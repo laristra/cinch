@@ -78,10 +78,10 @@ abort_bool()
 
 /// Print the contents of a container, using the user-provided predicate
 /// function to determine which elements should be otuput.
-#define cinch_loop_info_impl(header, container, predicate)                     \
-  std::cout << OUTPUT_GREEN("Info ") << OUTPUT_LTGRAY(header) << std::endl;    \
+#define cinch_container_info_impl(banner, container, delimiter, predicate)     \
+  std::cout << OUTPUT_GREEN("Info ") << OUTPUT_LTGRAY(banner) << std::endl;    \
   for(auto c: container) {                                                     \
-    predicate(c) && std::cout << OUTPUT_LTGRAY(c) << " ";                      \
+    predicate(c) && std::cout << OUTPUT_LTGRAY(c) << delimiter;                \
   }                                                                            \
   std::cout << std::endl;
 
@@ -115,8 +115,9 @@ abort_bool()
   cinch_info_impl(message, cinch::noop_bool<true>)
 
 /// Print the contents of a container.
-#define cinch_loop_info(header, container)                                     \
-  cinch_loop_info_impl(header, container, cinch::noop_bool<true>)
+#define cinch_container_info(banner, container, delimiter)                     \
+  cinch_container_info_impl(banner, container, delimiter,                      \
+    cinch::noop_bool<true>)
 
 /// Print a warning message.
 #define cinch_warn(message)                                                    \
