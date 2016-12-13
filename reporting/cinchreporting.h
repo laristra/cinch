@@ -31,6 +31,7 @@ namespace cinch {
 template<
   char C
 >
+inline
 std::string
 rstrip(
   const char * str
@@ -49,6 +50,7 @@ template<
   bool B,
   typename C = size_t
 >
+inline
 bool
 noop_bool(C c = 0)
 {
@@ -58,6 +60,7 @@ noop_bool(C c = 0)
 ///
 // Wrapper to execute std::abort as a boolean function.
 ///
+inline
 bool
 abort_bool()
 {
