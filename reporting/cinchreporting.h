@@ -57,6 +57,7 @@ noop_bool()
 ///
 // Wrapper to execute std::abort as a boolean function.
 ///
+inline
 bool
 abort_bool()
 {
