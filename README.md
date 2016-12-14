@@ -272,6 +272,10 @@ ENABLE\_COLOR\_OUTPUT is set to ON, the output will be colorized.
   outputting information to standard out. It is disabled if NDEGBUG is
   not defined.
 
+* **cinch\_loop\_info** Information reporting. This macro is useful for
+  outputting information from standard containers. It is disabled if
+  NDEGBUG is not defined.
+
 * **cinch\_warn** Warning output. This macro is useful for
   outputting non-fatal runtime warnings to standard out. It is disabled
   if NDEGBUG is not defined.

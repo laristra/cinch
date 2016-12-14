@@ -31,6 +31,7 @@ namespace cinch {
 template<
   char C
 >
+inline
 std::string
 rstrip(
   const char * str
@@ -46,10 +47,12 @@ rstrip(
 // \tparam B The boolean value to return, i.e., true or false.
 ///
 template<
-  bool B
+  bool B,
+  typename C = size_t
 >
+inline
 bool
-noop_bool()
+noop_bool(C c = 0)
 {
   return B;
 } // noop_bool
@@ -75,6 +78,15 @@ abort_bool()
 #define cinch_info_impl(message, predicate)                                    \
   predicate() &&                                                               \
     std::cout << OUTPUT_GREEN("Info ") << OUTPUT_LTGRAY(message) << std::endl
+
+/// Print the contents of a container, using the user-provided predicate
+/// function to determine which elements should be otuput.
+#define cinch_container_info_impl(banner, container, delimiter, predicate)     \
+  std::cout << OUTPUT_GREEN("Info ") << OUTPUT_LTGRAY(banner) << std::endl;    \
+  for(auto c: container) {                                                     \
+    predicate(c) && std::cout << OUTPUT_LTGRAY(c) << delimiter;                \
+  }                                                                            \
+  std::cout << std::endl;
 
 /// Print a warning message if the predicate evaluates to true.
 #define cinch_warn_impl(message, predicate)                                    \
@@ -104,6 +116,11 @@ abort_bool()
 /// Print an information message.
 #define cinch_info(message)                                                    \
   cinch_info_impl(message, cinch::noop_bool<true>)
+
+/// Print the contents of a container.
+#define cinch_container_info(banner, container, delimiter)                     \
+  cinch_container_info_impl(banner, container, delimiter,                      \
+    cinch::noop_bool<true>)
 
 /// Print a warning message.
 #define cinch_warn(message)                                                    \
