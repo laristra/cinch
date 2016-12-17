@@ -202,13 +202,30 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
-    # Add cinch reporting
+    # Add clog reporting
     #--------------------------------------------------------------------------#
 
     include_directories(cinch/reporting)
-    option(ENABLE_COLOR_OUTPUT "Enable colorized cinch reporting" ON)
-    if(ENABLE_COLOR_OUTPUT)
-        add_definitions(-DHAVE_COLOR_OUTPUT)
+
+    # Add an option to set the strip level
+    set(CLOG_STRIP_LEVEL CACHE STRING "Set the clog strip level")
+    if(NOT CLOG_STRIP_LEVEL)
+        set(CLOG_STRIP_LEVEL "0")
+    endif()
+    add_definitions(-DCLOG_STRIP_LEVEL=${CLOG_STRIP_LEVEL})
+
+    # Allow color output
+    option(CLOG_COLOR_OUTPUT "Enable colorized clog reporting" ON)
+    if(CLOG_COLOR_OUTPUT)
+        add_definitions(-DCLOG_COLOR_OUTPUT)
+    endif()
+
+    # MPI
+    if(MPI_${MPI_LANGUAGE}_FOUND)
+        option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
+        if(CLOG_ENABLE_MPI)
+            add_definitions(-DCLOG_ENABLE_MPI)
+        endif()
     endif()
 
     #--------------------------------------------------------------------------#

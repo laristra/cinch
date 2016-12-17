@@ -50,11 +50,11 @@
 #endif
 
 //----------------------------------------------------------------------------//
-// Set color output macros depending on whether or not HAVE_COLOR_OUTPUT
+// Set color output macros depending on whether or not CLOG_COLOR_OUTPUT
 // is defined.
 //----------------------------------------------------------------------------//
 
-#ifndef HAVE_COLOR_OUTPUT
+#ifndef CLOG_COLOR_OUTPUT
 
 #define COLOR_BLACK ""
 #define COLOR_DKGRAY ""
@@ -128,7 +128,7 @@
 #define OUTPUT_LTGRAY(s) COLOR_LTGRAY << s << COLOR_PLAIN
 #define OUTPUT_WHITE(s) COLOR_WHITE << s << COLOR_PLAIN
 
-#endif // HAVE_COLOR_OUTPUT
+#endif // CLOG_COLOR_OUTPUT
 
 namespace cinch {
 
@@ -136,16 +136,28 @@ namespace cinch {
 // Auxilliary types.
 //----------------------------------------------------------------------------//
 
+///
+// Stream buffer type to allow output to multiple targets
+// a la the tee function.
+///
 class tee_buffer_t
   : public std::streambuf
 {
 public:
 
+  ///
+  // Buffer data type to hold state and actual low-level
+  // stream buffer pointer.
+  ///
   struct buffer_data_t {
     bool enabled;
     std::streambuf * buffer;
   }; // struct buffer_data_t
 
+  ///
+  // Add a buffer to which output should be written. This also enables
+  // the buffer, i.e., output will be written to it.
+  ///
   void
   add_buffer(
     std::string key,
@@ -156,6 +168,10 @@ public:
     buffers_[key].buffer = sb;
   } // add_buffer
 
+  ///
+  // Enable a buffer so that output is written to it. This is mainly
+  // for buffers that have been disabled and need to be re-enabled.
+  ///
   bool
   enable_buffer(
     std::string key
@@ -164,6 +180,9 @@ public:
     buffers_[key].enabled = true;
   } // enable_buffer
 
+  ///
+  // Disable a buffer so that output is not written to it.
+  ///
   bool
   disable_buffer(
     std::string key
@@ -174,6 +193,14 @@ public:
 
 protected:
 
+  ///
+  // Override the overflow method. This streambuf has no buffer, so overflow
+  // happens for every character that is written to the string, allowing
+  // us to write to multiple output streams.
+  //
+  // \param c The character to write. This is passed in as an int so that
+  //          non-characters like EOF can be written to the stream.
+  ///
   virtual
   int
   overflow(
@@ -197,6 +224,9 @@ protected:
     } // if
   } // overflow
 
+  ///
+  // Override the sync method so that we sync all of the output buffers.
+  ///
   virtual
   int
   sync()
@@ -218,6 +248,9 @@ private:
 
 }; // class tee_buffer_t
 
+///
+// A stream class that writes to multiple output buffers.
+///
 struct tee_stream_t
   : public std::ostream
 {
@@ -237,6 +270,9 @@ struct tee_stream_t
     return *this;
   } // operator *
 
+  ///
+  // Add a new buffer to the output.
+  ///
   void
   add_buffer(
     std::string key,
@@ -300,6 +336,9 @@ public:
     return *stream_;
   } // stream
 
+  ///
+  // Return a null stream to disable output.
+  ///
   std::ostream &
   null_stream()
   {
@@ -307,7 +346,8 @@ public:
   } // null_stream
 
   ///
-  // FIXME
+  // Return the tee stream to allow the user to set configuration options.
+  // FIXME: Need a better interface for this...
   ///
   tee_stream_t &
   config_stream()
@@ -337,13 +377,12 @@ private:
 // Base type for log messages.
 //----------------------------------------------------------------------------//
 
-
 std::string
 demangle(
   const char * name
 )
 {
-#if defined __GNUG__
+#if defined __GNUC__
   int status = -4;
 
   std::unique_ptr<char, void(*)(void*)> res {
@@ -355,12 +394,22 @@ demangle(
 #endif
 } // demangle
 
+///
+// Function always returning true. Used for defaults.
+///
+inline
+bool
+true_state()
+{
+  return true;
+} // output_bool
 
 ///
 // \struct log_message_t cinchlog.h
 // \brief log_message_t provides a base class for implementing
 //        formatted logging utilities.
 ///
+template<typename P>
 struct log_message_t
 {
   ///
@@ -370,30 +419,35 @@ struct log_message_t
   // classes wishing to force exit should set this to true in their
   // override of the stream method.
   //
+  // \tparam P Predicate funtion type.
+  //
   // \param file The current file (where the log message was created).
   //             In general, this will always use the __FILE__ parameter
   //             from the calling macro.
   // \param line The current line (where the log message was called).
   //             In general, this will always use the __LINE__ parameter
   //             from the calling macro.
+  // \param predicate The predicate function to determine whether or not
+  //                  the calling runtime should produce output.
   ///
   log_message_t(
     const char * file,
-    int line
+    int line,
+    P && predicate
   )
   :
-    file_(file), line_(line), fatal_(false)
+    file_(file), line_(line), predicate_(predicate), fatal_(false)
   {
   } // log_message_t
 
   virtual
   ~log_message_t()
   {
-    if(fatal_) {
+    if(fatal_ && predicate_()) {
 
       // Create a backtrace.
-      // This is probably only defined for platforms that have glibc.
-#if defined __GNUG__
+      // This is only defined for platforms that have glibc.
+#if defined __GNUC__
       void * array[100];
       size_t size;
 
@@ -401,11 +455,23 @@ struct log_message_t
       char ** symbols = backtrace_symbols(array, size);
 
       std::ostream & stream = cinchlog_t::instance().stream();
+
       for(size_t i(0); i<size; ++i) {
-        stream << demangle(symbols[i]) << std::endl;
+        std::string re = symbols[i];
+
+        // Find the mangled name
+        auto start = re.find_first_of('(');
+        auto end = re.find_first_of('+');
+        std::string substr = re.substr(start+1, end-1-start);
+
+        // Output the demangled result
+        stream << re.substr(0, start+1) <<
+          OUTPUT_BROWN(demangle(substr.c_str())) <<
+          re.substr(end, re.size()) << std::endl;
       } // for
 #endif
 
+      // Exit with error condition.
       std::exit(1);
     } // if
   } // ~log_message_t
@@ -418,28 +484,35 @@ struct log_message_t
   std::ostream &
   stream()
   {
-    return cinchlog_t::instance().stream();
+    return predicate_() ? cinchlog_t::instance().stream() :
+      cinchlog_t::instance().null_stream();
   } // stream
 
 protected:
 
   const char * file_;
   int line_;
-
+  P & predicate_;
   bool fatal_;
 
 }; // struct log_message_t
 
 //----------------------------------------------------------------------------//
 // Convenience macro to define severity levels.
+//
+// Log message types defined using this macro always use the default
+// predicate function, true_state().
 //----------------------------------------------------------------------------//
 
-#define severity_message_t(severity, format)                                   \
+#define severity_message_t(severity, P, format)                                \
 struct severity ## _log_message_t                                              \
-  : public log_message_t                                                       \
+  : public log_message_t<P>                                                    \
 {                                                                              \
-  severity ## _log_message_t(const char * file, int line)                      \
-    : log_message_t(file, line) {}                                             \
+  severity ## _log_message_t(                                                  \
+    const char * file,                                                         \
+    int line,                                                                  \
+    P && predicate = true_state)                                               \
+    : log_message_t<P>(file, line, predicate) {}                               \
                                                                                \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
@@ -449,6 +522,7 @@ struct severity ## _log_message_t                                              \
                                                                                \
   std::ostream &                                                               \
   stream() override                                                            \
+    /* This is replaced by the scoped logic */                                 \
     format                                                                     \
 };
 
@@ -456,57 +530,82 @@ struct severity ## _log_message_t                                              \
 // Define the insertion style severity levels.
 //----------------------------------------------------------------------------//
 
-severity_message_t(trace,
+severity_message_t(trace, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 1
-    std::ostream & stream = cinchlog_t::instance().stream();
-    stream << OUTPUT_CYAN("[ TRACE ] ");
-    return stream;
+    if(predicate_()) {
+      std::ostream & stream = cinchlog_t::instance().stream();
+      stream << OUTPUT_CYAN("[    TRACE ] ");
+      return stream;
+    }
+    else {
+      return cinchlog_t::instance().null_stream();
+    } // if
 #else
     return cinchlog_t::instance().null_stream();
 #endif
   });
 
-severity_message_t(info,
+severity_message_t(info, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 2
-    std::ostream & stream = cinchlog_t::instance().stream();
-    stream << OUTPUT_GREEN("[  INFO ] ");
-    return stream;
+    if(predicate_()) {
+      std::ostream & stream = cinchlog_t::instance().stream();
+      stream << OUTPUT_GREEN("[     INFO ] ");
+      return stream;
+    }
+    else {
+      return cinchlog_t::instance().null_stream();
+    } // if
 #else
     return cinchlog_t::instance().null_stream();
 #endif
   });
 
-severity_message_t(warn,
+severity_message_t(warn, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 3
-    std::ostream & stream = cinchlog_t::instance().stream();
-    stream << OUTPUT_BROWN("[  WARN ] ") << COLOR_YELLOW;
-    return stream;
+    if(predicate_()) {
+      std::ostream & stream = cinchlog_t::instance().stream();
+      stream << OUTPUT_BROWN("[     WARN ] ") << COLOR_YELLOW;
+      return stream;
+    }
+    else {
+      return cinchlog_t::instance().null_stream();
+    } // if
 #else
     return cinchlog_t::instance().null_stream();
 #endif
   });
 
-severity_message_t(error,
+severity_message_t(error, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 4
-    std::ostream & stream = cinchlog_t::instance().stream();
-    stream << OUTPUT_RED("[ ERROR ] ") << COLOR_RED;
-    return stream;
+    if(predicate_()) {
+      std::ostream & stream = cinchlog_t::instance().stream();
+      stream << OUTPUT_RED("[    ERROR ] ") << COLOR_RED;
+      return stream;
+    }
+    else {
+      return cinchlog_t::instance().null_stream();
+    } // if
 #else
     return cinchlog_t::instance().null_stream();
 #endif
   });
 
-severity_message_t(fatal,
+severity_message_t(fatal, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 5
-    std::ostream & stream = cinchlog_t::instance().stream();
-    stream << OUTPUT_RED("[ FATAL ] ") << COLOR_LTRED;
-    fatal_ = true;
-    return stream;
+    if(predicate_()) {
+      std::ostream & stream = cinchlog_t::instance().stream();
+      stream << OUTPUT_RED("[    FATAL ] ") << COLOR_LTRED;
+      fatal_ = true;
+      return stream;
+    }
+    else {
+      return cinchlog_t::instance().null_stream();
+    } // if
 #else
     return cinchlog_t::instance().null_stream();
 #endif
@@ -524,8 +623,12 @@ severity_message_t(fatal,
 ///
 /// \param severity The severity level of the log entry.
 ///
+/// \note The form "true && ..." is necessary for tertiary argument
+///       evaluation so that the std::ostream & returned by the stream()
+///       function can be implicitly converted to an int.
+///
 #define clog(severity)                                                         \
-  cinch::severity ## _log_message_t(__FILE__, __LINE__).stream()
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__).stream()
 
 ///
 /// Method style interface for trace level severity log entries.
@@ -557,8 +660,101 @@ severity_message_t(fatal,
 #define clog_fatal(message)                                                    \
   clog(fatal) << message << std::endl
 
+///
+/// Assertion with error message.
+///
 #define clog_assert(test, message)                                             \
-  !(test) && cinch_fatal(message)
+  !(test) && clog_fatal(message)
+
+namespace clog {
+
+  ///
+  // Enum type to specify output delimiters for containers.
+  ///
+  enum clog_delimiters_t : size_t {
+    nl, // newline
+    sp, // space
+    co  // colon
+  };
+
+} // namespace
+
+///
+/// Output contents of a container.
+///
+#define clog_container(severity, banner, container, delimiter)                 \
+  {                                                                            \
+  std::stringstream ss;                                                        \
+  char delim =                                                                 \
+    (delimiter == clog::nl) ?                                                  \
+      '\n' :                                                                   \
+    (delimiter == clog::sp) ?                                                  \
+      ' ' :                                                                    \
+      ':';                                                                     \
+  ss << banner << delim;                                                       \
+  for(auto c: container) {                                                     \
+    (delimiter == clog::nl) && ss << OUTPUT_CYAN("[ CONTAINER] ");             \
+    ss << c << delim;                                                          \
+  }                                                                            \
+  clog(severity) << ss.str() << std::endl;                                     \
+  }
+
+// Enable MPI
+#if defined(CLOG_ENABLE_MPI)
+
+#include <mpi.h>
+
+namespace cinch {
+
+template<
+  size_t R
+>
+inline
+bool
+is_rank()
+{
+  int part;
+  MPI_Comm_rank(MPI_COMM_WORLD, &part);
+  return part == R;
+} // is_rank
+
+} // namespace
+
+///
+/// This handles all of the different logging modes for the insertion
+/// style logging interface for MPI runtime logging.
+///
+/// \param severity The severity level of the log entry.
+///
+/// \note The form "true && ..." is necessary for tertiary argument
+///       evaluation so that the std::ostream & returned by the stream()
+///       function can be implicitly converted to an int.
+///
+#define clog_rank(severity, rank)                                              \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+    cinch::is_rank<rank>).stream()
+
+///
+/// Output contents of a container.
+///
+#define clog_container_rank(severity, banner, container, delimiter, rank)      \
+  {                                                                            \
+  std::stringstream ss;                                                        \
+  char delim =                                                                 \
+    (delimiter == clog::nl) ?                                                  \
+      '\n' :                                                                   \
+    (delimiter == clog::sp) ?                                                  \
+      ' ' :                                                                    \
+      ':';                                                                     \
+  ss << banner << delim;                                                       \
+  for(auto c: container) {                                                     \
+    (delimiter == clog::nl) && ss << OUTPUT_CYAN("[ CONTAINER] ");             \
+    ss << c << delim;                                                          \
+  }                                                                            \
+  clog_rank(severity, rank) << ss.str() << std::endl;                          \
+  }
+
+#endif // CLOG_ENABLE_MPI
 
 #endif // cinch_cinchlog_h
 
