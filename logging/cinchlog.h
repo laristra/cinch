@@ -735,7 +735,7 @@ is_rank()
     cinch::is_rank<rank>).stream()
 
 ///
-/// Output contents of a container.
+/// Output contents of a container only on the specified rank.
 ///
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
   {                                                                            \
