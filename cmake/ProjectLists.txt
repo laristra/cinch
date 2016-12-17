@@ -202,10 +202,10 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
-    # Add clog reporting
+    # Add clog logging
     #--------------------------------------------------------------------------#
 
-    include_directories(cinch/reporting)
+    include_directories(cinch/logging)
 
     # Add an option to set the strip level
     set(CLOG_STRIP_LEVEL CACHE STRING "Set the clog strip level")
@@ -215,7 +215,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     add_definitions(-DCLOG_STRIP_LEVEL=${CLOG_STRIP_LEVEL})
 
     # Allow color output
-    option(CLOG_COLOR_OUTPUT "Enable colorized clog reporting" ON)
+    option(CLOG_COLOR_OUTPUT "Enable colorized clog logging" ON)
     if(CLOG_COLOR_OUTPUT)
         add_definitions(-DCLOG_COLOR_OUTPUT)
     endif()
