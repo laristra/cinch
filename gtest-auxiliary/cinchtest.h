@@ -6,7 +6,7 @@
 #ifndef cinchtest_h
 #define cinchtest_h
 
-#include "../reporting/cinchlog.h"
+#include "../logging/cinchlog.h"
 #include "listener.h"
 #include "output.h"
 
