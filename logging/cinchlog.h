@@ -20,9 +20,8 @@
 #include <vector>
 
 ///
-// \file cinchlog.h
-// \authors bergen
-// \date Initial file creation: Dec 15, 2016
+/// \file
+/// \date Initial file creation: Dec 15, 2016
 ///
 
 //----------------------------------------------------------------------------//
