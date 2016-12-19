@@ -177,6 +177,7 @@ public:
   )
   {
     buffers_[key].enabled = true;
+    return buffers_[key].enabled;
   } // enable_buffer
 
   ///
@@ -188,6 +189,7 @@ public:
   )
   {
     buffers_[key].enabled = false;
+    return buffers_[key].enabled;
   } // disable_buffer
 
 protected:
