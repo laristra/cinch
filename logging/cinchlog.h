@@ -753,6 +753,14 @@ is_rank()
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
   }
 
+#else
+
+#define clog_rank(severity, rank) \
+  std::cout
+
+#define clog_container_rank(severity, banner, container, delimiter, rank) \
+  std::cout
+
 #endif // CLOG_ENABLE_MPI
 
 #endif // cinch_cinchlog_h
