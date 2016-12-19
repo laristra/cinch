@@ -376,6 +376,7 @@ private:
 // Base type for log messages.
 //----------------------------------------------------------------------------//
 
+inline
 std::string
 demangle(
   const char * name
