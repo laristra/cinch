@@ -929,15 +929,20 @@ is_rank()
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
-    (delimiter == clog::nl) ?                                                  \
+    (delimiter == clog::newline) ?                                             \
       '\n' :                                                                   \
-    (delimiter == clog::sp) ?                                                  \
+    (delimiter == clog::space) ?                                               \
       ' ' :                                                                    \
-      ':';                                                                     \
-  ss << banner << delim;                                                       \
-  for(auto c: container) {                                                     \
-    (delimiter == clog::nl) && ss << OUTPUT_CYAN("[ CONTAINER] ");             \
-    ss << c << delim;                                                          \
+    (delimiter == clog::colon) ?                                               \
+      ':' :                                                                    \
+    (delimiter == clog::semicolon) ?                                           \
+      ';' :                                                                    \
+      ',';                                                                     \
+  ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  for(auto c = container.begin(); c != container.end(); ++c) {                 \
+    (delimiter == clog::newline) && ss << OUTPUT_CYAN("[ CONTAINER] ");        \
+    ss << *c;                                                                  \
+    (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
   }
