@@ -8,8 +8,14 @@
 
 #include "listener.h"
 
+int gtest_mpilegion_argc;
+char** gtest_mpilegion_argv;
+
 int main(int argc, char ** argv) {
 
+  gtest_mpilegion_argc = argc;
+  gtest_mpilegion_argv = argv;
+  
   int version, subversion;
   MPI_Get_version(&version, &subversion);
   std::cout <<"MPI version = "<< version<< " , subversion =" << subversion << std::endl;
