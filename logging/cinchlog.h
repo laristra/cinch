@@ -198,12 +198,14 @@ public:
 protected:
 
   ///
-  // Override the overflow method. This streambuf has no buffer, so overflow
-  // happens for every character that is written to the string, allowing
-  // us to write to multiple output streams.
-  //
-  // \param c The character to write. This is passed in as an int so that
-  //          non-characters like EOF can be written to the stream.
+  /// Override the overflow method. This streambuf has no buffer, so overflow
+  /// happens for every character that is written to the string, allowing
+  /// us to write to multiple output streams. This method also detects
+  /// colorization strings embedded in the character stream and removes
+  /// them from output that is going to non-colorized buffers.
+  ///
+  /// \param c The character to write. This is passed in as an int so that
+  ///          non-characters like EOF can be written to the stream.
   ///
   virtual
   int
@@ -219,7 +221,7 @@ protected:
       const size_t tbsize = test_buffer_.size();
 
       // Buffer the output for now...
-      push_one(c);
+      test_buffer_.append(1, c);
 
       switch(tbsize) {
 
@@ -297,7 +299,6 @@ protected:
           if(c == 'm') {
             // This is a color string termination. Write the
             // buffered output to the color buffers.
-            //push_one(c);
             return flush_buffer(color_buffers);
           }
           else {
@@ -329,34 +330,28 @@ protected:
 
 private:
 
-  int
-  push_one(
-    int c
-  )
-  {
-    test_buffer_.append(1, c);
-    return c;
-  } // push_one
-
+  // Predicate to select all buffers.
   static
   bool
   all_buffers(
     const buffer_data_t & bd
   )
   {
-    return true;
+    return bd.enabled;
   } // any_buffer
 
+  // Predicate to select color buffers.
   static
   bool
   color_buffers(
     const buffer_data_t & bd
   )
   {
-    return bd.colorized;
+    return bd.enabled && bd.colorized;
   } // any_buffer
 
-  template<typename P = decltype(all_buffers)>
+  // Flush buffered output to buffers that satisfy the predicate function.
+  template<typename P>
   int
   flush_buffer(P && predicate = all_buffers)
   {
@@ -395,6 +390,8 @@ struct tee_stream_t
   :
     std::ostream(&tee_)
   {
+    // Allow users to turn std::clog output on and off from
+    // their environment.
     if(const char * env = std::getenv("CLOG_ENABLE_STDLOG")) {
       tee_.add_buffer("clog", std::clog.rdbuf(), true);
     } // if
@@ -418,6 +415,32 @@ struct tee_stream_t
   {
     tee_.add_buffer(key, s.rdbuf(), colorized);
   } // add_buffer
+
+  ///
+  /// Enable an existing buffer. This is only 
+  ///
+  /// \param[in] key The string identifier of the streambuf.
+  ///
+  bool
+  enable_buffer(
+    std::string key
+  )
+  {
+    tee_.enable_buffer(key);
+  } // enable_buffer
+
+  ///
+  /// Disable an existing buffer.
+  ///
+  /// \param[in] key The string identifier of the streambuf.
+  ///
+  bool
+  disable_buffer(
+    std::string key
+  )
+  {
+    tee_.disable_buffer(key);
+  } // disable_buffer
 
 private:
 
@@ -803,6 +826,26 @@ severity_message_t(fatal, decltype(cinch::true_state),
 ///
 #define clog_assert(test, message)                                             \
   !(test) && clog_fatal(message)
+
+///
+/// Expose interface to add buffers. Added buffers are enabled 
+/// by default.
+///
+#define clog_add_buffer(name, ostream, colorized)                              \
+  cinch::cinchlog_t::instance().config_stream().add_buffer(name, ostream,      \
+    colorized)
+
+///
+/// Expose interface to enable buffers.
+///
+#define clog_enable_buffer(name)                                               \
+  cinch::cinchlog_t::instance().config_stream().enable_buffer(name)
+
+///
+/// Expose interface to disable buffers.
+///
+#define clog_disable_buffer(name)                                              \
+  cinch::cinchlog_t::instance().config_stream().disable_buffer(name)
 
 namespace clog {
 
