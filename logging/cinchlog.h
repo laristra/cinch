@@ -150,6 +150,7 @@ public:
   ///
   struct buffer_data_t {
     bool enabled;
+    bool colorized;
     std::streambuf * buffer;
   }; // struct buffer_data_t
 
@@ -160,11 +161,13 @@ public:
   void
   add_buffer(
     std::string key,
-    std::streambuf * sb
+    std::streambuf * sb,
+    bool colorized
   )
   {
     buffers_[key].enabled = true;
     buffers_[key].buffer = sb;
+    buffers_[key].colorized = colorized;
   } // add_buffer
 
   ///
@@ -212,16 +215,97 @@ protected:
       return !EOF;
     }
     else {
-      int eof = !EOF;
+      // Get the size before we add the current character
+      const size_t tbsize = test_buffer_.size();
 
-      // Put character to each buffer
-      for(auto b: buffers_) {
-        const int w = b.second.buffer->sputc(c);
-        eof = (eof == EOF) ? eof : w;
-      } // for
+      // Buffer the output for now...
+      push_one(c);
 
-      // Return EOF if one of the buffers hit the end
-      return eof == EOF ? EOF : c;
+      switch(tbsize) {
+
+        case 0:
+          if(c == '\033') {
+            // This could be a color string, start buffering
+            return c;
+          }
+          else {
+            // No match, go ahead and write the character
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 1:
+          if(c == '[') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 2:
+          if(c == '0' || c == '1') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 3:
+          if(c == ';') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else if(c == 'm') {
+            // This is a pain color termination. Write the
+            // buffered output to the color buffers.
+            return flush_buffer(color_buffers);
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 4:
+          if(c == '3') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 5:
+          if(isdigit(c) && (c - '0') < 8) {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 6:
+          if(c == 'm') {
+            // This is a color string termination. Write the
+            // buffered output to the color buffers.
+            //push_one(c);
+            return flush_buffer(color_buffers);
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+      } // switch
     } // if
   } // overflow
 
@@ -245,7 +329,58 @@ protected:
 
 private:
 
+  int
+  push_one(
+    int c
+  )
+  {
+    test_buffer_.append(1, c);
+    return c;
+  } // push_one
+
+  static
+  bool
+  all_buffers(
+    const buffer_data_t & bd
+  )
+  {
+    return true;
+  } // any_buffer
+
+  static
+  bool
+  color_buffers(
+    const buffer_data_t & bd
+  )
+  {
+    return bd.colorized;
+  } // any_buffer
+
+  template<typename P = decltype(all_buffers)>
+  int
+  flush_buffer(P && predicate = all_buffers)
+  {
+    int eof = !EOF;
+
+    // Put test buffer characters to each buffer
+    for(auto b: buffers_) {
+      if(predicate(b.second)) {
+        for(auto bc: test_buffer_) {
+          const int w = b.second.buffer->sputc(bc);
+          eof = (eof == EOF) ? eof : w;
+        } // for
+      } // if
+    } // for
+    
+    // Clear the test buffer
+    test_buffer_.clear();
+
+    // Return EOF if one of the buffers hit the end
+    return eof == EOF ? EOF : !EOF;
+  } // flush_buffer
+
   std::unordered_map<std::string, buffer_data_t> buffers_;
+  std::string test_buffer_;
 
 }; // class tee_buffer_t
 
@@ -261,7 +396,7 @@ struct tee_stream_t
     std::ostream(&tee_)
   {
     if(const char * env = std::getenv("CLOG_ENABLE_STDLOG")) {
-      tee_.add_buffer("clog", std::clog.rdbuf());
+      tee_.add_buffer("clog", std::clog.rdbuf(), true);
     } // if
   } // tee_stream_t
 
@@ -277,10 +412,11 @@ struct tee_stream_t
   void
   add_buffer(
     std::string key,
-    std::ostream & s
+    std::ostream & s,
+    bool colorized = false
   )
   {
-    tee_.add_buffer(key, s.rdbuf());
+    tee_.add_buffer(key, s.rdbuf(), colorized);
   } // add_buffer
 
 private:
@@ -674,9 +810,11 @@ namespace clog {
   // Enum type to specify output delimiters for containers.
   ///
   enum clog_delimiters_t : size_t {
-    nl, // newline
-    sp, // space
-    co  // colon
+    newline,
+    space,
+    colon,
+    semicolon,
+    comma
   };
 
 } // namespace
@@ -688,15 +826,20 @@ namespace clog {
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
-    (delimiter == clog::nl) ?                                                  \
+    (delimiter == clog::newline) ?                                             \
       '\n' :                                                                   \
-    (delimiter == clog::sp) ?                                                  \
+    (delimiter == clog::space) ?                                               \
       ' ' :                                                                    \
-      ':';                                                                     \
-  ss << banner << delim;                                                       \
-  for(auto c: container) {                                                     \
-    (delimiter == clog::nl) && ss << OUTPUT_CYAN("[ CONTAINER] ");             \
-    ss << c << delim;                                                          \
+    (delimiter == clog::colon) ?                                               \
+      ':' :                                                                    \
+    (delimiter == clog::semicolon) ?                                           \
+      ';' :                                                                    \
+      ',';                                                                     \
+  ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  for(auto c = container.begin(); c != container.end(); ++c) {                 \
+    (delimiter == clog::newline) && ss << OUTPUT_CYAN("[ CONTAINER] ");        \
+    ss << *c;                                                                  \
+    (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog(severity) << ss.str() << std::endl;                                     \
   }
