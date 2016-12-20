@@ -150,6 +150,7 @@ public:
   ///
   struct buffer_data_t {
     bool enabled;
+    bool colorized;
     std::streambuf * buffer;
   }; // struct buffer_data_t
 
@@ -160,11 +161,13 @@ public:
   void
   add_buffer(
     std::string key,
-    std::streambuf * sb
+    std::streambuf * sb,
+    bool colorized
   )
   {
     buffers_[key].enabled = true;
     buffers_[key].buffer = sb;
+    buffers_[key].colorized = colorized;
   } // add_buffer
 
   ///
@@ -195,12 +198,14 @@ public:
 protected:
 
   ///
-  // Override the overflow method. This streambuf has no buffer, so overflow
-  // happens for every character that is written to the string, allowing
-  // us to write to multiple output streams.
-  //
-  // \param c The character to write. This is passed in as an int so that
-  //          non-characters like EOF can be written to the stream.
+  /// Override the overflow method. This streambuf has no buffer, so overflow
+  /// happens for every character that is written to the string, allowing
+  /// us to write to multiple output streams. This method also detects
+  /// colorization strings embedded in the character stream and removes
+  /// them from output that is going to non-colorized buffers.
+  ///
+  /// \param c The character to write. This is passed in as an int so that
+  ///          non-characters like EOF can be written to the stream.
   ///
   virtual
   int
@@ -212,16 +217,96 @@ protected:
       return !EOF;
     }
     else {
-      int eof = !EOF;
+      // Get the size before we add the current character
+      const size_t tbsize = test_buffer_.size();
 
-      // Put character to each buffer
-      for(auto b: buffers_) {
-        const int w = b.second.buffer->sputc(c);
-        eof = (eof == EOF) ? eof : w;
-      } // for
+      // Buffer the output for now...
+      test_buffer_.append(1, c);
 
-      // Return EOF if one of the buffers hit the end
-      return eof == EOF ? EOF : c;
+      switch(tbsize) {
+
+        case 0:
+          if(c == '\033') {
+            // This could be a color string, start buffering
+            return c;
+          }
+          else {
+            // No match, go ahead and write the character
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 1:
+          if(c == '[') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 2:
+          if(c == '0' || c == '1') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 3:
+          if(c == ';') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else if(c == 'm') {
+            // This is a pain color termination. Write the
+            // buffered output to the color buffers.
+            return flush_buffer(color_buffers);
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 4:
+          if(c == '3') {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 5:
+          if(isdigit(c) && (c - '0') < 8) {
+            // This still looks like a color string, keep buffering
+            return c;
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+
+        case 6:
+          if(c == 'm') {
+            // This is a color string termination. Write the
+            // buffered output to the color buffers.
+            return flush_buffer(color_buffers);
+          }
+          else {
+            // This is some other kind of escape. Write the
+            // buffered output to all buffers.
+            return flush_buffer(all_buffers);
+          } // if
+      } // switch
     } // if
   } // overflow
 
@@ -245,7 +330,52 @@ protected:
 
 private:
 
+  // Predicate to select all buffers.
+  static
+  bool
+  all_buffers(
+    const buffer_data_t & bd
+  )
+  {
+    return bd.enabled;
+  } // any_buffer
+
+  // Predicate to select color buffers.
+  static
+  bool
+  color_buffers(
+    const buffer_data_t & bd
+  )
+  {
+    return bd.enabled && bd.colorized;
+  } // any_buffer
+
+  // Flush buffered output to buffers that satisfy the predicate function.
+  template<typename P>
+  int
+  flush_buffer(P && predicate = all_buffers)
+  {
+    int eof = !EOF;
+
+    // Put test buffer characters to each buffer
+    for(auto b: buffers_) {
+      if(predicate(b.second)) {
+        for(auto bc: test_buffer_) {
+          const int w = b.second.buffer->sputc(bc);
+          eof = (eof == EOF) ? eof : w;
+        } // for
+      } // if
+    } // for
+    
+    // Clear the test buffer
+    test_buffer_.clear();
+
+    // Return EOF if one of the buffers hit the end
+    return eof == EOF ? EOF : !EOF;
+  } // flush_buffer
+
   std::unordered_map<std::string, buffer_data_t> buffers_;
+  std::string test_buffer_;
 
 }; // class tee_buffer_t
 
@@ -260,8 +390,10 @@ struct tee_stream_t
   :
     std::ostream(&tee_)
   {
+    // Allow users to turn std::clog output on and off from
+    // their environment.
     if(const char * env = std::getenv("CLOG_ENABLE_STDLOG")) {
-      tee_.add_buffer("clog", std::clog.rdbuf());
+      tee_.add_buffer("clog", std::clog.rdbuf(), true);
     } // if
   } // tee_stream_t
 
@@ -277,11 +409,38 @@ struct tee_stream_t
   void
   add_buffer(
     std::string key,
-    std::ostream & s
+    std::ostream & s,
+    bool colorized = false
   )
   {
-    tee_.add_buffer(key, s.rdbuf());
+    tee_.add_buffer(key, s.rdbuf(), colorized);
   } // add_buffer
+
+  ///
+  /// Enable an existing buffer. This is only 
+  ///
+  /// \param[in] key The string identifier of the streambuf.
+  ///
+  bool
+  enable_buffer(
+    std::string key
+  )
+  {
+    tee_.enable_buffer(key);
+  } // enable_buffer
+
+  ///
+  /// Disable an existing buffer.
+  ///
+  /// \param[in] key The string identifier of the streambuf.
+  ///
+  bool
+  disable_buffer(
+    std::string key
+  )
+  {
+    tee_.disable_buffer(key);
+  } // disable_buffer
 
 private:
 
@@ -668,15 +827,37 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_assert(test, message)                                             \
   !(test) && clog_fatal(message)
 
+///
+/// Expose interface to add buffers. Added buffers are enabled 
+/// by default.
+///
+#define clog_add_buffer(name, ostream, colorized)                              \
+  cinch::cinchlog_t::instance().config_stream().add_buffer(name, ostream,      \
+    colorized)
+
+///
+/// Expose interface to enable buffers.
+///
+#define clog_enable_buffer(name)                                               \
+  cinch::cinchlog_t::instance().config_stream().enable_buffer(name)
+
+///
+/// Expose interface to disable buffers.
+///
+#define clog_disable_buffer(name)                                              \
+  cinch::cinchlog_t::instance().config_stream().disable_buffer(name)
+
 namespace clog {
 
   ///
   // Enum type to specify output delimiters for containers.
   ///
   enum clog_delimiters_t : size_t {
-    nl, // newline
-    sp, // space
-    co  // colon
+    newline,
+    space,
+    colon,
+    semicolon,
+    comma
   };
 
 } // namespace
@@ -688,15 +869,20 @@ namespace clog {
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
-    (delimiter == clog::nl) ?                                                  \
+    (delimiter == clog::newline) ?                                             \
       '\n' :                                                                   \
-    (delimiter == clog::sp) ?                                                  \
+    (delimiter == clog::space) ?                                               \
       ' ' :                                                                    \
-      ':';                                                                     \
-  ss << banner << delim;                                                       \
-  for(auto c: container) {                                                     \
-    (delimiter == clog::nl) && ss << OUTPUT_CYAN("[ CONTAINER] ");             \
-    ss << c << delim;                                                          \
+    (delimiter == clog::colon) ?                                               \
+      ':' :                                                                    \
+    (delimiter == clog::semicolon) ?                                           \
+      ';' :                                                                    \
+      ',';                                                                     \
+  ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  for(auto c = container.begin(); c != container.end(); ++c) {                 \
+    (delimiter == clog::newline) && ss << OUTPUT_CYAN("[ CONTAINER] ");        \
+    ss << *c;                                                                  \
+    (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog(severity) << ss.str() << std::endl;                                     \
   }
@@ -743,15 +929,20 @@ is_rank()
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
-    (delimiter == clog::nl) ?                                                  \
+    (delimiter == clog::newline) ?                                             \
       '\n' :                                                                   \
-    (delimiter == clog::sp) ?                                                  \
+    (delimiter == clog::space) ?                                               \
       ' ' :                                                                    \
-      ':';                                                                     \
-  ss << banner << delim;                                                       \
-  for(auto c: container) {                                                     \
-    (delimiter == clog::nl) && ss << OUTPUT_CYAN("[ CONTAINER] ");             \
-    ss << c << delim;                                                          \
+    (delimiter == clog::colon) ?                                               \
+      ':' :                                                                    \
+    (delimiter == clog::semicolon) ?                                           \
+      ';' :                                                                    \
+      ',';                                                                     \
+  ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  for(auto c = container.begin(); c != container.end(); ++c) {                 \
+    (delimiter == clog::newline) && ss << OUTPUT_CYAN("[ CONTAINER] ");        \
+    ss << *c;                                                                  \
+    (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
   }
