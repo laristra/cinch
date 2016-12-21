@@ -307,6 +307,7 @@ protected:
             return flush_buffer(all_buffers);
           } // if
       } // switch
+      return c;
     } // if
   } // overflow
 
@@ -427,6 +428,7 @@ struct tee_stream_t
   )
   {
     tee_.enable_buffer(key);
+    return true;
   } // enable_buffer
 
   ///
@@ -440,6 +442,7 @@ struct tee_stream_t
   )
   {
     tee_.disable_buffer(key);
+    return false;
   } // disable_buffer
 
 private:
