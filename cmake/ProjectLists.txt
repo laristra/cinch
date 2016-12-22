@@ -24,6 +24,7 @@
 #------------------------------------------------------------------------------#
 
 #we are using target_include_directories, which is a cmake-3.0 feature
+cmake_minimum_required(VERSION 3.0)
 set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
 
 if(CMAKE_VERSION VERSION_LESS CINCH_REQUIRED_CMAKE_VERSION)
