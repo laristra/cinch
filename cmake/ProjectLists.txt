@@ -861,6 +861,13 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
     endforeach(unit)
 
+    #--------------------------------------------------------------------------#
+    # Install cinch logging utility
+    #--------------------------------------------------------------------------#
+
+    install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
+        DESTINATION include)
+
 endif(${CINCH_TOP_LEVEL_PROJECT})
 
 #------------------------------------------------------------------------------#

@@ -11,7 +11,11 @@
 #include <execinfo.h>
 #endif
 
+#include <cstdlib>
+#include <time.h>
+
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -537,7 +541,7 @@ private:
 }; // class cinchlog_t
 
 //----------------------------------------------------------------------------//
-// Base type for log messages.
+// Helper functions.
 //----------------------------------------------------------------------------//
 
 inline
@@ -558,6 +562,26 @@ demangle(
 #endif
 } // demangle
 
+inline
+std::string
+timestamp()
+{
+  char stamp[14];
+  time_t t = time(0);
+  strftime(stamp, sizeof(stamp), "%m%d %H:%M:%S", gmtime(&t));
+  return std::string(stamp);
+} // timestamp
+
+template<char C>
+std::string rstrip(const char *file) {
+  std::string tmp(file);
+  return tmp.substr(tmp.rfind(C)+1);
+} // rstrip
+
+//----------------------------------------------------------------------------//
+// Base type for log messages.
+//----------------------------------------------------------------------------//
+
 ///
 // Function always returning true. Used for defaults.
 ///
@@ -577,22 +601,22 @@ template<typename P>
 struct log_message_t
 {
   ///
-  // Constructor.
-  //
-  // This method initializes the \e fatal_ data member to false. Derived
-  // classes wishing to force exit should set this to true in their
-  // override of the stream method.
-  //
-  // \tparam P Predicate funtion type.
-  //
-  // \param file The current file (where the log message was created).
-  //             In general, this will always use the __FILE__ parameter
-  //             from the calling macro.
-  // \param line The current line (where the log message was called).
-  //             In general, this will always use the __LINE__ parameter
-  //             from the calling macro.
-  // \param predicate The predicate function to determine whether or not
-  //                  the calling runtime should produce output.
+  /// Constructor.
+  ///
+  /// This method initializes the \e fatal_ data member to false. Derived
+  /// classes wishing to force exit should set this to true in their
+  /// override of the stream method.
+  ///
+  /// \tparam P Predicate funtion type.
+  ///
+  /// \param file The current file (where the log message was created).
+  ///             In general, this will always use the __FILE__ parameter
+  ///             from the calling macro.
+  /// \param line The current line (where the log message was called).
+  ///             In general, this will always use the __LINE__ parameter
+  ///             from the calling macro.
+  /// \param predicate The predicate function to determine whether or not
+  ///                  the calling runtime should produce output.
   ///
   log_message_t(
     const char * file,
@@ -623,15 +647,23 @@ struct log_message_t
       for(size_t i(0); i<size; ++i) {
         std::string re = symbols[i];
 
-        // Find the mangled name
+        // Look for a mangled name
         auto start = re.find_first_of('(');
         auto end = re.find_first_of('+');
-        std::string substr = re.substr(start+1, end-1-start);
+
+        std::string symbol;
+
+        if(start != std::string::npos && end != std::string::npos) {
+          symbol = re.substr(0, start+1) +
+            demangle(re.substr(start+1, end-1-start).c_str()) +
+            re.substr(end, re.size());
+        }
+        else {
+          symbol = re;
+        } // if
 
         // Output the demangled result
-        stream << re.substr(0, start+1) <<
-          OUTPUT_BROWN(demangle(substr.c_str())) <<
-          re.substr(end, re.size()) << std::endl;
+        stream << symbol << std::endl;
       } // for
 #endif
 
@@ -694,12 +726,16 @@ struct severity ## _log_message_t                                              \
 // Define the insertion style severity levels.
 //----------------------------------------------------------------------------//
 
+#define message_stamp \
+  timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
+
 severity_message_t(trace, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 1
     if(predicate_()) {
       std::ostream & stream = cinchlog_t::instance().stream();
-      stream << OUTPUT_CYAN("[    TRACE ] ");
+      stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_CYAN("] ");
       return stream;
     }
     else {
@@ -715,7 +751,8 @@ severity_message_t(info, decltype(cinch::true_state),
 #if CLOG_STRIP_LEVEL < 2
     if(predicate_()) {
       std::ostream & stream = cinchlog_t::instance().stream();
-      stream << OUTPUT_GREEN("[     INFO ] ");
+      stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_GREEN("] ");
       return stream;
     }
     else {
@@ -731,7 +768,8 @@ severity_message_t(warn, decltype(cinch::true_state),
 #if CLOG_STRIP_LEVEL < 3
     if(predicate_()) {
       std::ostream & stream = cinchlog_t::instance().stream();
-      stream << OUTPUT_BROWN("[     WARN ] ") << COLOR_YELLOW;
+      stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
       return stream;
     }
     else {
@@ -747,7 +785,8 @@ severity_message_t(error, decltype(cinch::true_state),
 #if CLOG_STRIP_LEVEL < 4
     if(predicate_()) {
       std::ostream & stream = cinchlog_t::instance().stream();
-      stream << OUTPUT_RED("[    ERROR ] ") << COLOR_RED;
+      stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_RED("] ") << COLOR_LTRED;
       return stream;
     }
     else {
@@ -763,7 +802,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #if CLOG_STRIP_LEVEL < 5
     if(predicate_()) {
       std::ostream & stream = cinchlog_t::instance().stream();
-      stream << OUTPUT_RED("[    FATAL ] ") << COLOR_LTRED;
+      stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
       fatal_ = true;
       return stream;
     }
@@ -882,9 +921,11 @@ namespace clog {
       ';' :                                                                    \
       ',';                                                                     \
   ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  size_t entry(0);                                                             \
   for(auto c = container.begin(); c != container.end(); ++c) {                 \
-    (delimiter == clog::newline) && ss << OUTPUT_CYAN("[ CONTAINER] ");        \
-    ss << *c;                                                                  \
+    (delimiter == clog::newline) &&                                            \
+    ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
+      entry++ << OUTPUT_CYAN("]") << std::endl << *c;                          \
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog(severity) << ss.str() << std::endl;                                     \
@@ -942,9 +983,11 @@ is_rank()
       ';' :                                                                    \
       ',';                                                                     \
   ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  size_t entry(0);                                                             \
   for(auto c = container.begin(); c != container.end(); ++c) {                 \
-    (delimiter == clog::newline) && ss << OUTPUT_CYAN("[ CONTAINER] ");        \
-    ss << *c;                                                                  \
+    (delimiter == clog::newline) &&                                            \
+    ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
+      entry++ << OUTPUT_CYAN("]") << std::endl << *c;                          \
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
