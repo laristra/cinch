@@ -9,7 +9,7 @@
 #define EXPAND_AND_STRINGIFY(s) _UTIL_STRINGIFY(s)
 
 #ifndef GTEST_INIT
-  #include "gtest-legion-init.h"
+  #include "gtest-init.h"
 #else
   #include EXPAND_AND_STRINGIFY(GTEST_INIT)
 #endif

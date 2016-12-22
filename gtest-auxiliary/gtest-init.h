@@ -6,7 +6,7 @@
 #ifndef gtest_init_h
 #define gtest_init_h
 
-void gtest_initialize(int argc, char ** argv) {}
+inline void gtest_init(int argc, char ** argv) {}
 
 #endif // gtest_init_h
 

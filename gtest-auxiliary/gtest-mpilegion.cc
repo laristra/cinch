@@ -6,13 +6,26 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
+#define _UTIL_STRINGIFY(s) #s
+#define EXPAND_AND_STRINGIFY(s) _UTIL_STRINGIFY(s)
+
+#ifndef GTEST_INIT
+  #include "gtest-init.h"
+#else
+  #include EXPAND_AND_STRINGIFY(GTEST_INIT)
+#endif
+
+#undef EXPAND_AND_STRINGIFY
+#undef _UTIL_STRINGIFY
+
 #include "listener.h"
 
 int main(int argc, char ** argv) {
 
   int version, subversion;
   MPI_Get_version(&version, &subversion);
-  std::cout <<"MPI version = "<< version<< " , subversion =" << subversion << std::endl;
+  std::cout <<"MPI version = "<< version<< " , subversion =" <<
+    subversion << std::endl;
 //TOFIX:: add check for Gasnet conduit
   if(version==3 && subversion>0){
     int provided;
@@ -38,6 +51,9 @@ int main(int argc, char ** argv) {
 
   // Adds a listener to the end.  Google Test takes the ownership.
   listeners.Append(new cinch::listener);
+
+  // Call the user-provided initialization function
+  gtest_init(argc, argv);
 
   int result = RUN_ALL_TESTS();
 
