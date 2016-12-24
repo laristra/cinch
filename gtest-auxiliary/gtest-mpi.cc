@@ -8,7 +8,12 @@
 #include <cstring>
 #include <vector>
 
-#include "listener.h"
+#if defined(ENABLE_GFLAGS)
+  #include <gflags/gflags.h>
+  DEFINE_string(groups, "all", "Specify the active tag groups");
+#endif // ENABLE_GFLAGS
+
+#include "cinchtest.h"
 
 int main(int argc, char ** argv) {
 
@@ -24,14 +29,26 @@ int main(int argc, char ** argv) {
       if (std::strncmp(*itr, "--gtest_output", 14) == 0) {
         args.erase(itr);
         break;
-      }
-    }
-  }
+      } // if
+    } // for
+  } // if
+
   argc = args.size();
   argv = args.data();
 
   // Initialize the GTest runtime
   ::testing::InitGoogleTest(&argc, argv);
+
+  // This is used for initialization of clog if gflags is not enabled.
+  std::string groups = "all";
+
+#if defined(ENABLE_GFLAGS)
+  // Send any unprocessed arguments to GFlags
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+#endif // ENABLE_GFLAGS
+
+  // Initialize the cinchlog runtime
+  clog_init(groups);
 
   ::testing::TestEventListeners& listeners =
     ::testing::UnitTest::GetInstance()->listeners();

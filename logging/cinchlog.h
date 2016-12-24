@@ -531,12 +531,14 @@ public:
       std::string tag;
       while(std::getline(is, tag, ',')) {
         if(tag_map_.find(tag) != tag_map_.end()) {
+#if 0
           std::cout << "Enabling tag group " << tag << std::endl;
+#endif
           tag_bitset_.set(tag_map_[tag]);
         }
         else {
-          std::cout << "CLOG WARNING: " << tag <<
-            " has not been registered. Ignoring this group." << std::endl;
+          std::cerr << "CLOG WARNING: " << tag <<
+            " has not been registered. Ignoring this group..." << std::endl;
         } // if
       } // while
     }
@@ -716,7 +718,7 @@ demangle(
 
   return (status==0) ? res.get() : name ;
 #else
-	return name;
+  return name;
 #endif
 } // demangle
 
