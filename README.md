@@ -316,6 +316,10 @@ Method style output with severity level *severity* and output message
 clog_info("The number is " << number);
 ```
 
+* **clog_every_n(severity, message, n)**  
+Output every nth iteration using *severity* and *message*. This method
+is not defined for fatal severity level or assertions.
+
 * **clog_assert(test, message)**  
 Assert that *test* is true. If *test* is false, this call will
 execute *clog_fatal(message)*.
