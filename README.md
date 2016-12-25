@@ -261,109 +261,331 @@ Cinch will check for a local GoogleTest installation on the system during
 the Cmake configuration step.  If GoogleTest is not found, it will be
 built by Cinch (GoogleTest source code is included with Cinch).
 
-## Reporting
+## Cinch Logging Utilities (CLOG)
 
-***CMake Option:*** **ENABLE\_COLOR\_OUTPUT (default ON)**
+### Options
 
-Cinch has support for information, warning, and error reporting. If
-ENABLE\_COLOR\_OUTPUT is set to ON, the output will be colorized.
+***CMake Option:*** **CLOG_ENABLE_STDLOG (default OFF)**
 
-* **cinch\_info** Information reporting. This macro is useful for
-  outputting information to standard out. It is disabled if NDEGBUG is
-  not defined.
+***CMake Option:*** **CLOG_STRIP_LEVEL (default "0")**
 
-* **cinch\_loop\_info** Information reporting. This macro is useful for
-  outputting information from standard containers. It is disabled if
-  NDEGBUG is not defined.
+***CMake Option:*** **CLOG_TAG_BITS (default "16")**
 
-* **cinch\_warn** Warning output. This macro is useful for
-  outputting non-fatal runtime warnings to standard out. It is disabled
-  if NDEGBUG is not defined.
+***CMake Option:*** **CLOG_COLOR_OUTPUT (default OFF)**
 
-* **cinch\_error** Error output and abort. This macro is useful for
-  outputting fatal runtime messages to standard error. After writing the
-  message, this macro will call std::abort.
+### Basic Description
 
-* **cinch\_assert** Execute a runtime assertion and call *cinch\_error*
-  if the assertion fails, thus printing an error message and exiting
-  with abort.
-
-Here is an example of each of these macros:
+Cinch has support for trace, info, warn, error, and fatal log reporting
+(similar to Google Log). There are two interface styles for logging
+information using CLOG: Insertion style, e.g.,
 
 ```cpp
-#include <cinchreporting.h>
+clog(info) << "This is some information" << std::endl;
+```
+
+and a method interface, e.g.,
+
+```cpp
+clog_info("This is some information");
+```
+
+Both interface styles are available for all severity levels (discussed
+below).
+
+**NOTE:** CLOG is automatically available for Cinch unit tests.
+
+### CLOG Interface Macros
+
+* **clog_init(groups)**  
+Initialize the CLOG runtime, enabling the tag groups specified in
+*groups*, e.g.,
+```cpp
+clog_init("group1,group2,group3");
+```
+
+* **clog(severity)**  
+Insertion style output with severity level *severity*, e.g.,
+```cpp
+clog(error) << "This is an error level severity message" << std::endl;
+```
+
+* **clog_severity(message)**  
+Method style output with severity level *severity* and output message
+*message*. Note that *message* can be any valid C++ stream, e.g.,
+```cpp
+clog_info("The number is " << number);
+```
+
+* **clog_assert(test, message)**  
+Assert that *test* is true. If *test* is false, this call will
+execute *clog_fatal(message)*.
+
+* **clog_add_buffer(name, ostream, colorized)**  
+Add the buffer defined by the *ostream* argument in rdbuf(). The second
+parameter *name* is the string name to associate with the buffer, and
+can be used in subsequent calls to the CLOG buffer interface. The last
+parameter indicates whether or not the buffer supports color output.
+
+* **clog_enable_buffer(name)**  
+Enable the buffer identified by *name*.
+
+* **clog_disable_buffer(name)**  
+Disable the buffer identified by *name*.
+
+### Controlling CLOG Output: Output Streams
+
+CLOG can write output to multiple output streams at once.  Users can
+control which CLOG log files and output are created by adding and
+enabling/disabling various output streams. By default, CLOG directs
+output to std::clog (this is the default C++ log iostream and is not
+part of CLOG) when the **CLOG_ENABLE_STDLOG** environment variable is
+defined. Other output streams must be added by the user application. As
+an example, if the user application wanted CLOG output to go to a file
+named *output.log*, one could do the following:
+
+```cpp
+#include <ofstream>
+
+#include "cinchlog.h"
 
 int main(int argc, char ** argv) {
 
-  // Print information to standard out
-  cinch_info("Hello World! We got " << argc-1 << " arguments");
+  // Initialize CLOG with output for all tag groups (discussed below)
+  clog_init("all");
 
-  // Print a warning to standard out
-  if(argc < 3) {
-    cinch_warn("Only got " << argc-1 << " arguments");
-  } // if
+  // Open an output stream for "output.log"
+  std::ofstream output("output.log");
 
-  // Print an error message to standard error and exit with abort
-  if(argc < 2) {
-    cinch_error("This program requires at least 1 argument");
-  } // if
+  // Add the stream to CLOG:
+  // param 1 ("output") The string name of the buffer.
+  // param 2 (output)   The stream (CLOG will call stream.rdbuf() on this).
+  // param 3 (false)    A boolean denoting whether or not the buffer
+  //                    supports colorization.
+  //
+  // Note that output is automatically enabled for buffers when they
+  // are added. Buffers can be disable with clog_disable_buffer(string name),
+  // and re-enabled with clog_enable_buffer(string name).
+  clog_add_buffer("output", output, false);
 
-  // Use an assertion for the above error case
-  cinch_assert(argc >= 1, "This program requires at least 1 argument")
+  // Write some information to the output file (and to std::clog if enabled)
+  clog(info) << "This will go to output.log" << std::endl;
 
   return 0;
 } // main
 ```
 
-Running this code with no arguments will produce the following output
-(markdown is unable to show the colorization):
+### Controlling CLOG Output: Severity Levels
 
-    % ./example
-    % Info Hello World! We got 0 arguments
-    % !Warning!
-    %      Message: Only got 0 arguments
-    %      [line 10 example.cc]
-    % !!!ERROR!!!
-    %      Message: This program requires at least 1 argument
-    %      [line 15 example.cc]
-    % Executing std::abort()...
-    % Aborted (core dumped)
+CLOG output can be controlled at compile time by specifying a particular
+severity level. Any logging messages with a lower severity level than
+the one specified by **CLOG_STRIP_LEVEL** will be disabled. Note that
+this implies that CLOG will produce no output for
+**CLOG_STRIP_LEVEL >= 5**.
 
-In addition to this simple macro interface, cinch also provides macro
-calls that can be customized to control output, e.g., to a single rank
-or task id. To print output only on rank 0 of an MPI program, one could
-write something like this:
+The different severity levels have the following behavior:
+
+* **trace**  
+Enabled only for severity level 0 (less than 1)  
+Trace output is suitable for fine-grained logging information.
+
+* **info**  
+Enabled for severity levels less than 2  
+Info output is suitable for normal logging information.
+
+* **warn**  
+Enabled for severity levels less than 3  
+Warn output is useful for issuing warnings. When **CLOG_COLOR_OUTPUT**
+is enabled, warn messages will be displayed in yellow.
+
+* **error**  
+Enabled for severity levels less than 4  
+Error output is useful for issuing non-fatal errors. When
+**CLOG_COLOR_OUTPUT** is enabled, error messages will be displayed in
+red.
+
+* **fatal**  
+Enabled for severity levels less than 5  
+Fatal error output is useful for issuing fatal errors. Fatal errors
+print a message, dump the current stack trace, and call std::exit(1).
+When **CLOG_COLOR_OUTPUT** is enabled, fatal messages will be displayed
+in red.
+
+### Controlling CLOG Output: Tag Groups
+
+Runtime control of CLOG output is possible by adding scoping sections in
+the source code. These are referred to as *tag groups* because the
+scoped section is labeled with a tag. The number of possible tag groups
+is controlled by **CLOG_TAG_BITS** (default 16).  Tag groups can be
+enabled or disabled at runtime by specifying the list of tag groups to
+the *clog_init* function. Generally, these are controlled by a
+command-line flag that is interpreted by the user's application. Here is
+an example code using GFlags to control output:
 
 ```cpp
-// Define a simple predicate function to select a particular rank
-template<size_t R>
-bool is_part() {
-  int part;
-  MPI_Comm_rank(MPI_COMM_WORLD, &part);
-  return part == R;
-} // is_part
+#include <gflags/gflags.h>
 
-// Define a macro using the predicate to control output
-#define info_one(message, part)           \
-  cinch_info_impl(message, is_part<part>)
+// Create a command-line flag "--groups" with default value "all"
+DEFINE_string(groups, "all", "Specify the active tag groups");
+
+#include "cinchlog.h"
 
 int main(int argc, char ** argv) {
 
-  // Initialize the MPI runtime
-  MPI_Init(&argc, &argv);
+  // Parse the command-line arguments
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  // Call the custom macro with a message and rank
-  info_one("This message will only be printed by rank 0", 0);
+  // If the user has specified tag groups with --groups=group1, ...
+  // these groups will be enabled. Recall that the default is "all".
+  clog_init(FLAGS_groups);
 
-  // Finalize the MPI runtime
-  MPI_Finalize();
+  {
+  // Create a new tag scope. Log messages within this scope will
+  // only be output if tag group "tag1" or tag group "all" is enabled.
+  clog_tag_scope(tag1);
+
+  clog(info) << "Enabled for tag group tag1" << std::endl;
+
+  clog(warn) << "This is a warning in group tag1" << std::endl;
+  } // scope
+
+  {
+  // Create a new tag scope. Log messages within this scope will
+  // only be output if tag group "tag2" or tag group "all" is enabled.
+  clog_tag_scope(tag2);
+
+  clog(info) << "Enabled for tag group tag2" << std::endl;
+
+  clog(error) << "This is an error in group tag2" << std::endl;
+  } // scope
+
+  clog(info) << "This output is not scoped" << std::endl;
 
   return 0;
 } // main
 ```
 
-It is left to the user to define suitable predicate functions, as it is
-beyond the scope of cinch to handle every possible runtime requirement.
+Example code runs:
+
+```
+% ./example --groups=tag1
+% [I1225 11:59:59 example.cc:22] Enabled for tag group tag1
+% [W1225 11:59:59 example.cc:24] This is a warning in group tag1
+% [I1225 11:59:59 example.cc:37] This output is not scoped
+
+% ./example --groups=tag2
+% [I1225 11:59:59 example.cc:32] Enabled for tag group tag1
+% [E1225 11:59:59 example.cc:34] This is an error in group tag2
+% [I1225 11:59:59 example.cc:37] This output is not scoped
+
+% ./example
+% [I1225 11:59:59 example.cc:22] Enabled for tag group tag1
+% [W1225 11:59:59 example.cc:24] This is a warning in group tag1
+% [I1225 11:59:59 example.cc:32] Enabled for tag group tag1
+% [E1225 11:59:59 example.cc:34] This is an error in group tag2
+% [I1225 11:59:59 example.cc:37] This output is not scoped
+```
+
+### Advanced Topics: Predicated Output
+
+The normal CLOG interface is implemented through a set of macros.
+Advanced users, who need greater control over CLOG, can create their own
+interfaces (macro or otherwise) to directly access the low-level CLOG
+interface. Log messages in CLOG derive from the *cinch::log_message_t*
+type, which provides a constructor, virtual destructor, and a virtual
+stream method:
+
+```cpp
+template<typename P>
+struct log_message_t
+{
+
+  // Constructor:
+  // param 1 (file)      The originating file of the message (__FILE__)
+  // param 2 (line)      The originating line of the mesasge (__LINE__)
+  // param 3 (predicate) A predicate function that can be used to
+  //                     control output.
+  log_message_t(
+    const char * file,
+    int line,
+    P && predicate
+  )
+  {
+    // See cinchlog.h for implementation.
+  } // log_message_t
+
+  // Destructor.
+  virtual
+  ~log_message_t()
+  {
+    // See cinchlog.h for implementation.
+  } // ~log_message_t
+
+  // Stream method.
+  virtual
+  std::ostream &
+  stream()
+  {
+    // See cinchlog.h for implementation.
+  } // stream
+
+}; // struct log_message_t
+```
+
+Users wishing to customize CLOG can change the default behavior by
+overriding the virtual methods of this type, and by providing custom
+predicates. Much of the basic CLOG functionality is implemented in this
+manner, e.g., the following code implements the trace level severity
+output:
+
+```cpp
+#define severity_message_t(severity, P, format)                                \
+struct severity ## _log_message_t                                              \
+  : public log_message_t<P>                                                    \
+{                                                                              \
+  severity ## _log_message_t(                                                  \
+    const char * file,                                                         \
+    int line,                                                                  \
+    P && predicate = true_state)                                               \
+    : log_message_t<P>(file, line, predicate) {}                               \
+                                                                               \
+  ~severity ## _log_message_t()                                                \
+  {                                                                            \
+    /* Clean colors from the stream */                                         \
+    clog_t::instance().stream() << COLOR_PLAIN;                                \
+  }                                                                            \
+                                                                               \
+  std::ostream &                                                               \
+  stream() override                                                            \
+    /* This is replaced by the scoped logic */                                 \
+    format                                                                     \
+};
+
+//----------------------------------------------------------------------------//
+// Define the insertion style severity levels.
+//----------------------------------------------------------------------------//
+
+#define message_stamp \
+  timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
+
+severity_message_t(trace, decltype(cinch::true_state),
+  {
+#if CLOG_STRIP_LEVEL < 1
+    if(clog_t::instance().tag_enabled() && predicate_()) {
+      std::ostream & stream = clog_t::instance().stream();
+      stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_CYAN("] ");
+      return stream;
+    }
+    else {
+      return clog_t::instance().null_stream();
+    } // if
+#else
+    return clog_t::instance().null_stream();
+#endif
+  });
+```
+
+Interested users should look at the source code for more examples.
 
 ## Versioning
 
