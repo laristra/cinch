@@ -40,7 +40,7 @@
 // Set CLOG_TAG_BITS to enable TAG_BITS number of groups
 
 #ifndef CLOG_TAG_BITS
-#define CLOG_TAG_BITS 4
+#define CLOG_TAG_BITS 32
 #endif
 
 //----------------------------------------------------------------------------//
@@ -142,6 +142,14 @@
 
 #endif // CLOG_COLOR_OUTPUT
 
+//----------------------------------------------------------------------------//
+// Macro utilities.
+//----------------------------------------------------------------------------//
+
+// Concatenate two names
+#define clog_concat(a, b)                                                      \
+  a ## b
+
 namespace cinch {
 
 //----------------------------------------------------------------------------//
@@ -149,8 +157,8 @@ namespace cinch {
 //----------------------------------------------------------------------------//
 
 ///
-// Stream buffer type to allow output to multiple targets
-// a la the tee function.
+/// Stream buffer type to allow output to multiple targets
+/// a la the tee function.
 ///
 class tee_buffer_t
   : public std::streambuf
@@ -158,8 +166,8 @@ class tee_buffer_t
 public:
 
   ///
-  // Buffer data type to hold state and actual low-level
-  // stream buffer pointer.
+  /// Buffer data type to hold state and actual low-level
+  /// stream buffer pointer.
   ///
   struct buffer_data_t {
     bool enabled;
@@ -168,8 +176,8 @@ public:
   }; // struct buffer_data_t
 
   ///
-  // Add a buffer to which output should be written. This also enables
-  // the buffer, i.e., output will be written to it.
+  /// Add a buffer to which output should be written. This also enables
+  /// the buffer, i.e., output will be written to it.
   ///
   void
   add_buffer(
@@ -184,8 +192,8 @@ public:
   } // add_buffer
 
   ///
-  // Enable a buffer so that output is written to it. This is mainly
-  // for buffers that have been disabled and need to be re-enabled.
+  /// Enable a buffer so that output is written to it. This is mainly
+  /// for buffers that have been disabled and need to be re-enabled.
   ///
   bool
   enable_buffer(
@@ -197,7 +205,7 @@ public:
   } // enable_buffer
 
   ///
-  // Disable a buffer so that output is not written to it.
+  /// Disable a buffer so that output is not written to it.
   ///
   bool
   disable_buffer(
@@ -325,7 +333,7 @@ protected:
   } // overflow
 
   ///
-  // Override the sync method so that we sync all of the output buffers.
+  /// Override the sync method so that we sync all of the output buffers.
   ///
   virtual
   int
@@ -394,7 +402,7 @@ private:
 }; // class tee_buffer_t
 
 ///
-// A stream class that writes to multiple output buffers.
+/// A stream class that writes to multiple output buffers.
 ///
 struct tee_stream_t
   : public std::ostream
@@ -418,7 +426,7 @@ struct tee_stream_t
   } // operator *
 
   ///
-  // Add a new buffer to the output.
+  /// Add a new buffer to the output.
   ///
   void
   add_buffer(
@@ -550,7 +558,7 @@ public:
   } // clog_t
 
   ///
-  // Return the log stream.
+  /// Return the log stream.
   ///
   std::ostream &
   stream()
@@ -559,7 +567,7 @@ public:
   } // stream
 
   ///
-  // Return a null stream to disable output.
+  /// Return a null stream to disable output.
   ///
   std::ostream &
   null_stream()
@@ -568,8 +576,8 @@ public:
   } // null_stream
 
   ///
-  // Return the tee stream to allow the user to set configuration options.
-  // FIXME: Need a better interface for this...
+  /// Return the tee stream to allow the user to set configuration options.
+  /// FIXME: Need a better interface for this...
   ///
   tee_stream_t &
   config_stream()
@@ -743,7 +751,7 @@ std::string rstrip(const char *file) {
 //----------------------------------------------------------------------------//
 
 ///
-// Function always returning true. Used for defaults.
+/// Function always returning true. Used for defaults.
 ///
 inline
 bool
@@ -753,9 +761,9 @@ true_state()
 } // output_bool
 
 ///
-// \struct log_message_t cinchlog.h
-// \brief log_message_t provides a base class for implementing
-//        formatted logging utilities.
+/// \struct log_message_t cinchlog.h
+/// \brief log_message_t provides a base class for implementing
+///        formatted logging utilities.
 ///
 template<typename P>
 struct log_message_t
@@ -833,7 +841,7 @@ struct log_message_t
   } // ~log_message_t
 
   ///
-  // Return the output stream. Override this method to add additional
+  /// Return the output stream. Override this method to add additional
   // formatting to a particular severity output.
   ///
   virtual
@@ -1021,6 +1029,24 @@ severity_message_t(fatal, decltype(cinch::true_state),
 ///
 #define clog_error(message)                                                    \
   clog(error) << message << std::endl
+
+/// Indirection to expand counter name.
+#define clog_counter_varname(str, line)                                        \
+  clog_concat(str, line)
+
+/// Indirection to expand counter name.
+#define clog_counter(str)                                                      \
+  clog_counter_varname(str, __LINE__)
+
+/// Define a counter name.
+#define counter_name clog_counter(counter)
+
+///
+/// Method style interface to output every nth iteration.
+///
+#define clog_every_n(severity, message, n)                                     \
+  static size_t counter_name = 0;                                              \
+  if(++counter_name%n == 0) { clog_ ## severity(message); }
 
 ///
 /// Method style interface for fatal level severity log entries.
