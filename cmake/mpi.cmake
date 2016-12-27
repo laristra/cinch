@@ -34,7 +34,7 @@ endif(ENABLE_MPI_CXX_BINDINGS)
 
 if(MPI_${MPI_LANGUAGE}_FOUND)
     include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
-    add_definitions(-DHAVE_MPI)
+    add_definitions(-DENABLE_MPI)
 endif(MPI_${MPI_LANGUAGE}_FOUND)
 
 endif(ENABLE_MPI)

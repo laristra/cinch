@@ -146,11 +146,50 @@
 // Macro utilities.
 //----------------------------------------------------------------------------//
 
-// Concatenate two names
-#define clog_concat(a, b)                                                      \
-  a ## b
+#define _clog_util_stringify(s) #s
+#define _clog_stringify(s) _clog_util_stringify(s)
+#define clog_concat(a, b) a ## b
 
 namespace cinch {
+
+//----------------------------------------------------------------------------//
+// Helper functions.
+//----------------------------------------------------------------------------//
+
+inline
+std::string
+demangle(
+  const char * name
+)
+{
+#if defined __GNUC__
+  int status = -4;
+
+  std::unique_ptr<char, void(*)(void*)> res {
+    abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
+
+  return (status==0) ? res.get() : name ;
+#else
+  return name;
+#endif
+} // demangle
+
+inline
+std::string
+timestamp(bool underscores = false)
+{
+  char stamp[14];
+  time_t t = time(0);
+  std::string format = underscores ? "%m%d_%H%M%S" : "%m%d %H:%M:%S";
+  strftime(stamp, sizeof(stamp), format.c_str(), localtime(&t));
+  return std::string(stamp);
+} // timestamp
+
+template<char C>
+std::string rstrip(const char *file) {
+  std::string tmp(file);
+  return tmp.substr(tmp.rfind(C)+1);
+} // rstrip
 
 //----------------------------------------------------------------------------//
 // Auxilliary types.
@@ -439,7 +478,7 @@ struct tee_stream_t
   } // add_buffer
 
   ///
-  /// Enable an existing buffer. This is only 
+  /// Enable an existing buffer.
   ///
   /// \param[in] key The string identifier of the streambuf.
   ///
@@ -689,16 +728,11 @@ private:
 // failed with helpful information if the user tries to create a tag
 // scope for a tag that hasn't been registered.
 
-// We haven't need these until now, but we might want to move them
-// up so that they are more visible.
-#define _CLOG_UTIL_STRINGIFY(s) #s
-#define _CLOG_STRINGIFY(s) _CLOG_UTIL_STRINGIFY(s)
-
 // Register a tag group with the runtime (clog_t). We need the static
 // size_t so that tag scopes can be created quickly during execution.
 #define clog_register_tag(name)                                                \
   static size_t name ## _clog_tag_id =                                         \
-  cinch::clog_t::instance().register_tag(_CLOG_STRINGIFY(name));
+  cinch::clog_t::instance().register_tag(_clog_stringify(name));
 
 // Return the static variable created in the clog_register_tag macro above.
 #define clog_tag_lookup(name)                                                  \
@@ -707,44 +741,6 @@ private:
 // Create a new tag scope.
 #define clog_tag_scope(name)                                                   \
   cinch::clog_tag_scope_t name ## _clog_tag_scope__(clog_tag_lookup(name));
-
-//----------------------------------------------------------------------------//
-// Helper functions.
-//----------------------------------------------------------------------------//
-
-inline
-std::string
-demangle(
-  const char * name
-)
-{
-#if defined __GNUC__
-  int status = -4;
-
-  std::unique_ptr<char, void(*)(void*)> res {
-    abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
-
-  return (status==0) ? res.get() : name ;
-#else
-  return name;
-#endif
-} // demangle
-
-inline
-std::string
-timestamp()
-{
-  char stamp[14];
-  time_t t = time(0);
-  strftime(stamp, sizeof(stamp), "%m%d %H:%M:%S", gmtime(&t));
-  return std::string(stamp);
-} // timestamp
-
-template<char C>
-std::string rstrip(const char *file) {
-  std::string tmp(file);
-  return tmp.substr(tmp.rfind(C)+1);
-} // rstrip
 
 //----------------------------------------------------------------------------//
 // Base type for log messages.
@@ -966,7 +962,7 @@ severity_message_t(error, decltype(cinch::true_state),
   });
 
 // FIXME: This probably does not have the behavior we want, i.e.,
-//        fatal error should not be predicated.
+//        fatal errors should not be predicated.
 severity_message_t(fatal, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 5
@@ -987,7 +983,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 } // namespace cinch
 
 //----------------------------------------------------------------------------//
-// Macros
+// Macro Interface
 //----------------------------------------------------------------------------//
 
 #define clog_init(groups)                                                      \
@@ -1010,7 +1006,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 /// Method style interface for trace level severity log entries.
 ///
 #define clog_trace(message)                                                    \
-  clog(info) << message << std::endl
+  clog(trace) << message << std::endl
 
 ///
 /// Method style interface for info level severity log entries.
@@ -1044,9 +1040,9 @@ severity_message_t(fatal, decltype(cinch::true_state),
 ///
 /// Method style interface to output every nth iteration.
 ///
-#define clog_every_n(severity, message, n)                                     \
+#define clog_every_n(severity, n, message)                                     \
   static size_t counter_name = 0;                                              \
-  if(++counter_name%n == 0) { clog_ ## severity(message); }
+  if(counter_name++%n == 0) { clog_ ## severity(message); }
 
 ///
 /// Method style interface for fatal level severity log entries.
@@ -1129,17 +1125,61 @@ namespace clog {
 
 namespace cinch {
 
+struct mpi_config_t {
+
+  static
+  mpi_config_t &
+  instance()
+  {
+    static mpi_config_t m;
+    return m;
+  } // instance
+
+  const
+  size_t &
+  active_rank() const
+  {
+    return active_rank_;
+  } // active_rank
+
+  size_t &
+  active_rank()
+  {
+    return active_rank_;
+  } // active_rank
+
+private:
+
+  mpi_config_t()
+  :
+    active_rank_(0)
+  {}
+
+  size_t active_rank_;
+
+}; // struct mpi_config_t
+
 template<
   size_t R
 >
 inline
 bool
-is_rank()
+is_static_rank()
 {
   int part;
   MPI_Comm_rank(MPI_COMM_WORLD, &part);
   return part == R;
-} // is_rank
+} // is_static_rank
+
+// FIXME: Not sure if I like this approach...
+inline
+bool
+is_active_rank()
+{
+  int part;
+  MPI_Comm_rank(MPI_COMM_WORLD, &part);
+  return part == mpi_config_t::instance().active_rank();
+} // is_active_rank
 
 } // namespace
 
@@ -1155,7 +1195,16 @@ is_rank()
 ///
 #define clog_rank(severity, rank)                                              \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
-    cinch::is_rank<rank>).stream()
+    cinch::is_static_rank<rank>).stream()
+
+// FIXME: Not sure if I like this approach...
+#define clog_set_output_rank(rank)                                             \
+  cinch::mpi_config_t::instance().active_rank() = rank
+
+// FIXME: Not sure if I like this approach...
+#define clog_one(severity)                                                     \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+    cinch::is_active_rank).stream()
 
 ///
 /// Output contents of a container only on the specified rank.
@@ -1186,10 +1235,15 @@ is_rank()
 
 #else
 
-#define clog_rank(severity, rank) \
+#define clog_rank(severity, rank)                                              \
   std::cout
 
-#define clog_container_rank(severity, banner, container, delimiter, rank) \
+#define clog_set_output_rank(rank)
+
+#define clog_one(severity)                                                     \
+  std::cout
+
+#define clog_container_rank(severity, banner, container, delimiter, rank)      \
   std::cout
 
 #endif // CLOG_ENABLE_MPI
