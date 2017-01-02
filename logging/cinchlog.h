@@ -323,7 +323,7 @@ protected:
             return c;
           }
           else if(c == 'm') {
-            // This is a pain color termination. Write the
+            // This is a plain color termination. Write the
             // buffered output to the color buffers.
             return flush_buffer(color_buffers);
           }
@@ -554,7 +554,7 @@ public:
   ///
   ///
   void
-  init(std::string groups = "all")
+  init(std::string active = "none")
   {
     // Because active tags are specified at runtime, it is
     // necessary to maintain a map of the compile-time registered
@@ -566,21 +566,24 @@ public:
     // hashes. We should consider creating a const_string_t type for
     // constexpr string creation.
 
-    if(groups != "all") {
-      // Set all of the bits to false, then go through the tags
-      // that were specified by the user.
-      tag_bitset_.reset();
+    // Initialize everything to false. This is the default, i.e., "none".
+    tag_bitset_.reset();
 
-      // The default group is always active (unscoped)
+    if(active == "all") {
+      // Turn on all of the bits for "all".
+      tag_bitset_.flip();
+    }
+    else if(active != "none") {
+      // Turn on the bits for the selected groups.
+
+      // The default group is always active (unscoped). To avoid
+      // output for this tag, make sure to scope all CLOG output.
       tag_bitset_.set(0);
 
-      std::istringstream is(groups);
+      std::istringstream is(active);
       std::string tag;
       while(std::getline(is, tag, ',')) {
         if(tag_map_.find(tag) != tag_map_.end()) {
-#if 0
-          std::cout << "Enabling tag group " << tag << std::endl;
-#endif
           tag_bitset_.set(tag_map_[tag]);
         }
         else {
@@ -588,13 +591,17 @@ public:
             " has not been registered. Ignoring this group..." << std::endl;
         } // if
       } // while
-    }
-    else {
-      // This is the default: All tags are active, so we set all
-      // of the bits to true.
-      tag_bitset_.reset().flip();
     } // if
   } // clog_t
+
+  ///
+  /// Return the tag map.
+  ///
+  const std::unordered_map<std::string, size_t> &
+  tag_map()
+  {
+    return tag_map_;
+  } // tag_map
 
   ///
   /// Return the log stream.
@@ -732,7 +739,7 @@ private:
 // size_t so that tag scopes can be created quickly during execution.
 #define clog_register_tag(name)                                                \
   static size_t name ## _clog_tag_id =                                         \
-  cinch::clog_t::instance().register_tag(_clog_stringify(name));
+  cinch::clog_t::instance().register_tag(_clog_stringify(name))
 
 // Return the static variable created in the clog_register_tag macro above.
 #define clog_tag_lookup(name)                                                  \
@@ -740,7 +747,10 @@ private:
 
 // Create a new tag scope.
 #define clog_tag_scope(name)                                                   \
-  cinch::clog_tag_scope_t name ## _clog_tag_scope__(clog_tag_lookup(name));
+  cinch::clog_tag_scope_t name ## _clog_tag_scope__(clog_tag_lookup(name))
+
+#define clog_tag_map()                                                         \
+  cinch::clog_t::instance().tag_map()
 
 //----------------------------------------------------------------------------//
 // Base type for log messages.
@@ -788,7 +798,8 @@ struct log_message_t
     P && predicate
   )
   :
-    file_(file), line_(line), predicate_(predicate), fatal_(false)
+    file_(file), line_(line), predicate_(predicate),
+    fatal_(false), clean_color_(false)
   {
   } // log_message_t
 
@@ -853,6 +864,7 @@ protected:
   const char * file_;
   int line_;
   P & predicate_;
+  bool clean_color_;
   bool fatal_;
 
 }; // struct log_message_t
@@ -877,7 +889,9 @@ struct severity ## _log_message_t                                              \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
     /* Clean colors from the stream */                                         \
-    clog_t::instance().stream() << COLOR_PLAIN;                                \
+    if(clean_color_) {                                                         \
+      clog_t::instance().stream() << COLOR_PLAIN;                              \
+    }                                                                          \
   }                                                                            \
                                                                                \
   std::ostream &                                                               \
@@ -893,6 +907,7 @@ struct severity ## _log_message_t                                              \
 #define message_stamp \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
+// Trace
 severity_message_t(trace, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 1
@@ -910,6 +925,7 @@ severity_message_t(trace, decltype(cinch::true_state),
 #endif
   });
 
+// Info
 severity_message_t(info, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 2
@@ -927,6 +943,7 @@ severity_message_t(info, decltype(cinch::true_state),
 #endif
   });
 
+// Warn
 severity_message_t(warn, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 3
@@ -934,6 +951,7 @@ severity_message_t(warn, decltype(cinch::true_state),
       std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+      clean_color_ = true;
       return stream;
     }
     else {
@@ -944,6 +962,7 @@ severity_message_t(warn, decltype(cinch::true_state),
 #endif
   });
 
+// Error
 severity_message_t(error, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 4
@@ -951,6 +970,7 @@ severity_message_t(error, decltype(cinch::true_state),
       std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_RED("] ") << COLOR_LTRED;
+      clean_color_ = true;
       return stream;
     }
     else {
@@ -963,12 +983,14 @@ severity_message_t(error, decltype(cinch::true_state),
 
 // FIXME: This probably does not have the behavior we want, i.e.,
 //        fatal errors should not be predicated.
+// Fatal
 severity_message_t(fatal, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 5
     if(clog_t::instance().tag_enabled() && predicate_()) {
       std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+      clean_color_ = true;
       fatal_ = true;
       return stream;
     }
@@ -986,8 +1008,8 @@ severity_message_t(fatal, decltype(cinch::true_state),
 // Macro Interface
 //----------------------------------------------------------------------------//
 
-#define clog_init(groups)                                                      \
-  cinch::clog_t::instance().init(groups)
+#define clog_init(active)                                                      \
+  cinch::clog_t::instance().init(active)
 
 ///
 /// This handles all of the different logging modes for the insertion
@@ -1197,11 +1219,11 @@ is_active_rank()
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
     cinch::is_static_rank<rank>).stream()
 
-// FIXME: Not sure if I like this approach...
+// Set the output rank for clog_one calls.
 #define clog_set_output_rank(rank)                                             \
   cinch::mpi_config_t::instance().active_rank() = rank
 
-// FIXME: Not sure if I like this approach...
+// Output to the rank set by clog_set_output_rank()
 #define clog_one(severity)                                                     \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
     cinch::is_active_rank).stream()
@@ -1231,6 +1253,33 @@ is_active_rank()
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
+  }
+
+///
+/// Output contents of a container only on the specified rank.
+///
+#define clog_container_one(severity, banner, container, delimiter)             \
+  {                                                                            \
+  std::stringstream ss;                                                        \
+  char delim =                                                                 \
+    (delimiter == clog::newline) ?                                             \
+      '\n' :                                                                   \
+    (delimiter == clog::space) ?                                               \
+      ' ' :                                                                    \
+    (delimiter == clog::colon) ?                                               \
+      ':' :                                                                    \
+    (delimiter == clog::semicolon) ?                                           \
+      ';' :                                                                    \
+      ',';                                                                     \
+  ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  size_t entry(0);                                                             \
+  for(auto c = container.begin(); c != container.end(); ++c) {                 \
+    (delimiter == clog::newline) &&                                            \
+    ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
+      entry++ << OUTPUT_CYAN("]") << std::endl << *c;                          \
+    (c != --container.end()) && ss << delim;                                   \
+  }                                                                            \
+  clog_one(severity) << ss.str() << std::endl;                                 \
   }
 
 #else

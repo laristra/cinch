@@ -50,7 +50,7 @@ include(include_links)
 include(insource)
 include(subdirlist)
 include(unit)
-include(unit-execution-policy)
+include(test-execution-policy)
 include(documentation)
 include(library)
 include(application)
@@ -266,6 +266,9 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     option(ENABLE_JENKINS_OUTPUT
         "Generate jenkins xml output for every test" OFF)
 
+# FIXME: Need enable devel
+    include_directories(cinch/auxiliary)
+
     if(ENABLE_UNIT_TESTS)
 
         enable_testing()
@@ -289,7 +292,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
           set(GTEST_LIBRARIES gtest)
         endif()
 
-        include_directories(cinch/gtest-auxiliary)
+        include_directories(cinch/auxiliary/gtest)
 
         #----------------------------------------------------------------------#
         # pFUnit
@@ -318,12 +321,17 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Add default execution polices
         #----------------------------------------------------------------------#
 
-        cinch_add_unit_execution_policy(SERIAL
-            ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
+        cinch_add_test_execution_policy(SERIAL
+            ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-standard.cc
+        )
+
+        cinch_add_test_execution_policy(SERIAL_DEVEL
+            ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-standard.cc
+            DEFINES "-DCINCH_DEVEL_TEST"
         )
 
         if(FORTRAN_ENABLED)
-            cinch_add_unit_execution_policy(FORTRAN
+            cinch_add_test_execution_policy(FORTRAN
                 ${PFUNIT_DRIVER}
                 LIBRARIES ${PFUNIT_LIBRARY})
         endif(FORTRAN_ENABLED)
@@ -336,10 +344,20 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         # MPI Runtime
         if(MPI_${MPI_LANGUAGE}_FOUND)
-            cinch_add_unit_execution_policy(MPI
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpi.cc
+            cinch_add_test_execution_policy(MPI
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpi.cc
                 FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
+                EXEC ${MPIEXEC}
+                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}
+            )
+
+            cinch_add_test_execution_policy(MPI_DEVEL
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpi.cc
+                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                DEFINES "-DCINCH_DEVEL_TEST"
                 LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
                 EXEC ${MPIEXEC}
                 EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}
@@ -358,8 +376,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         # Legion Runtime
         if(Legion_FOUND)
-            cinch_add_unit_execution_policy(LEGION
-               ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-legion.cc
+            cinch_add_test_execution_policy(LEGION
+               ${CMAKE_SOURCE_DIR}/cinch/auxiliary/gtest/gtest-legion.cc
                FLAGS ${Legion_CXX_FLAGS}
                INCLUDES ${Legion_INCLUDE_DIRS}
                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
@@ -373,8 +391,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         endif()
 
         if(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
-            cinch_add_unit_execution_policy(MPILEGION
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
+            cinch_add_test_execution_policy(MPILEGION
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/gtest//gtest-mpilegion.cc
                 FLAGS ${Legion_CXX_FLAGS}
                     ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${Legion_INCLUDE_DIRS}
@@ -601,7 +619,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Don't create the unit test if its policy is not defined
         #----------------------------------------------------------------------#
 
-        if(${unit_target_execution_policy}_UNIT_POLICY_LIST)
+        if(${unit_target_execution_policy}_TEST_POLICY_LIST)
 
             #------------------------------------------------------------------#
             # Create the full path to the source files
@@ -619,15 +637,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             # Get policy information
             string(REPLACE ":" ";" unit_policy_list
-                "${${unit_target_execution_policy}_UNIT_POLICY_LIST}")
+                "${${unit_target_execution_policy}_TEST_POLICY_LIST}")
 
             list(GET unit_policy_list 0 unit_policy_name)
             list(GET unit_policy_list 1 unit_policy_runtime)
             list(GET unit_policy_list 2 unit_policy_flags)
             list(GET unit_policy_list 3 unit_policy_includes)
-            list(GET unit_policy_list 4 unit_policy_libraries)
-            list(GET unit_policy_list 5 unit_policy_exec)
-            list(GET unit_policy_list 6 unit_policy_exec_threads)
+            list(GET unit_policy_list 4 unit_policy_defines)
+            list(GET unit_policy_list 5 unit_policy_libraries)
+            list(GET unit_policy_list 6 unit_policy_exec)
+            list(GET unit_policy_list 7 unit_policy_exec_threads)
 
             # Convert stored values back into lists
             string(REPLACE "|" ";" unit_policy_runtime
@@ -636,6 +655,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 "${unit_policy_flags}")
             string(REPLACE "|" ";" unit_policy_includes
                 "${unit_policy_includes}")
+            string(REPLACE "|" ";" unit_policy_defines
+                "${unit_policy_defines}")
             string(REPLACE "|" ";" unit_policy_libraries
                 "${unit_policy_libraries}")
 
@@ -731,6 +752,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(NOT "${unit_target_defines}" STREQUAL "None")
                 target_compile_definitions(${unit_target_name} PRIVATE
                     ${unit_target_defines})
+            endif()
+
+            if(NOT "${unit_policy_defines}" STREQUAL "None")
+                target_compile_definitions(${unit_target_name} PRIVATE
+                    ${unit_policy_defines})
             endif()
 
             #------------------------------------------------------------------#
@@ -878,7 +904,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             endif(${thread_instances} GREATER 1)
 
-        endif(${unit_target_execution_policy}_UNIT_POLICY_LIST)
+        endif(${unit_target_execution_policy}_TEST_POLICY_LIST)
 
     endforeach(unit)
 

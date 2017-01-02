@@ -3,17 +3,24 @@
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
+#include <cstring>
 #include <gtest/gtest.h>
 #include <mpi.h>
-#include <cstring>
+
 #include <vector>
 
+// Include and flag definitions for GFlags.
 #if defined(ENABLE_GFLAGS)
   #include <gflags/gflags.h>
-  DEFINE_string(groups, "all", "Specify the active tag groups");
+  DEFINE_string(active, "none", "Specify the active tag groups");
+  DEFINE_bool(tags, false, "List available tag groups and exit.");
 #endif // ENABLE_GFLAGS
 
 #include "cinchtest.h"
+
+//----------------------------------------------------------------------------//
+// Main
+//----------------------------------------------------------------------------//
 
 int main(int argc, char ** argv) {
 
@@ -40,23 +47,45 @@ int main(int argc, char ** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   // This is used for initialization of clog if gflags is not enabled.
-  std::string groups = "all";
+  std::string active("none");
+  bool tags(false);
 
 #if defined(ENABLE_GFLAGS)
+  // Usage
+  gflags::SetUsageMessage("[options]");
+
   // Send any unprocessed arguments to GFlags
   gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+  // Get the flags
+  active = FLAGS_active;
+  tags = FLAGS_tags;
 #endif // ENABLE_GFLAGS
 
-  // Initialize the cinchlog runtime
-  clog_init(groups);
+  int result(0);
 
-  ::testing::TestEventListeners& listeners =
-    ::testing::UnitTest::GetInstance()->listeners();
+  if(tags != false) {
+    // Output the available tags
+    if(rank == 0) {
+      std::cout << "Available tags (CLOG):" << std::endl;
+      for(auto t: clog_tag_map()) {
+        std::cout << "  " << t.first << std::endl;
+      } // for
+    } // if
+  }
+  else {
+    // Initialize the cinchlog runtime
+    clog_init(active);
 
-  // Adds a listener to the end.  Google Test takes the ownership.
-  listeners.Append(new cinch::listener);
+    ::testing::TestEventListeners& listeners =
+      ::testing::UnitTest::GetInstance()->listeners();
 
-  int result = RUN_ALL_TESTS();
+    // Adds a listener to the end.  Google Test takes the ownership.
+    listeners.Append(new cinch::listener);
+
+    // Run the tests for this target
+    result = RUN_ALL_TESTS();
+  } // if
 
   // Shutdown the MPI runtime
   MPI_Finalize();
