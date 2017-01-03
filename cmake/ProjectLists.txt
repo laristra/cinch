@@ -842,7 +842,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             list(LENGTH thread_instance_list thread_instances)
 
-            if(NOT "${unit_target_execution_policy}" STREQUAL "FORTRAN")
+            string(REGEX MATCH "DEVEL" _IS_DEVEL
+                ${unit_target_execution_policy})
+
+            set(_IS_GTEST)
+            if(NOT "${unit_target_execution_policy}" STREQUAL "FORTRAN"
+                AND NOT _IS_DEVEL)
+                set(_IS_GTEST TRUE)
+            endif()
+
+            if(_IS_GTEST)
                 set(UNIT_FLAGS --gtest_color=no)
                 if(ENABLE_COLOR_UNIT_TESTS)
                     set(UNIT_FLAGS --gtest_color=yes)
@@ -854,12 +863,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(${thread_instances} GREATER 1)
 
                 foreach(instance ${thread_instance_list})
-                    if(ENABLE_JENKINS_OUTPUT)
+                    if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
                         set(_OUTPUT
                             ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
                         set(UNIT_FLAGS ${UNIT_FLAGS}
                             --gtest_output=xml:${_OUTPUT})
-                    endif(ENABLE_JENKINS_OUTPUT)
+                    endif()
 
                     add_test(
                         NAME
@@ -874,12 +883,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             else()
 
-                if(ENABLE_JENKINS_OUTPUT)
+                if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
                     set(_OUTPUT
                         ${_OUTPUT_DIR}/${unit_target_name}.xml)
                     set(UNIT_FLAGS ${UNIT_FLAGS}
                         --gtest_output=xml:${_OUTPUT})
-                endif(ENABLE_JENKINS_OUTPUT)
+                endif()
 
                 if(NOT "${unit_policy_exec}" STREQUAL "None")
                     add_test(
