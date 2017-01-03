@@ -1297,6 +1297,9 @@ is_active_rank()
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
   std::cout
 
+#define clog_container_one(severity, banner, container, delimiter)             \
+  std::cout
+
 #endif // CLOG_ENABLE_MPI
 
 #endif // cinch_cinchlog_h
