@@ -1249,7 +1249,8 @@ is_active_rank()
   for(auto c = container.begin(); c != container.end(); ++c) {                 \
     (delimiter == clog::newline) &&                                            \
     ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
-      entry++ << OUTPUT_CYAN("]") << std::endl << *c;                          \
+      entry++ << OUTPUT_CYAN("]") << std::endl;                                \
+    ss << *c;                                                                  \
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
@@ -1276,7 +1277,8 @@ is_active_rank()
   for(auto c = container.begin(); c != container.end(); ++c) {                 \
     (delimiter == clog::newline) &&                                            \
     ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
-      entry++ << OUTPUT_CYAN("]") << std::endl << *c;                          \
+      entry++ << OUTPUT_CYAN("]") << std::endl;                                \
+    ss << *c;                                                                  \
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_one(severity) << ss.str() << std::endl;                                 \
