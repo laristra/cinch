@@ -377,7 +377,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Legion Runtime
         if(Legion_FOUND)
             cinch_add_test_execution_policy(LEGION
-               ${CMAKE_SOURCE_DIR}/cinch/auxiliary/gtest/gtest-legion.cc
+               ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-legion.cc
                FLAGS ${Legion_CXX_FLAGS}
                INCLUDES ${Legion_INCLUDE_DIRS}
                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
@@ -392,7 +392,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         if(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
             cinch_add_test_execution_policy(MPILEGION
-                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/gtest//gtest-mpilegion.cc
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpilegion.cc
                 FLAGS ${Legion_CXX_FLAGS}
                     ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${Legion_INCLUDE_DIRS}
