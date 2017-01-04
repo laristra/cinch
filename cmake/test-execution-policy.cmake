@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_add_unit_execution_policy policy runtime)
+function(cinch_add_test_execution_policy policy runtime)
 
     #--------------------------------------------------------------------------#
     # Setup argument options.
@@ -11,56 +11,67 @@ function(cinch_add_unit_execution_policy policy runtime)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args FLAGS INCLUDES LIBRARIES EXEC EXEC_THREADS)
-    cmake_parse_arguments(unit "${options}" "${one_value_args}"
+    set(multi_value_args FLAGS INCLUDES DEFINES LIBRARIES EXEC EXEC_THREADS)
+    cmake_parse_arguments(test "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
     #--------------------------------------------------------------------------#
     # Check for include arguments
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_FLAGS)
-        set(unit_FLAGS "None")
+    if(NOT test_FLAGS)
+        set(test_FLAGS "None")
     else()
         # Quotes are important here so that list is interpreted as a string
-        string(REPLACE ";" "|" unit_FLAGS "${unit_FLAGS}")
+        string(REPLACE ";" "|" test_FLAGS "${test_FLAGS}")
         # Replace leading spaces to avoid overquoting
-        string(STRIP "${unit_FLAGS}" unit_FLAGS)
-    endif(NOT unit_FLAGS)
+        string(STRIP "${test_FLAGS}" test_FLAGS)
+    endif(NOT test_FLAGS)
 
     #--------------------------------------------------------------------------#
     # Check for include arguments
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_INCLUDES)
-        set(unit_INCLUDES "None")
+    if(NOT test_INCLUDES)
+        set(test_INCLUDES "None")
     else()
         # Quotes are important here so that list is interpreted as a string
-        string(REPLACE ";" "|" unit_INCLUDES "${unit_INCLUDES}")
-    endif(NOT unit_INCLUDES)
+        string(REPLACE ";" "|" test_INCLUDES "${test_INCLUDES}")
+    endif(NOT test_INCLUDES)
+
+    #--------------------------------------------------------------------------#
+    # Check for define arguments
+    #--------------------------------------------------------------------------#
+
+    if(NOT test_DEFINES)
+        set(test_DEFINES "None")
+    else()
+        # Quotes are important here so that list is interpreted as a string
+        string(REPLACE ";" "|" test_DEFINES "${test_DEFINES}")
+    endif(NOT test_DEFINES)
 
     #--------------------------------------------------------------------------#
     # Check for library arguments
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_LIBRARIES)
-        set(unit_LIBRARIES "None")
+    if(NOT test_LIBRARIES)
+        set(test_LIBRARIES "None")
     else()
         # Quotes are important here so that list is interpreted as a string
-        string(REPLACE ";" "|" unit_LIBRARIES "${unit_LIBRARIES}")
-    endif(NOT unit_LIBRARIES)
+        string(REPLACE ";" "|" test_LIBRARIES "${test_LIBRARIES}")
+    endif(NOT test_LIBRARIES)
 
     #--------------------------------------------------------------------------#
     # Check for execution arguments
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_EXEC)
-        set(unit_EXEC "None")
-    endif(NOT unit_EXEC)
+    if(NOT test_EXEC)
+        set(test_EXEC "None")
+    endif(NOT test_EXEC)
 
-    if(NOT unit_EXEC_THREADS)
-        set(unit_EXEC_THREADS "None")
-    endif(NOT unit_EXEC_THREADS)
+    if(NOT test_EXEC_THREADS)
+        set(test_EXEC_THREADS "None")
+    endif(NOT test_EXEC_THREADS)
 
     #--------------------------------------------------------------------------#
     # Check that the policy runtime is defined
@@ -74,10 +85,10 @@ function(cinch_add_unit_execution_policy policy runtime)
     # Add policy
     #--------------------------------------------------------------------------#
 
-    set(${policy}_UNIT_POLICY_LIST
-        "${policy}:${runtime}:${unit_FLAGS}:${unit_INCLUDES}:${unit_LIBRARIES}:${unit_EXEC}:${unit_EXEC_THREADS}" PARENT_SCOPE)
+    set(${policy}_TEST_POLICY_LIST
+        "${policy}:${runtime}:${test_FLAGS}:${test_INCLUDES}:${test_DEFINES}:${test_LIBRARIES}:${test_EXEC}:${test_EXEC_THREADS}" PARENT_SCOPE)
 
-endfunction(cinch_add_unit_execution_policy)
+endfunction(cinch_add_test_execution_policy)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

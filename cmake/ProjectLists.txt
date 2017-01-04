@@ -50,7 +50,7 @@ include(include_links)
 include(insource)
 include(subdirlist)
 include(unit)
-include(unit-execution-policy)
+include(test-execution-policy)
 include(documentation)
 include(library)
 include(application)
@@ -202,22 +202,51 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
+    # Add support for GFlags
+    #--------------------------------------------------------------------------#
+
+    option(ENABLE_GFLAGS "Enable command-line flag support" OFF)
+
+    if(ENABLE_GFLAGS)
+        find_package(GFlags)
+
+        if(GFlags_FOUND)
+            # We found a system or local installation
+            include_directories(${GFlags_INCLUDE_DIRS})
+        else()
+            # Build it ourselves
+            add_subdirectory(${CMAKE_SOURCE_DIR}/cinch/gflags)
+            include_directories(${CMAKE_BINARY_DIR}/cinch/gflags/include)
+            set(GFLAGS_LIBRARIES gflags)
+        endif()
+
+        # Add this to the compile definitions
+        add_definitions(-DENABLE_GFLAGS)
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Add clog logging
     #--------------------------------------------------------------------------#
 
     include_directories(cinch/logging)
 
     # Add an option to set the strip level
-    set(CLOG_STRIP_LEVEL CACHE STRING "Set the clog strip level")
-    if(NOT CLOG_STRIP_LEVEL)
-        set(CLOG_STRIP_LEVEL "0")
-    endif()
+    set(CLOG_STRIP_LEVEL "0" CACHE STRING "Set the clog strip level")
     add_definitions(-DCLOG_STRIP_LEVEL=${CLOG_STRIP_LEVEL})
 
     # Allow color output
     option(CLOG_COLOR_OUTPUT "Enable colorized clog logging" ON)
     if(CLOG_COLOR_OUTPUT)
         add_definitions(-DCLOG_COLOR_OUTPUT)
+    endif()
+
+    # Enable tag groups
+    option(CLOG_ENABLE_TAGS "Enable tag groups" OFF)
+    if(CLOG_ENABLE_TAGS)
+        set(CLOG_TAG_BITS "16" CACHE STRING
+            "Select the number of bits to use for tag groups.")
+        add_definitions(-DCLOG_ENABLE_TAGS)
+        add_definitions(-DCLOG_TAG_BITS=${CLOG_TAG_BITS})
     endif()
 
     # MPI
@@ -236,6 +265,9 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     option(ENABLE_COLOR_UNIT_TESTS "Enable colorized unit testing output" OFF)
     option(ENABLE_JENKINS_OUTPUT
         "Generate jenkins xml output for every test" OFF)
+
+# FIXME: Need enable devel
+    include_directories(cinch/auxiliary)
 
     if(ENABLE_UNIT_TESTS)
 
@@ -260,7 +292,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
           set(GTEST_LIBRARIES gtest)
         endif()
 
-        include_directories(cinch/gtest-auxiliary)
+        include_directories(cinch/auxiliary/gtest)
 
         #----------------------------------------------------------------------#
         # pFUnit
@@ -289,50 +321,78 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Add default execution polices
         #----------------------------------------------------------------------#
 
+        cinch_add_test_execution_policy(SERIAL
+            ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-standard.cc
+        )
+
+        cinch_add_test_execution_policy(SERIAL_DEVEL
+            ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-standard.cc
+            DEFINES "-DCINCH_DEVEL_TEST"
+        )
+
         if(FORTRAN_ENABLED)
-            cinch_add_unit_execution_policy(FORTRAN
+            cinch_add_test_execution_policy(FORTRAN
                 ${PFUNIT_DRIVER}
                 LIBRARIES ${PFUNIT_LIBRARY})
         endif(FORTRAN_ENABLED)
 
-        if(MPI_${MPI_LANGUAGE}_FOUND AND NOT Legion_FOUND)
-            cinch_add_unit_execution_policy(SERIAL
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
-                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES})
+        # Need to collect extra runtime libraries into a standard variable
+        # that users can add to their unit test defines if needed.
+        set(CINCH_RUNTIME_INCLUDES)
+        set(CINCH_RUNTIME_FLAGS)
+        set(CINCH_RUNTIME_LIBRARIES)
 
-            cinch_add_unit_execution_policy(MPI
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpi.cc
+        # MPI Runtime
+        if(MPI_${MPI_LANGUAGE}_FOUND)
+            cinch_add_test_execution_policy(MPI
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpi.cc
                 FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
                 LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
                 EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
-        elseif(NOT MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
-            cinch_add_unit_execution_policy(SERIAL
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
+                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}
+            )
+
+            cinch_add_test_execution_policy(MPI_DEVEL
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpi.cc
+                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                DEFINES "-DCINCH_DEVEL_TEST"
+                LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
+                EXEC ${MPIEXEC}
+                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}
+            )
+
+            set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS}
+                ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+            )
+            set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
+                ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+            )
+            set(CINCH_RUNTIME_LIBRARIES ${CINCH_RUNTIME_LIBRARIES}
+                ${MPI_${MPI_LANGUAGE}_LIBRARIES}
+            )
+        endif()
+
+        # Legion Runtime
+        if(Legion_FOUND)
+            cinch_add_test_execution_policy(LEGION
+               ${CMAKE_SOURCE_DIR}/cinch/auxiliary/gtest/gtest-legion.cc
                FLAGS ${Legion_CXX_FLAGS}
                INCLUDES ${Legion_INCLUDE_DIRS}
                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
 
-            cinch_add_unit_execution_policy(LEGION
-               ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-legion.cc
-               FLAGS ${Legion_CXX_FLAGS}
-               INCLUDES ${Legion_INCLUDE_DIRS}
-               LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
-        elseif(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
-            cinch_add_unit_execution_policy(SERIAL
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc
-                FLAGS ${Legion_CXX_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${Legion_INCLUDE_DIRS}
-                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_LIBRARIES})
+            set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS} ${Legion_CXX_FLAGS})
+            set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
+                ${Legion_INCLUDE_DIRS})
+            set(CINCH_RUNTIME_LIBRARIES ${CINCH_RUNTIME_LIBRARIES}
+                ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
+            )
+        endif()
 
-            cinch_add_unit_execution_policy(MPILEGION
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
+        if(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
+            cinch_add_test_execution_policy(MPILEGION
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/gtest//gtest-mpilegion.cc
                 FLAGS ${Legion_CXX_FLAGS}
                     ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${Legion_INCLUDE_DIRS}
@@ -341,31 +401,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     ${MPI_${MPI_LANGUAGE}_LIBRARIES}
                 EXEC ${MPIEXEC}
                 EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}) 
-
-            cinch_add_unit_execution_policy(LEGION
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
-                FLAGS ${Legion_CXX_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${Legion_INCLUDE_DIRS}
-                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-                EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
-
-            cinch_add_unit_execution_policy(MPI
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-mpilegion.cc
-                FLAGS ${Legion_CXX_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${Legion_INCLUDE_DIRS}
-                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-                EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
-        else()
-            cinch_add_unit_execution_policy(SERIAL
-                ${CMAKE_SOURCE_DIR}/cinch/gtest-auxiliary/gtest-standard.cc)
         endif()
 
     endif(ENABLE_UNIT_TESTS)
@@ -584,7 +619,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         # Don't create the unit test if its policy is not defined
         #----------------------------------------------------------------------#
 
-        if(${unit_target_execution_policy}_UNIT_POLICY_LIST)
+        if(${unit_target_execution_policy}_TEST_POLICY_LIST)
 
             #------------------------------------------------------------------#
             # Create the full path to the source files
@@ -602,15 +637,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             # Get policy information
             string(REPLACE ":" ";" unit_policy_list
-                "${${unit_target_execution_policy}_UNIT_POLICY_LIST}")
+                "${${unit_target_execution_policy}_TEST_POLICY_LIST}")
 
             list(GET unit_policy_list 0 unit_policy_name)
             list(GET unit_policy_list 1 unit_policy_runtime)
             list(GET unit_policy_list 2 unit_policy_flags)
             list(GET unit_policy_list 3 unit_policy_includes)
-            list(GET unit_policy_list 4 unit_policy_libraries)
-            list(GET unit_policy_list 5 unit_policy_exec)
-            list(GET unit_policy_list 6 unit_policy_exec_threads)
+            list(GET unit_policy_list 4 unit_policy_defines)
+            list(GET unit_policy_list 5 unit_policy_libraries)
+            list(GET unit_policy_list 6 unit_policy_exec)
+            list(GET unit_policy_list 7 unit_policy_exec_threads)
 
             # Convert stored values back into lists
             string(REPLACE "|" ";" unit_policy_runtime
@@ -619,6 +655,8 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 "${unit_policy_flags}")
             string(REPLACE "|" ";" unit_policy_includes
                 "${unit_policy_includes}")
+            string(REPLACE "|" ";" unit_policy_defines
+                "${unit_policy_defines}")
             string(REPLACE "|" ";" unit_policy_libraries
                 "${unit_policy_libraries}")
 
@@ -716,6 +754,11 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     ${unit_target_defines})
             endif()
 
+            if(NOT "${unit_policy_defines}" STREQUAL "None")
+                target_compile_definitions(${unit_target_name} PRIVATE
+                    ${unit_policy_defines})
+            endif()
+
             #------------------------------------------------------------------#
             # Add output directory as inlcude
             #------------------------------------------------------------------#
@@ -752,6 +795,10 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             endif(NOT "${unit_policy_includes}" STREQUAL "None")
 
             target_link_libraries(${unit_target_name} ${GTEST_LIBRARIES})
+
+            if(ENABLE_GFLAGS)
+                target_link_libraries(${unit_target_name} ${GFLAGS_LIBRARIES})
+            endif()
 
             if(NOT "${unit_policy_libraries}" STREQUAL "None")
                 target_link_libraries(${unit_target_name}
@@ -795,7 +842,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             list(LENGTH thread_instance_list thread_instances)
 
-            if(NOT "${unit_target_execution_policy}" STREQUAL "FORTRAN")
+            string(REGEX MATCH "DEVEL" _IS_DEVEL
+                ${unit_target_execution_policy})
+
+            set(_IS_GTEST)
+            if(NOT "${unit_target_execution_policy}" STREQUAL "FORTRAN"
+                AND NOT _IS_DEVEL)
+                set(_IS_GTEST TRUE)
+            endif()
+
+            if(_IS_GTEST)
                 set(UNIT_FLAGS --gtest_color=no)
                 if(ENABLE_COLOR_UNIT_TESTS)
                     set(UNIT_FLAGS --gtest_color=yes)
@@ -807,12 +863,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             if(${thread_instances} GREATER 1)
 
                 foreach(instance ${thread_instance_list})
-                    if(ENABLE_JENKINS_OUTPUT)
+                    if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
                         set(_OUTPUT
                             ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
                         set(UNIT_FLAGS ${UNIT_FLAGS}
                             --gtest_output=xml:${_OUTPUT})
-                    endif(ENABLE_JENKINS_OUTPUT)
+                    endif()
 
                     add_test(
                         NAME
@@ -827,12 +883,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             else()
 
-                if(ENABLE_JENKINS_OUTPUT)
+                if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
                     set(_OUTPUT
                         ${_OUTPUT_DIR}/${unit_target_name}.xml)
                     set(UNIT_FLAGS ${UNIT_FLAGS}
                         --gtest_output=xml:${_OUTPUT})
-                endif(ENABLE_JENKINS_OUTPUT)
+                endif()
 
                 if(NOT "${unit_policy_exec}" STREQUAL "None")
                     add_test(
@@ -857,7 +913,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             endif(${thread_instances} GREATER 1)
 
-        endif(${unit_target_execution_policy}_UNIT_POLICY_LIST)
+        endif(${unit_target_execution_policy}_TEST_POLICY_LIST)
 
     endforeach(unit)
 

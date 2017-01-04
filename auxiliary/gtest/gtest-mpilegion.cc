@@ -18,22 +18,20 @@
 #undef EXPAND_AND_STRINGIFY
 #undef _UTIL_STRINGIFY
 
-#include "listener.h"
+#if defined(ENABLE_GFLAGS)
+  #include <gflags/gflags.h>
+  DEFINE_string(groups, "all", "Specify the active tag groups");
+#endif // ENABLE_GFLAGS
 
-int gtest_mpilegion_argc;
-char** gtest_mpilegion_argv;
+#include "cinchtest.h"
 
 int main(int argc, char ** argv) {
 
-  gtest_mpilegion_argc = argc;
-  gtest_mpilegion_argv = argv;
-  
+  // Get the MPI version
   int version, subversion;
   MPI_Get_version(&version, &subversion);
-  std::cout <<"MPI version = "<< version<< " , subversion =" <<
-    subversion << std::endl;
-//TOFIX:: add check for Gasnet conduit
-  if(version==3 && subversion>0){
+
+  if(version==3 && subversion>0) {
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     // If you fail this assertion, then your version of MPI
@@ -45,12 +43,27 @@ int main(int argc, char ** argv) {
            "GASNet MPI conduit with the Legion-MPI Interop!\n");
     assert(provided == MPI_THREAD_MULTIPLE);
   }
-  else{
+  else {
     // Initialize the MPI runtime
     MPI_Init(&argc, &argv);
-  }
+  } // if
+
   // Initialize the GTest runtime
   ::testing::InitGoogleTest(&argc, argv);
+
+  // This is used for initialization of clog if gflags is not enabled.
+  std::string groups = "all";
+
+#if defined(ENABLE_GFLAGS)
+  // Send any unprocessed arguments to GFlags
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+#endif // ENABLE_GFLAGS
+
+  // Initialize the cinchlog runtime
+  clog_init(groups);
+
+  // Output MPI Version information
+  clog(info) << "MPI version: " << version << "." << subversion << std::endl;
 
   ::testing::TestEventListeners& listeners =
     ::testing::UnitTest::GetInstance()->listeners();

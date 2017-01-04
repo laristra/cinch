@@ -1,19 +1,21 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2015 Los Alamos National Security, LLC
+ * Copyright (c) 2016 Los Alamos National Security, LLC
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
 #ifndef cinch_cinchlog_h
 #define cinch_cinchlog_h
 
-#if defined __GNUG__
+#if defined __GNUC__
 #include <cxxabi.h>
 #include <execinfo.h>
-#endif
+#endif // __GNUC__
 
+#include <cassert>
 #include <cstdlib>
 #include <time.h>
 
+#include <bitset>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -33,6 +35,13 @@
 //----------------------------------------------------------------------------//
 
 // Set CLOG_ENABLE_STDLOG to enable output to std::clog
+
+// Set CLOG_ENABLE_TAGS to enable tag groups
+// Set CLOG_TAG_BITS to enable TAG_BITS number of groups
+
+#ifndef CLOG_TAG_BITS
+#define CLOG_TAG_BITS 32
+#endif
 
 //----------------------------------------------------------------------------//
 // Compile-time configuration parameters.
@@ -133,15 +142,62 @@
 
 #endif // CLOG_COLOR_OUTPUT
 
+//----------------------------------------------------------------------------//
+// Macro utilities.
+//----------------------------------------------------------------------------//
+
+#define _clog_util_stringify(s) #s
+#define _clog_stringify(s) _clog_util_stringify(s)
+#define clog_concat(a, b) a ## b
+
 namespace cinch {
+
+//----------------------------------------------------------------------------//
+// Helper functions.
+//----------------------------------------------------------------------------//
+
+inline
+std::string
+demangle(
+  const char * name
+)
+{
+#if defined __GNUC__
+  int status = -4;
+
+  std::unique_ptr<char, void(*)(void*)> res {
+    abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
+
+  return (status==0) ? res.get() : name ;
+#else
+  return name;
+#endif
+} // demangle
+
+inline
+std::string
+timestamp(bool underscores = false)
+{
+  char stamp[14];
+  time_t t = time(0);
+  std::string format = underscores ? "%m%d_%H%M%S" : "%m%d %H:%M:%S";
+  strftime(stamp, sizeof(stamp), format.c_str(), localtime(&t));
+  return std::string(stamp);
+} // timestamp
+
+template<char C>
+std::string rstrip(const char *file) {
+  std::string tmp(file);
+  return tmp.substr(tmp.rfind(C)+1);
+} // rstrip
 
 //----------------------------------------------------------------------------//
 // Auxilliary types.
 //----------------------------------------------------------------------------//
 
 ///
-// Stream buffer type to allow output to multiple targets
-// a la the tee function.
+/// Stream buffer type to allow output to multiple targets
+/// a la the tee function.
 ///
 class tee_buffer_t
   : public std::streambuf
@@ -149,8 +205,8 @@ class tee_buffer_t
 public:
 
   ///
-  // Buffer data type to hold state and actual low-level
-  // stream buffer pointer.
+  /// Buffer data type to hold state and actual low-level
+  /// stream buffer pointer.
   ///
   struct buffer_data_t {
     bool enabled;
@@ -159,8 +215,8 @@ public:
   }; // struct buffer_data_t
 
   ///
-  // Add a buffer to which output should be written. This also enables
-  // the buffer, i.e., output will be written to it.
+  /// Add a buffer to which output should be written. This also enables
+  /// the buffer, i.e., output will be written to it.
   ///
   void
   add_buffer(
@@ -175,8 +231,8 @@ public:
   } // add_buffer
 
   ///
-  // Enable a buffer so that output is written to it. This is mainly
-  // for buffers that have been disabled and need to be re-enabled.
+  /// Enable a buffer so that output is written to it. This is mainly
+  /// for buffers that have been disabled and need to be re-enabled.
   ///
   bool
   enable_buffer(
@@ -188,7 +244,7 @@ public:
   } // enable_buffer
 
   ///
-  // Disable a buffer so that output is not written to it.
+  /// Disable a buffer so that output is not written to it.
   ///
   bool
   disable_buffer(
@@ -267,7 +323,7 @@ protected:
             return c;
           }
           else if(c == 'm') {
-            // This is a pain color termination. Write the
+            // This is a plain color termination. Write the
             // buffered output to the color buffers.
             return flush_buffer(color_buffers);
           }
@@ -316,7 +372,7 @@ protected:
   } // overflow
 
   ///
-  // Override the sync method so that we sync all of the output buffers.
+  /// Override the sync method so that we sync all of the output buffers.
   ///
   virtual
   int
@@ -385,7 +441,7 @@ private:
 }; // class tee_buffer_t
 
 ///
-// A stream class that writes to multiple output buffers.
+/// A stream class that writes to multiple output buffers.
 ///
 struct tee_stream_t
   : public std::ostream
@@ -409,7 +465,7 @@ struct tee_stream_t
   } // operator *
 
   ///
-  // Add a new buffer to the output.
+  /// Add a new buffer to the output.
   ///
   void
   add_buffer(
@@ -422,7 +478,7 @@ struct tee_stream_t
   } // add_buffer
 
   ///
-  /// Enable an existing buffer. This is only 
+  /// Enable an existing buffer.
   ///
   /// \param[in] key The string identifier of the streambuf.
   ///
@@ -460,42 +516,95 @@ private:
 //----------------------------------------------------------------------------//
 
 ///
-// \class cinchlog_t cinchlog.h
-// \brief cinchlog_t provides access to logging parameters and configuration.
-//
-// This type provides access to the underlying logging parameters for
-// configuration and information. The cinch logging functions provide
-// basic logging with an interface that is similar to Google's GLOG
-// and the Boost logging utilities.
-//
-// \note We may want to consider adopting one of these packages
-// in the future.
+/// \class clog_t cinchlog.h
+/// \brief clog_t provides access to logging parameters and configuration.
 ///
-class cinchlog_t
+/// This type provides access to the underlying logging parameters for
+/// configuration and information. The cinch logging functions provide
+/// basic logging with an interface that is similar to Google's GLOG
+/// and the Boost logging utilities.
+///
+/// \note We may want to consider adopting one of these packages
+/// in the future.
+///
+class clog_t
 {
 public:
 
   /// Copy constructor (disabled)
-  cinchlog_t(const cinchlog_t &) = delete;
+  clog_t(const clog_t &) = delete;
 
   /// Assignment operator (disabled)
-  cinchlog_t & operator = (const cinchlog_t &) = delete;
+  clog_t & operator = (const clog_t &) = delete;
 
   ///
-  // Meyer's singleton instance.
-  //
-  // \return The singleton instance of this type.
+  /// Meyer's singleton instance.
+  ///
+  /// \return The singleton instance of this type.
   ///
   static
-  cinchlog_t &
+  clog_t &
   instance()
   {
-    static cinchlog_t c;
+    static clog_t c;
     return c;
   } // instance
 
   ///
-  // Return the log stream.
+  ///
+  ///
+  void
+  init(std::string active = "none")
+  {
+    // Because active tags are specified at runtime, it is
+    // necessary to maintain a map of the compile-time registered
+    // tag names to the id that they get assigned after the clog_t
+    // initialzation (register_tag). This map will be used to populate
+    // the tag_bitset_ for fast runtime comparisons of enabled tag groups.
+
+    // Note: For the time being, the map uses actual strings rather than
+    // hashes. We should consider creating a const_string_t type for
+    // constexpr string creation.
+
+    // Initialize everything to false. This is the default, i.e., "none".
+    tag_bitset_.reset();
+
+    if(active == "all") {
+      // Turn on all of the bits for "all".
+      tag_bitset_.flip();
+    }
+    else if(active != "none") {
+      // Turn on the bits for the selected groups.
+
+      // The default group is always active (unscoped). To avoid
+      // output for this tag, make sure to scope all CLOG output.
+      tag_bitset_.set(0);
+
+      std::istringstream is(active);
+      std::string tag;
+      while(std::getline(is, tag, ',')) {
+        if(tag_map_.find(tag) != tag_map_.end()) {
+          tag_bitset_.set(tag_map_[tag]);
+        }
+        else {
+          std::cerr << "CLOG WARNING: " << tag <<
+            " has not been registered. Ignoring this group..." << std::endl;
+        } // if
+      } // while
+    } // if
+  } // clog_t
+
+  ///
+  /// Return the tag map.
+  ///
+  const std::unordered_map<std::string, size_t> &
+  tag_map()
+  {
+    return tag_map_;
+  } // tag_map
+
+  ///
+  /// Return the log stream.
   ///
   std::ostream &
   stream()
@@ -504,7 +613,7 @@ public:
   } // stream
 
   ///
-  // Return a null stream to disable output.
+  /// Return a null stream to disable output.
   ///
   std::ostream &
   null_stream()
@@ -513,8 +622,8 @@ public:
   } // null_stream
 
   ///
-  // Return the tee stream to allow the user to set configuration options.
-  // FIXME: Need a better interface for this...
+  /// Return the tee stream to allow the user to set configuration options.
+  /// FIXME: Need a better interface for this...
   ///
   tee_stream_t &
   config_stream()
@@ -522,68 +631,133 @@ public:
     return *stream_;
   } // stream
 
+  ///
+  /// Return the next tag id.
+  ///
+  size_t
+  register_tag(const char * name)
+  {
+    const size_t id = ++tag_id_;
+    assert(id < CLOG_TAG_BITS && "Tag bits overflow! Increase CLOG_TAG_BITS");
+    tag_map_[name] = id;
+    return id;
+  } // next_tag
+
+  ///
+  /// Return a reference to the active tag (const version).
+  ///
+  const size_t &
+  active_tag() const
+  {
+    return active_tag_;
+  } // active_tag
+
+  ///
+  /// Return a reference to the active tag (mutable version).
+  ///
+  size_t &
+  active_tag()
+  {
+    return active_tag_;
+  } // active_tag
+
+  bool
+  tag_enabled()
+  {
+#if defined(CLOG_ENABLE_TAGS)
+    return tag_bitset_.test(active_tag_);
+#else
+    return true;
+#endif // CLOG_ENABLE_TAGS
+  } // tag_enabled
+
 private:
 
   ///
-  // Constructor. This method is hidden because we are a singleton.
-  //
-  cinchlog_t()
+  /// Constructor. This method is hidden because we are a singleton.
+  ///
+  clog_t()
   :
-    null_stream_(0)
+    null_stream_(0), tag_id_(0), active_tag_(0)
   {
-  } // cinchlog_t
+  } // clog_t
 
-  ~cinchlog_t() {}
+  ~clog_t() {}
 
   tee_stream_t stream_;
   std::ostream null_stream_;
 
-}; // class cinchlog_t
+  size_t tag_id_;
+  size_t active_tag_;
+  std::bitset<CLOG_TAG_BITS> tag_bitset_;
+  std::unordered_map<std::string, size_t> tag_map_;
+
+}; // class clog_t
 
 //----------------------------------------------------------------------------//
-// Helper functions.
+// Tag scope.
 //----------------------------------------------------------------------------//
 
-inline
-std::string
-demangle(
-  const char * name
-)
+///
+/// \class clog_tag_scope_t
+/// \brief clog_tag_scope_t provides an execution scope for which a given
+///        tag id is active.
+///
+/// This type sets the active tag id to the id passed to the constructor,
+/// stashing the current active tag. When the instance goes out of scope,
+/// the active tag is reset to the stashed value.
+///
+struct clog_tag_scope_t
 {
-#if defined __GNUC__
-  int status = -4;
+  clog_tag_scope_t(size_t tag = 0)
+  :
+    stash_(clog_t::instance().active_tag())
+  {
+    clog_t::instance().active_tag() = tag;
+  } // clog_tag_scope_t
 
-  std::unique_ptr<char, void(*)(void*)> res {
-    abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
+  ~clog_tag_scope_t()
+  {
+    clog_t::instance().active_tag() = stash_;
+  } // ~clog_tag_scope_t
 
-  return (status==0) ? res.get() : name ;
-#else
-	return name;
-#endif
-} // demangle
+private:
 
-inline
-std::string
-timestamp()
-{
-  char stamp[14];
-  time_t t = time(0);
-  strftime(stamp, sizeof(stamp), "%m%d %H:%M:%S", gmtime(&t));
-  return std::string(stamp);
-} // timestamp
+  size_t stash_;
 
-template<char C>
-std::string rstrip(const char *file) {
-  std::string tmp(file);
-  return tmp.substr(tmp.rfind(C)+1);
-} // rstrip
+}; // clog_tag_scope_t
+
+// Note that none of the tag interface is thread safe. This will have
+// to be fixed in the future. One way to do this would be to use TLS
+// for the active tag information.
+//
+// Another feature that would be nice is if the static size_t definition
+// failed with helpful information if the user tries to create a tag
+// scope for a tag that hasn't been registered.
+
+// Register a tag group with the runtime (clog_t). We need the static
+// size_t so that tag scopes can be created quickly during execution.
+#define clog_register_tag(name)                                                \
+  static size_t name ## _clog_tag_id =                                         \
+  cinch::clog_t::instance().register_tag(_clog_stringify(name))
+
+// Return the static variable created in the clog_register_tag macro above.
+#define clog_tag_lookup(name)                                                  \
+  name ## _clog_tag_id
+
+// Create a new tag scope.
+#define clog_tag_scope(name)                                                   \
+  cinch::clog_tag_scope_t name ## _clog_tag_scope__(clog_tag_lookup(name))
+
+#define clog_tag_map()                                                         \
+  cinch::clog_t::instance().tag_map()
 
 //----------------------------------------------------------------------------//
 // Base type for log messages.
 //----------------------------------------------------------------------------//
 
 ///
-// Function always returning true. Used for defaults.
+/// Function always returning true. Used for defaults.
 ///
 inline
 bool
@@ -593,9 +767,9 @@ true_state()
 } // output_bool
 
 ///
-// \struct log_message_t cinchlog.h
-// \brief log_message_t provides a base class for implementing
-//        formatted logging utilities.
+/// \struct log_message_t cinchlog.h
+/// \brief log_message_t provides a base class for implementing
+///        formatted logging utilities.
 ///
 template<typename P>
 struct log_message_t
@@ -624,7 +798,8 @@ struct log_message_t
     P && predicate
   )
   :
-    file_(file), line_(line), predicate_(predicate), fatal_(false)
+    file_(file), line_(line), predicate_(predicate),
+    fatal_(false), clean_color_(false)
   {
   } // log_message_t
 
@@ -642,7 +817,7 @@ struct log_message_t
       size = backtrace(array, 100);
       char ** symbols = backtrace_symbols(array, size);
 
-      std::ostream & stream = cinchlog_t::instance().stream();
+      std::ostream & stream = clog_t::instance().stream();
 
       for(size_t i(0); i<size; ++i) {
         std::string re = symbols[i];
@@ -673,15 +848,15 @@ struct log_message_t
   } // ~log_message_t
 
   ///
-  // Return the output stream. Override this method to add additional
+  /// Return the output stream. Override this method to add additional
   // formatting to a particular severity output.
   ///
   virtual
   std::ostream &
   stream()
   {
-    return predicate_() ? cinchlog_t::instance().stream() :
-      cinchlog_t::instance().null_stream();
+    return predicate_() ? clog_t::instance().stream() :
+      clog_t::instance().null_stream();
   } // stream
 
 protected:
@@ -689,6 +864,7 @@ protected:
   const char * file_;
   int line_;
   P & predicate_;
+  bool clean_color_;
   bool fatal_;
 
 }; // struct log_message_t
@@ -713,7 +889,9 @@ struct severity ## _log_message_t                                              \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
     /* Clean colors from the stream */                                         \
-    cinchlog_t::instance().stream() << COLOR_PLAIN;                            \
+    if(clean_color_) {                                                         \
+      clog_t::instance().stream() << COLOR_PLAIN;                              \
+    }                                                                          \
   }                                                                            \
                                                                                \
   std::ostream &                                                               \
@@ -729,96 +907,109 @@ struct severity ## _log_message_t                                              \
 #define message_stamp \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
+// Trace
 severity_message_t(trace, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 1
-    if(predicate_()) {
-      std::ostream & stream = cinchlog_t::instance().stream();
+    if(clog_t::instance().tag_enabled() && predicate_()) {
+      std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_CYAN("] ");
       return stream;
     }
     else {
-      return cinchlog_t::instance().null_stream();
+      return clog_t::instance().null_stream();
     } // if
 #else
-    return cinchlog_t::instance().null_stream();
+    return clog_t::instance().null_stream();
 #endif
   });
 
+// Info
 severity_message_t(info, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 2
-    if(predicate_()) {
-      std::ostream & stream = cinchlog_t::instance().stream();
+    if(clog_t::instance().tag_enabled() && predicate_()) {
+      std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_GREEN("] ");
       return stream;
     }
     else {
-      return cinchlog_t::instance().null_stream();
+      return clog_t::instance().null_stream();
     } // if
 #else
-    return cinchlog_t::instance().null_stream();
+    return clog_t::instance().null_stream();
 #endif
   });
 
+// Warn
 severity_message_t(warn, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 3
-    if(predicate_()) {
-      std::ostream & stream = cinchlog_t::instance().stream();
+    if(clog_t::instance().tag_enabled() && predicate_()) {
+      std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+      clean_color_ = true;
       return stream;
     }
     else {
-      return cinchlog_t::instance().null_stream();
+      return clog_t::instance().null_stream();
     } // if
 #else
-    return cinchlog_t::instance().null_stream();
+    return clog_t::instance().null_stream();
 #endif
   });
 
+// Error
 severity_message_t(error, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 4
-    if(predicate_()) {
-      std::ostream & stream = cinchlog_t::instance().stream();
+    if(clog_t::instance().tag_enabled() && predicate_()) {
+      std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_RED("] ") << COLOR_LTRED;
+      clean_color_ = true;
       return stream;
     }
     else {
-      return cinchlog_t::instance().null_stream();
+      return clog_t::instance().null_stream();
     } // if
 #else
-    return cinchlog_t::instance().null_stream();
+    return clog_t::instance().null_stream();
 #endif
   });
 
+// FIXME: This probably does not have the behavior we want, i.e.,
+//        fatal errors should not be predicated.
+// Fatal
 severity_message_t(fatal, decltype(cinch::true_state),
   {
 #if CLOG_STRIP_LEVEL < 5
-    if(predicate_()) {
-      std::ostream & stream = cinchlog_t::instance().stream();
+    if(clog_t::instance().tag_enabled() && predicate_()) {
+      std::ostream & stream = clog_t::instance().stream();
       stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+      clean_color_ = true;
       fatal_ = true;
       return stream;
     }
     else {
-      return cinchlog_t::instance().null_stream();
+      return clog_t::instance().null_stream();
     } // if
 #else
-    return cinchlog_t::instance().null_stream();
+    return clog_t::instance().null_stream();
 #endif
   });
 
 } // namespace cinch
 
 //----------------------------------------------------------------------------//
-// Macros
+// Macro Interface
 //----------------------------------------------------------------------------//
+
+#define clog_init(active)                                                      \
+  cinch::clog_t::instance().init(active)
 
 ///
 /// This handles all of the different logging modes for the insertion
@@ -837,7 +1028,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 /// Method style interface for trace level severity log entries.
 ///
 #define clog_trace(message)                                                    \
-  clog(info) << message << std::endl
+  clog(trace) << message << std::endl
 
 ///
 /// Method style interface for info level severity log entries.
@@ -857,6 +1048,24 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_error(message)                                                    \
   clog(error) << message << std::endl
 
+/// Indirection to expand counter name.
+#define clog_counter_varname(str, line)                                        \
+  clog_concat(str, line)
+
+/// Indirection to expand counter name.
+#define clog_counter(str)                                                      \
+  clog_counter_varname(str, __LINE__)
+
+/// Define a counter name.
+#define counter_name clog_counter(counter)
+
+///
+/// Method style interface to output every nth iteration.
+///
+#define clog_every_n(severity, n, message)                                     \
+  static size_t counter_name = 0;                                              \
+  if(counter_name++%n == 0) { clog_ ## severity(message); }
+
 ///
 /// Method style interface for fatal level severity log entries.
 ///
@@ -874,20 +1083,20 @@ severity_message_t(fatal, decltype(cinch::true_state),
 /// by default.
 ///
 #define clog_add_buffer(name, ostream, colorized)                              \
-  cinch::cinchlog_t::instance().config_stream().add_buffer(name, ostream,      \
+  cinch::clog_t::instance().config_stream().add_buffer(name, ostream,          \
     colorized)
 
 ///
 /// Expose interface to enable buffers.
 ///
 #define clog_enable_buffer(name)                                               \
-  cinch::cinchlog_t::instance().config_stream().enable_buffer(name)
+  cinch::clog_t::instance().config_stream().enable_buffer(name)
 
 ///
 /// Expose interface to disable buffers.
 ///
 #define clog_disable_buffer(name)                                              \
-  cinch::cinchlog_t::instance().config_stream().disable_buffer(name)
+  cinch::clog_t::instance().config_stream().disable_buffer(name)
 
 namespace clog {
 
@@ -938,17 +1147,61 @@ namespace clog {
 
 namespace cinch {
 
+struct mpi_config_t {
+
+  static
+  mpi_config_t &
+  instance()
+  {
+    static mpi_config_t m;
+    return m;
+  } // instance
+
+  const
+  size_t &
+  active_rank() const
+  {
+    return active_rank_;
+  } // active_rank
+
+  size_t &
+  active_rank()
+  {
+    return active_rank_;
+  } // active_rank
+
+private:
+
+  mpi_config_t()
+  :
+    active_rank_(0)
+  {}
+
+  size_t active_rank_;
+
+}; // struct mpi_config_t
+
 template<
   size_t R
 >
 inline
 bool
-is_rank()
+is_static_rank()
 {
   int part;
   MPI_Comm_rank(MPI_COMM_WORLD, &part);
   return part == R;
-} // is_rank
+} // is_static_rank
+
+// FIXME: Not sure if I like this approach...
+inline
+bool
+is_active_rank()
+{
+  int part;
+  MPI_Comm_rank(MPI_COMM_WORLD, &part);
+  return part == mpi_config_t::instance().active_rank();
+} // is_active_rank
 
 } // namespace
 
@@ -964,7 +1217,16 @@ is_rank()
 ///
 #define clog_rank(severity, rank)                                              \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
-    cinch::is_rank<rank>).stream()
+    cinch::is_static_rank<rank>).stream()
+
+// Set the output rank for clog_one calls.
+#define clog_set_output_rank(rank)                                             \
+  cinch::mpi_config_t::instance().active_rank() = rank
+
+// Output to the rank set by clog_set_output_rank()
+#define clog_one(severity)                                                     \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+    cinch::is_active_rank).stream()
 
 ///
 /// Output contents of a container only on the specified rank.
@@ -987,18 +1249,55 @@ is_rank()
   for(auto c = container.begin(); c != container.end(); ++c) {                 \
     (delimiter == clog::newline) &&                                            \
     ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
-      entry++ << OUTPUT_CYAN("]") << std::endl << *c;                          \
+      entry++ << OUTPUT_CYAN("]") << std::endl;                                \
+    ss << *c;                                                                  \
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
   }
 
+///
+/// Output contents of a container only on the specified rank.
+///
+#define clog_container_one(severity, banner, container, delimiter)             \
+  {                                                                            \
+  std::stringstream ss;                                                        \
+  char delim =                                                                 \
+    (delimiter == clog::newline) ?                                             \
+      '\n' :                                                                   \
+    (delimiter == clog::space) ?                                               \
+      ' ' :                                                                    \
+    (delimiter == clog::colon) ?                                               \
+      ':' :                                                                    \
+    (delimiter == clog::semicolon) ?                                           \
+      ';' :                                                                    \
+      ',';                                                                     \
+  ss << banner << (delimiter == clog::newline ? '\n' : ' ');                   \
+  size_t entry(0);                                                             \
+  for(auto c = container.begin(); c != container.end(); ++c) {                 \
+    (delimiter == clog::newline) &&                                            \
+    ss << OUTPUT_CYAN("[C") << OUTPUT_LTGRAY(" entry ") <<                     \
+      entry++ << OUTPUT_CYAN("]") << std::endl;                                \
+    ss << *c;                                                                  \
+    (c != --container.end()) && ss << delim;                                   \
+  }                                                                            \
+  clog_one(severity) << ss.str() << std::endl;                                 \
+  }
+
 #else
 
-#define clog_rank(severity, rank) \
+#define clog_rank(severity, rank)                                              \
   std::cout
 
-#define clog_container_rank(severity, banner, container, delimiter, rank) \
+#define clog_set_output_rank(rank)
+
+#define clog_one(severity)                                                     \
+  std::cout
+
+#define clog_container_rank(severity, banner, container, delimiter, rank)      \
+  std::cout
+
+#define clog_container_one(severity, banner, container, delimiter)             \
   std::cout
 
 #endif // CLOG_ENABLE_MPI
