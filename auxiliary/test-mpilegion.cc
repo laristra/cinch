@@ -151,8 +151,9 @@ int main(int argc, char ** argv) {
 #endif
   } // if
 
+  // FIXME: This is some kind of GASNet bug (or maybe Legion).
   // Shutdown the MPI runtime
-  MPI_Finalize();
+  //MPI_Finalize();
 
   return result;
 
