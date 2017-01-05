@@ -3,12 +3,12 @@
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#ifndef gtest_init_h
-#define gtest_init_h
+#ifndef test_init_h
+#define test_init_h
 
-inline void gtest_init(int argc, char ** argv) {}
+inline void test_init(int argc, char ** argv) {}
 
-#endif // gtest_init_h
+#endif // test_init_h
 
 /*~-------------------------------------------------------------------------~-*
  * Formatting options for vim.

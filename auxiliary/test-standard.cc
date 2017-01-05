@@ -33,10 +33,10 @@ void print_devel_code_label(std::string name) {
 #define _UTIL_STRINGIFY(s) #s
 #define EXPAND_AND_STRINGIFY(s) _UTIL_STRINGIFY(s)
 
-#ifndef GTEST_INIT
-  #include "gtest-init.h"
+#ifndef TEST_INIT
+  #include "test-init.h"
 #else
-  #include EXPAND_AND_STRINGIFY(GTEST_INIT)
+  #include EXPAND_AND_STRINGIFY(TEST_INIT)
 #endif
 
 #undef EXPAND_AND_STRINGIFY
@@ -83,9 +83,12 @@ int main(int argc, char ** argv) {
     // Initialize the cinchlog runtime
     clog_init(active);
 
+    // Call the user-provided initialization function
+    test_init(argc, argv);
+
 #if defined(CINCH_DEVEL_TEST)
     // Perform test initialization.
-    user_devel_code_init(print_devel_code_label);
+    cinch_devel_code_init(print_devel_code_label);
 
     // Run the devel test.
     user_devel_code_logic();
@@ -96,9 +99,6 @@ int main(int argc, char ** argv) {
 
     // Adds a listener to the end.  Google Test takes the ownership.
     listeners.Append(new cinch::listener);
-
-    // Call the user-provided initialization function
-    gtest_init(argc, argv);
 
     // Run the tests for this target.
     result = RUN_ALL_TESTS();

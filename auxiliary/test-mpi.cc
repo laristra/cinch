@@ -105,7 +105,7 @@ int main(int argc, char ** argv) {
 
 #if defined(CINCH_DEVEL_TEST)
     // Perform test initialization.
-    user_devel_code_init(print_devel_code_label);
+    cinch_devel_code_init(print_devel_code_label);
 
     // Run the devel test.
     user_devel_code_logic();  

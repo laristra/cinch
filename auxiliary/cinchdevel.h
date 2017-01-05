@@ -13,11 +13,11 @@
 /// \date Initial file creation: Dec 28, 2016
 ///
 
-void user_devel_code_init(std::function<void(std::string)> func);
+void cinch_devel_code_init(std::function<void(std::string)> func);
 void user_devel_code_logic();
 
 #define DEVEL(name)                                                            \
-  void user_devel_code_init(std::function<void(std::string)>  func) {          \
+  void cinch_devel_code_init(std::function<void(std::string)>  func) {         \
     func(_clog_stringify(name));                                               \
   }                                                                            \
   void user_devel_code_logic()
