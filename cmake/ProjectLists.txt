@@ -401,6 +401,30 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     ${MPI_${MPI_LANGUAGE}_LIBRARIES}
                 EXEC ${MPIEXEC}
                 EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}) 
+
+            cinch_add_test_execution_policy(MPILEGION_DEVEL
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpilegion.cc
+                FLAGS ${Legion_CXX_FLAGS}
+                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
+                INCLUDES ${Legion_INCLUDE_DIRS}
+                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
+                DEFINES "-DCINCH_DEVEL_TEST"
+                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
+                    ${MPI_${MPI_LANGUAGE}_LIBRARIES}
+                EXEC ${MPIEXEC}
+                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
+
+            set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS}
+                ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS} ${Legion_CXX_FLAGS}
+            )
+            set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
+                ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH} ${Legion_INCLUDE_DIRS}
+            )
+            set(CINCH_RUNTIME_LIBRARIES ${CINCH_RUNTIME_LIBRARIES}
+                ${MPI_${MPI_LANGUAGE}_LIBRARIES} 
+                ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
+            )
+
         endif()
 
     endif(ENABLE_UNIT_TESTS)
