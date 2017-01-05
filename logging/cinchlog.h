@@ -453,7 +453,7 @@ struct tee_stream_t
   {
     // Allow users to turn std::clog output on and off from
     // their environment.
-    if(const char * env = std::getenv("CLOG_ENABLE_STDLOG")) {
+    if(std::getenv("CLOG_ENABLE_STDLOG")) {
       tee_.add_buffer("clog", std::clog.rdbuf(), true);
     } // if
   } // tee_stream_t
@@ -613,6 +613,17 @@ public:
   } // stream
 
   ///
+  /// Return the log stream predicated on a boolean.
+  /// This method interface will allow us to select between
+  /// the actual stream and a null stream.
+  ///
+  std::ostream &
+  severity_stream(bool active = true)
+  {
+    return active ? *stream_ : null_stream_;
+  } // stream
+
+  ///
   /// Return a null stream to disable output.
   ///
   std::ostream &
@@ -746,7 +757,7 @@ private:
   name ## _clog_tag_id
 
 // Create a new tag scope.
-#define clog_tag_scope(name)                                                   \
+#define clog_tag_guard(name)                                                   \
   cinch::clog_tag_scope_t name ## _clog_tag_scope__(clog_tag_lookup(name))
 
 #define clog_tag_map()                                                         \
@@ -799,7 +810,7 @@ struct log_message_t
   )
   :
     file_(file), line_(line), predicate_(predicate),
-    fatal_(false), clean_color_(false)
+    clean_color_(false), fatal_(false)
   {
   } // log_message_t
 
@@ -910,75 +921,47 @@ struct severity ## _log_message_t                                              \
 // Trace
 severity_message_t(trace, decltype(cinch::true_state),
   {
-#if CLOG_STRIP_LEVEL < 1
-    if(clog_t::instance().tag_enabled() && predicate_()) {
-      std::ostream & stream = clog_t::instance().stream();
-      stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_CYAN("] ");
-      return stream;
-    }
-    else {
-      return clog_t::instance().null_stream();
-    } // if
-#else
-    return clog_t::instance().null_stream();
-#endif
+    std::ostream & stream =
+      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 1 &&
+        predicate_() && clog_t::instance().tag_enabled());
+    stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_CYAN("] ");
+    return stream;
   });
 
 // Info
 severity_message_t(info, decltype(cinch::true_state),
   {
-#if CLOG_STRIP_LEVEL < 2
-    if(clog_t::instance().tag_enabled() && predicate_()) {
-      std::ostream & stream = clog_t::instance().stream();
-      stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_GREEN("] ");
-      return stream;
-    }
-    else {
-      return clog_t::instance().null_stream();
-    } // if
-#else
-    return clog_t::instance().null_stream();
-#endif
+    std::ostream & stream =
+      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 2 &&
+        predicate_() && clog_t::instance().tag_enabled());
+    stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_GREEN("] ");
+    return stream;
   });
 
 // Warn
 severity_message_t(warn, decltype(cinch::true_state),
   {
-#if CLOG_STRIP_LEVEL < 3
-    if(clog_t::instance().tag_enabled() && predicate_()) {
-      std::ostream & stream = clog_t::instance().stream();
-      stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
-      clean_color_ = true;
-      return stream;
-    }
-    else {
-      return clog_t::instance().null_stream();
-    } // if
-#else
-    return clog_t::instance().null_stream();
-#endif
+    std::ostream & stream =
+      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 3 &&
+        predicate_() && clog_t::instance().tag_enabled());
+    stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+    clean_color_ = true;
+    return stream;
   });
 
 // Error
 severity_message_t(error, decltype(cinch::true_state),
   {
-#if CLOG_STRIP_LEVEL < 4
-    if(clog_t::instance().tag_enabled() && predicate_()) {
-      std::ostream & stream = clog_t::instance().stream();
-      stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_RED("] ") << COLOR_LTRED;
-      clean_color_ = true;
-      return stream;
-    }
-    else {
-      return clog_t::instance().null_stream();
-    } // if
-#else
-    return clog_t::instance().null_stream();
-#endif
+    std::ostream & stream =
+      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 4 &&
+        predicate_() && clog_t::instance().tag_enabled());
+    stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_RED("] ") << COLOR_LTRED;
+    clean_color_ = true;
+    return stream;
   });
 
 // FIXME: This probably does not have the behavior we want, i.e.,
@@ -986,20 +969,13 @@ severity_message_t(error, decltype(cinch::true_state),
 // Fatal
 severity_message_t(fatal, decltype(cinch::true_state),
   {
-#if CLOG_STRIP_LEVEL < 5
-    if(clog_t::instance().tag_enabled() && predicate_()) {
-      std::ostream & stream = clog_t::instance().stream();
-      stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
-      clean_color_ = true;
-      fatal_ = true;
-      return stream;
-    }
-    else {
-      return clog_t::instance().null_stream();
-    } // if
-#else
-    return clog_t::instance().null_stream();
-#endif
+    std::ostream & stream =
+      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 5 &&
+        predicate_() && clog_t::instance().tag_enabled());
+    stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+    clean_color_ = true;
+    fatal_ = true;
+    return stream;
   });
 
 } // namespace cinch
