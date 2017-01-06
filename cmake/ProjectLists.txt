@@ -382,6 +382,13 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                INCLUDES ${Legion_INCLUDE_DIRS}
                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
 
+            cinch_add_test_execution_policy(LEGION_DEVEL
+               ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-legion.cc
+               FLAGS ${Legion_CXX_FLAGS}
+               DEFINES "-DCINCH_DEVEL_TEST"
+               INCLUDES ${Legion_INCLUDE_DIRS}
+               LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
+
             set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS} ${Legion_CXX_FLAGS})
             set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
                 ${Legion_INCLUDE_DIRS})
