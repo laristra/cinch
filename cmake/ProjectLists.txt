@@ -202,6 +202,17 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     endif(NOT DEFINED LIBDIR)
 
     #--------------------------------------------------------------------------#
+    # Add support for Boost preprocessor.
+    #--------------------------------------------------------------------------#
+
+    option(ENABLE_BOOST_PREPROCESSOR "Enable Boost.Preprocessor subset" OFF)
+
+    if(ENABLE_BOOST_PREPROCESSOR)
+        include_directories(cinch/boost/preprocessor/include)
+        add_definitions(-DENABLE_BOOST_PREPROCESSOR)
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Add support for GFlags
     #--------------------------------------------------------------------------#
 

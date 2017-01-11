@@ -7,3 +7,6 @@
 [submodule "gflags"]
 	path = gflags
 	url = ../../gflags/gflags.git
+[submodule "boost/preprocessor"]
+	path = boost/preprocessor
+	url = https://github.com/boostorg/preprocessor.git
