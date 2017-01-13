@@ -9,4 +9,4 @@
 	url = ../../boostorg/preprocessor.git
 [submodule "gflags"]
 	path = gflags
-	url = ../../gflags/gflags.git
+	url = ../gflags.git
