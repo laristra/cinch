@@ -279,9 +279,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     option(ENABLE_JENKINS_OUTPUT
         "Generate jenkins xml output for every test" OFF)
 
-# FIXME: Need enable devel
-    include_directories(${CINCH_SOURCE_DIR}/auxiliary)
-
     if(ENABLE_UNIT_TESTS)
 
         enable_testing()
@@ -307,7 +304,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
           set(GTEST_LIBRARIES gtest)
         endif()
 
-        include_directories(${CINCH_SOURCE_DIR}/auxiliary/gtest)
+        include_directories(${CINCH_SOURCE_DIR}/auxiliary)
 
         #----------------------------------------------------------------------#
         # pFUnit
