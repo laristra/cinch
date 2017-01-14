@@ -23,7 +23,7 @@
 # Require some version of cmake
 #------------------------------------------------------------------------------#
 
-#we are using target_include_directories, which is a cmake-3.0 feature
+# We are using target_include_directories, which is a cmake-3.0 feature
 set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
 
 if(CMAKE_VERSION VERSION_LESS CINCH_REQUIRED_CMAKE_VERSION)
@@ -42,6 +42,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cinch/cmake)
 #------------------------------------------------------------------------------#
 
 include(info)
+include(cinch_minimum_required)
 include(colors)
 include(common)
 include(conformance-init)
