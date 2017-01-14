@@ -296,7 +296,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
           add_library(gtest
             ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
           target_include_directories(gtest PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/cinch/gtest/googletest)
+            ${CINCH_SOURCE_DIR}/gtest/googletest)
           target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
           include_directories(${CINCH_SOURCE_DIR}/gtest/googlemock/include)
           include_directories(${CINCH_SOURCE_DIR}/gtest/googletest)
