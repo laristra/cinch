@@ -10,7 +10,7 @@ function(cinch_minimum_required version)
 
 
     if(CINCH_VERSION VERSION_LESS ${version})
-        message(FATAL_ERROR "This project requries Cinch version ${version}"
+        message(FATAL_ERROR "${PROJECT_NAME} requries Cinch version ${version}"
             " (found version ${CINCH_VERSION})"
         )
     else()
