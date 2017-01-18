@@ -210,7 +210,6 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
     if(ENABLE_BOOST_PREPROCESSOR)
         include_directories(${CINCH_SOURCE_DIR}/boost/preprocessor/include)
-        add_definitions(-DENABLE_BOOST_PREPROCESSOR)
     endif()
 
     #--------------------------------------------------------------------------#
@@ -950,6 +949,13 @@ if(CINCH_APPLICATION_DIRECTORIES)
     endforeach(application_directory)
 
 endif(CINCH_APPLICATION_DIRECTORIES)
+
+#------------------------------------------------------------------------------#
+# Capture cinch configuration.
+#------------------------------------------------------------------------------#
+
+configure_file(${PROJECT_SOURCE_DIR}/cinch/config/cinch.h.in
+    ${CMAKE_BINARY_DIR}/cinch.h @ONLY)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
