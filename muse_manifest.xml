@@ -1,16 +1,11 @@
-<manifest alg="2" build="2017.0.1.363" opt="true" iceEnabled="true" iceMarkupVersion="2" iceEnabledOptions="link,responsive,cachebuster" exportTarget="other" domain="https://laristra.github.io/cinch" resolutions="1x" timestamp="1484802529249">
+<manifest alg="2" build="2017.0.1.363" opt="true" iceEnabled="true" iceMarkupVersion="2" iceEnabledOptions="link,responsive,cachebuster" exportTarget="other" domain="https://laristra.github.io/cinch" resolutions="1x" timestamp="1484803692097">
   <folder name="css">
     <file name="site_global.css" crc="146726845"/>
     <file name="master_main.css" crc="3985329494" ref="index:documentation:people:download"/>
-    <file name="index.css" crc="147030255" ref="index"/>
+    <file name="index.css" crc="213319163" ref="index"/>
     <file name="documentation.css" crc="404068515" ref="documentation"/>
     <file name="people.css" crc="4094588127" ref="people"/>
-    <file name="download.css" crc="4094588127" ref="download"/>
-  </folder>
-  <folder name="assets">
-    <file name="flecsi-user-guide.pdf" crc="3768657720" seo="true" mt="1484686676000"/>
-    <file name="flecsi-developer-guide.pdf" crc="3975936734" seo="true" mt="1484686676000"/>
-    <file name="index.html" crc="207792728" seo="true" mt="1484686676000"/>
+    <file name="download.css" crc="123320289" ref="download"/>
   </folder>
   <folder name="scripts">
     <file name="jquery-1.8.3.min.js" crc="209076791" ref="index:people:documentation:download"/>
@@ -25,8 +20,8 @@
   <folder name="images">
     <file name="logo.gif" crc="379197196" seo="true" ref="index:people:documentation:download"/>
   </folder>
-  <file name="index.html" crc="2407794" seo="true" mt="1484802517725" redirect="true"/>
+  <file name="index.html" crc="253104200" seo="true" mt="1484802866331" redirect="true"/>
   <file name="people.html" crc="517189355" seo="true" mt="1484801733059" redirect="true"/>
   <file name="documentation.html" crc="4272648141" seo="true" mt="1484801733059" redirect="true"/>
-  <file name="download.html" crc="456789664" seo="true" mt="1484801733059" redirect="true"/>
+  <file name="download.html" crc="98633749" seo="true" mt="1484803502070" redirect="true"/>
 </manifest>
