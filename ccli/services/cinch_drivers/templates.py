@@ -149,9 +149,9 @@ cinch_example_header = Template(
 #define example_utils_h
 
 ///
-// \\file utils.h
-// \\authors ${AUTHOR}
-// \date Initial file creation: ${DATE}
+/// \\file utils.h
+/// \\authors ${AUTHOR}
+/// \date Initial file creation: ${DATE}
 ///
 
 namespace example {
@@ -176,9 +176,9 @@ cinch_example_source = Template(
  *~-------------------------------------------------------------------------~~*/
 
 ///
-// \\file utils.cc
-// \\authors ${AUTHOR}
-// \date Initial file creation: ${DATE}
+/// \\file utils.cc
+/// \\authors ${AUTHOR}
+/// \date Initial file creation: ${DATE}
 ///
 
 #include <iostream>
@@ -292,11 +292,11 @@ cinch_app_source = Template(
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-/*!
- * \\file app.cc
- * \\authors ${AUTHOR}
- * \date Initial file creation: ${DATE}
- */
+///
+/// \\file app.cc
+/// \\authors ${AUTHOR}
+/// \date Initial file creation: ${DATE}
+///
 
 #include "example/example/utils.h"
 
