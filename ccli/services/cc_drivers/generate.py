@@ -21,7 +21,7 @@ def generate(args):
   """
 
   # Set virtual destructor and add protected section if this is a base class.
-  virtual = 'virtual' if args.baseclass else ''
+  virtual = 'virtual ' if args.baseclass else ''
   protected = 'protected:\n\n' if args.baseclass else ''
 
   # Setup template keywords if the class is templated.

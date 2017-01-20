@@ -13,9 +13,9 @@ cc_source_template = Template(
  *~-------------------------------------------------------------------------~~*/
 
 ///
-// \\file ${FILENAME}
-// \\authors ${AUTHOR}
-// \date Initial file creation: ${DATE}
+/// \\file ${FILENAME}
+/// \\authors ${AUTHOR}
+/// \date Initial file creation: ${DATE}
 ///
 
 #include "${HEADER}"
