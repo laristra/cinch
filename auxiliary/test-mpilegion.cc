@@ -4,6 +4,7 @@
  *~-------------------------------------------------------------------------~~*/
 
 #include <mpi.h>
+#include <legion.h>
 
 // Include and flag definitions for GFlags.
 #if defined(ENABLE_GFLAGS)
@@ -60,6 +61,7 @@ int main(int argc, char ** argv) {
   int version, subversion;
   MPI_Get_version(&version, &subversion);
 
+#ifdef GASNET_CONDUIT_MPI
   if(version==3 && subversion>0) {
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -76,6 +78,9 @@ int main(int argc, char ** argv) {
     // Initialize the MPI runtime
     MPI_Init(&argc, &argv);
   } // if
+#else
+   MPI_Init(&argc, &argv);
+#endif
 
   // Disable XML output, if requested, everywhere but rank 0
   int rank;
@@ -153,7 +158,9 @@ int main(int argc, char ** argv) {
 
   // FIXME: This is some kind of GASNet bug (or maybe Legion).
   // Shutdown the MPI runtime
-  //MPI_Finalize();
+#ifndef GASNET_CONDUIT_MPI
+  MPI_Finalize();
+#endif
 
   return result;
 

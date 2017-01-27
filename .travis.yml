@@ -29,14 +29,14 @@ env: #maybe add mpich later
     - CCACHE_CPP2=yes
     - GVER=4.9
   matrix:
-    - MPI=ON  TEST=losalamos/cinch-example
-    - MPI=OFF TEST=losalamos/cinch-example
-    - MPI=ON  TEST=losalamos/cinch-nested-example
-    - MPI=OFF TEST=losalamos/cinch-nested-example
+    - MPI=ON  TEST=laristra/cinch-example
+    - MPI=OFF TEST=laristra/cinch-example
+    - MPI=ON  TEST=laristra/cinch-nested-example
+    - MPI=OFF TEST=laristra/cinch-nested-example
     - MPI=ON  TEST=losalamos/vpic
     - MPI=OFF TEST=losalamos/vpic
-#    - MPI=ON  TEST=losalamos/flecsi GVER=5
-#    - MPI=OFF TEST=losalamos/flecsi GVER=5
+#    - MPI=ON  TEST=laristra/flecsi GVER=5
+#    - MPI=OFF TEST=laristra/flecsi GVER=5
 
 script:
   - git checkout -b cinch_current_commit

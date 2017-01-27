@@ -190,9 +190,15 @@ function(cinch_add_doc target config directory output)
         # lets you specify a working directory for a custom target.
         #----------------------------------------------------------------------#
 
+        if("${PROJECT_NAME}" STREQUAL "cinch")
+            set(TEX_DIR ${CMAKE_SOURCE_DIR}/tex)
+        else()
+            set(TEX_DIR ${CMAKE_SOURCE_DIR}/cinch/tex)
+        endif()
+
         add_custom_target(${target} ALL
             ${PANDOC_EXECUTABLE}
-                --include-in-header=${CMAKE_SOURCE_DIR}/cinch/tex/required.tex
+                --include-in-header=${TEX_DIR}/required.tex
                 ${pandoc_options} ${target}.md
                 -o ${CMAKE_BINARY_DIR}/doc/${output}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc/.${target})

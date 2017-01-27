@@ -4,6 +4,9 @@
 [submodule "pfunit"]
 	path = pfunit
 	url = ../pfunit.git
+[submodule "boost/preprocessor"]
+	path = boost/preprocessor
+	url = ../../boostorg/preprocessor.git
 [submodule "gflags"]
 	path = gflags
-	url = ../../gflags/gflags.git
+	url = ../gflags.git

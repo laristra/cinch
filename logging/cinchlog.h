@@ -148,7 +148,7 @@
 
 #define _clog_util_stringify(s) #s
 #define _clog_stringify(s) _clog_util_stringify(s)
-#define clog_concat(a, b) a ## b
+#define _clog_concat(a, b) a ## b
 
 namespace cinch {
 
@@ -1026,7 +1026,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 
 /// Indirection to expand counter name.
 #define clog_counter_varname(str, line)                                        \
-  clog_concat(str, line)
+  _clog_concat(str, line)
 
 /// Indirection to expand counter name.
 #define clog_counter(str)                                                      \
