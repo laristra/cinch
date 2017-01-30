@@ -1,6 +1,6 @@
-<manifest alg="2" build="2017.0.1.363" opt="true" iceEnabled="true" iceMarkupVersion="2" iceEnabledOptions="link,responsive,cachebuster" exportTarget="other" domain="https://laristra.github.io/cinch" resolutions="1x" timestamp="1484803692097">
+<manifest alg="2" build="2017.0.1.363" opt="true" iceEnabled="true" iceMarkupVersion="2" iceEnabledOptions="link,responsive,cachebuster" exportTarget="other" domain="https://laristra.github.io/cinch" resolutions="1x" timestamp="1484862488448">
   <folder name="css">
-    <file name="site_global.css" crc="146726845"/>
+    <file name="site_global.css" crc="397018975"/>
     <file name="master_main.css" crc="3985329494" ref="index:documentation:people:download"/>
     <file name="index.css" crc="213319163" ref="index"/>
     <file name="documentation.css" crc="404068515" ref="documentation"/>
