@@ -519,6 +519,7 @@ if(CINCH_LIBRARY_TARGETS)
         # Add the subdirectory
         #----------------------------------------------------------------------#
 
+        include_directories(${library_target_directory})
         add_subdirectory(${library_target_directory})
 
         #----------------------------------------------------------------------#
