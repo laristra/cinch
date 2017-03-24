@@ -1009,13 +1009,6 @@ if(CINCH_APPLICATION_DIRECTORIES)
 endif(CINCH_APPLICATION_DIRECTORIES)
 
 #------------------------------------------------------------------------------#
-# Capture cinch configuration.
-#------------------------------------------------------------------------------#
-
-configure_file(${PROJECT_SOURCE_DIR}/cinch/config/cinch.h.in
-    ${CMAKE_BINARY_DIR}/cinch.h @ONLY)
-
-#------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 # vim: set tabstop=4 shiftwidth=4 filetype=cmake expandtab :
 #------------------------------------------------------------------------------#
