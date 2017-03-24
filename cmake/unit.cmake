@@ -11,7 +11,8 @@ function(cinch_add_unit target)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args SOURCES DEFINES INPUTS LIBRARIES POLICY THREADS)
+    set(multi_value_args SOURCES DEFINES DEPENDS INPUTS
+        LIBRARIES POLICY THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -35,6 +36,17 @@ function(cinch_add_unit target)
     else()
         string(REPLACE ";" "|" unit_DEFINES "${unit_DEFINES}")
     endif(NOT unit_DEFINES)
+
+    #--------------------------------------------------------------------------#
+    # Check for explicit dependencies. This flag is necessary for
+    # preprocessor header includes.
+    #--------------------------------------------------------------------------#
+
+    if(NOT unit_DEPENDS)
+        set(unit_DEPENDS "None")
+    else()
+        string(REPLACE ";" "|" unit_DEPENDS "${unit_DEPENDS}")
+    endif(NOT unit_DEPENDS)
 
     #--------------------------------------------------------------------------#
     # Check for files. 
@@ -108,7 +120,7 @@ function(cinch_add_unit target)
     #--------------------------------------------------------------------------#
 
     list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_DEFINES}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}:${PROJECT_NAME}")
+        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_DEFINES}:${unit_DEPENDS}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}:${PROJECT_NAME}")
     set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
         CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
 

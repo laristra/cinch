@@ -634,19 +634,22 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         list(GET unit_target_list 1 unit_target_directory)
         list(GET unit_target_list 2 unit_target_sources)
         list(GET unit_target_list 3 unit_target_defines)
-        list(GET unit_target_list 4 unit_target_inputs)
-        list(GET unit_target_list 5 unit_target_include_dirs)
-        list(GET unit_target_list 6 unit_target_libraries)
-        list(GET unit_target_list 7 unit_target_compile_defs)
-        list(GET unit_target_list 8 unit_target_execution_policy)
-        list(GET unit_target_list 9 unit_target_execution_threads)
-        list(GET unit_target_list 10 unit_project_name)
+        list(GET unit_target_list 4 unit_target_depends)
+        list(GET unit_target_list 5 unit_target_inputs)
+        list(GET unit_target_list 6 unit_target_include_dirs)
+        list(GET unit_target_list 7 unit_target_libraries)
+        list(GET unit_target_list 8 unit_target_compile_defs)
+        list(GET unit_target_list 9 unit_target_execution_policy)
+        list(GET unit_target_list 10 unit_target_execution_threads)
+        list(GET unit_target_list 11 unit_project_name)
 
         # Convert stored values back into lists
         string(REPLACE "|" ";" unit_target_sources
             "${unit_target_sources}")
         string(REPLACE "|" ";" unit_target_defines
             "${unit_target_defines}")
+        string(REPLACE "|" ";" unit_target_depends
+            "${unit_target_depends}")
         string(REPLACE "|" ";" unit_target_libraries
             "${unit_target_libraries}")
         string(REPLACE "|" ";" unit_target_inputs
@@ -717,6 +720,16 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             endif("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
 
             #------------------------------------------------------------------#
+            # Create target-specific main file for preprocessor header
+            # dependency problem.
+            #------------------------------------------------------------------#
+ 
+            get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
+            set(_TARGET_MAIN ${unit_target_name}_${_RUNTIME_MAIN})
+            configure_file(${unit_policy_runtime}
+                ${_OUTPUT_DIR}/${_TARGET_MAIN} COPYONLY)
+
+            #------------------------------------------------------------------#
             # Add user-specified defines
             #------------------------------------------------------------------#
 
@@ -781,7 +794,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                     PROPERTIES COMPILE_DEFINITIONS "${_PFUNIT_DEFINES}")
             else()
                 add_executable(${unit_target_name} ${_UNIT_SOURCES}
-                    ${unit_policy_runtime})
+                    ${_OUTPUT_DIR}/${_TARGET_MAIN})
             endif()
 
             if(NOT "${unit_policy_flags}" STREQUAL "None")
@@ -804,7 +817,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
             endif()
 
             #------------------------------------------------------------------#
-            # Add output directory as inlcude
+            # Add output directory as include
             #------------------------------------------------------------------#
 
             target_include_directories(${unit_target_name} PRIVATE
@@ -827,7 +840,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 foreach(library ${unit_target_libraries})
                     target_link_libraries(${unit_target_name} ${library})
                 endforeach(library)
-            endif(NOT "${unit_target_libraries}" STREQUAL "None")
+            endif()
 
             #------------------------------------------------------------------#
             # Add include and link options
@@ -855,6 +868,18 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             set_target_properties(${unit_target_name}
                 PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${_OUTPUT_DIR})
+
+            #------------------------------------------------------------------#
+            # Add user-specified dependencies
+            #------------------------------------------------------------------#
+
+            if(NOT "${unit_target_depends}" STREQUAL "None")
+                foreach(depend ${unit_target_depends})
+                    set_property(SOURCE ${_OUTPUT_DIR}/${_TARGET_MAIN}
+                        APPEND PROPERTY OBJECT_DEPENDS
+                        ${CMAKE_SOURCE_DIR}/${depend})
+                endforeach(depend)
+            endif()
 
             #------------------------------------------------------------------#
             # Copy dependency file to test directory
