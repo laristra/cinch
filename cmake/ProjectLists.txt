@@ -49,6 +49,7 @@ include(conformance-init)
 include(conformance)
 include(include_links)
 include(insource)
+include(header_depends)
 include(subdirlist)
 include(unit)
 include(test-execution-policy)
@@ -875,9 +876,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             if(NOT "${unit_target_depends}" STREQUAL "None")
                 foreach(depend ${unit_target_depends})
-                    set_property(SOURCE ${_OUTPUT_DIR}/${_TARGET_MAIN}
-                        APPEND PROPERTY OBJECT_DEPENDS
-                        ${CMAKE_SOURCE_DIR}/${depend})
+                    header_depends(${CMAKE_SOURCE_DIR}/${depend})
+                    foreach(dependency ${HEADER_DEPENDENCIES})
+                        set_property(SOURCE ${_OUTPUT_DIR}/${_TARGET_MAIN}
+                            APPEND PROPERTY OBJECT_DEPENDS
+                            ${dependency})
+                    endforeach()
                 endforeach(depend)
             endif()
 
