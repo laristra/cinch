@@ -1,3 +1,7 @@
+#------------------------------------------------------------------------------#
+# Copyright (c) 2014 Los Alamos National Security, LLC
+# All rights reserved.
+#------------------------------------------------------------------------------#
 
 function(header_depends header)
 
@@ -18,20 +22,18 @@ function(header_depends header)
 	get_directory_property(_includes DIRECTORY ${CMAKE_SOURCE_DIR}
   		INCLUDE_DIRECTORIES)
 
-	# Create string of compiler definitions for script
+	# Create list of compiler definitions for command
 	list(REMOVE_DUPLICATES _defines)
 	set(_COMPILE_DEFINES)
 	foreach(def ${_defines})
-	  set(_COMPILE_DEFINES
-		 ${_COMPILE_DEFINES} -D${def})
+	  set(_COMPILE_DEFINES ${_COMPILE_DEFINES} -D${def})
 	endforeach()
 
-	# Create string of include directories for script
+	# Create list of include directories for command
 	list(REMOVE_DUPLICATES _includes)
 	set(_INCLUDE_DIRECTORIES)
 	foreach(inc ${_includes})
-	  set(_INCLUDE_DIRECTORIES
-		 ${_INCLUDE_DIRECTORIES} -I${inc})
+	  set(_INCLUDE_DIRECTORIES ${_INCLUDE_DIRECTORIES} -I${inc})
 	endforeach()
 
 	# Strip any spaces from the flags
@@ -40,7 +42,8 @@ function(header_depends header)
 	# Create an argument list for the command. Note that this
 	# must be a valid CMake list.
 	set(_ARGS ${_CXX_FLAGS} -MM ${_COMPILE_DEFINES}
-		${_INCLUDE_DIRECTORIES} ${header})
+		${_INCLUDE_DIRECTORIES} ${header}
+	)
 
 	# Execute the compiler with -MM option to get the
 	# dependency inforamtion for the given header file.
@@ -58,3 +61,8 @@ function(header_depends header)
 	set(HEADER_DEPENDENCIES ${_DEP_LIST} PARENT_SCOPE)
 
 endfunction()
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#
