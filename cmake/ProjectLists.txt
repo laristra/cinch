@@ -876,7 +876,12 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
             if(NOT "${unit_target_depends}" STREQUAL "None")
                 foreach(depend ${unit_target_depends})
+
+                    # Get a list of the include dependencies of each
+                    # user-provided dependency.
                     header_depends(${CMAKE_SOURCE_DIR}/${depend})
+
+                    # Add explicit dependence to the main source file.
                     foreach(dependency ${HEADER_DEPENDENCIES})
                         set_property(SOURCE ${_OUTPUT_DIR}/${_TARGET_MAIN}
                             APPEND PROPERTY OBJECT_DEPENDS
