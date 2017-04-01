@@ -13,8 +13,7 @@ cc_source_template = Template(
  *~-------------------------------------------------------------------------~~*/
 
 ///
-/// \\file ${FILENAME}
-/// \\authors ${AUTHOR}
+/// \\file
 /// \date Initial file creation: ${DATE}
 ///
 

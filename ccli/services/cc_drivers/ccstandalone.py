@@ -13,8 +13,7 @@ cc_stand_alone_template = Template(
  *~-------------------------------------------------------------------------~~*/
 
 ///
-/// \\file ${FILENAME}
-/// \\authors ${AUTHOR}
+/// \\file
 /// \date Initial file creation: ${DATE}
 ///
 ${NAMESPACE_START}

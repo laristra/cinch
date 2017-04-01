@@ -16,8 +16,7 @@ cc_header_template = Template(
 #define ${NAMESPACE_GUARD}${BASENAME}_h
 
 ///
-/// \\file ${FILENAME}
-/// \\authors ${AUTHOR}
+/// \\file
 /// \date Initial file creation: ${DATE}
 ///
 

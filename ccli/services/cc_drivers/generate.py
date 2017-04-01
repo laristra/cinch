@@ -6,7 +6,6 @@
 from ccheader import cc_header_template
 from ccsource import cc_source_template
 from ccstandalone import cc_stand_alone_template
-import getpass
 import datetime
 import re
 from ccli.services.service_utils import *
@@ -46,7 +45,6 @@ def generate(args):
   hfile = (args.filename if args.filename != None else args.basename) + '.h'
 
   # Get the current user and date
-  author = getpass.getuser()
   date = datetime.datetime.now().strftime("%b %d, %Y")
 
   # Setup up spaces to use for tabs
@@ -56,7 +54,6 @@ def generate(args):
   # Do substitutions on header template
   #----------------------------------------------------------------------------#
   header_output = cc_header_template.substitute(
-    AUTHOR=author,
     DATE=date,
     SPACES=spaces,
     TABSTOP=args.tabstop,
@@ -99,7 +96,6 @@ def generate(args):
     # Do substitutions on source template
     #--------------------------------------------------------------------------#
     source_output = cc_source_template.substitute(
-      AUTHOR=author,
       DATE=date,
       SPACES=spaces,
       TABSTOP=args.tabstop,
@@ -140,7 +136,6 @@ def generate(args):
     # Do substitutions on stand-alone source template
     #--------------------------------------------------------------------------#
     source_output = cc_stand_alone_template.substitute(
-      AUTHOR=author,
       DATE=date,
       SPACES=spaces,
       TABSTOP=args.tabstop,
