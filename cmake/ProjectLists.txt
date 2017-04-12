@@ -412,7 +412,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         if(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
             cinch_add_test_execution_policy(MPILEGION
-                ${CINCH_SOURCE_DIR}/auxiliary/test-mpilegion.cc
+                ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc
                 FLAGS ${Legion_CXX_FLAGS}
                     ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${Legion_INCLUDE_DIRS}
@@ -423,7 +423,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
                 EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}) 
 
             cinch_add_test_execution_policy(MPILEGION_DEVEL
-                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-mpilegion.cc
+                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-legion.cc
                 FLAGS ${Legion_CXX_FLAGS}
                     ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
                 INCLUDES ${Legion_INCLUDE_DIRS}
