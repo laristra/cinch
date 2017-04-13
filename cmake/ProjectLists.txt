@@ -388,6 +388,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         # Legion Runtime
         if(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
+            add_definitions(-DLEGION_CMAKE)
             cinch_add_test_execution_policy(LEGION
                 ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc
                 FLAGS ${Legion_CXX_FLAGS}
