@@ -54,8 +54,8 @@ function(cinch_add_doxygen)
             #------------------------------------------------------------------#
 
             add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
-            add_dependencies(install-doxygen ${CINCH_CONFIG_INFOTAG}install-doxygen)
-
+            add_dependencies(install-doxygen
+                ${CINCH_CONFIG_INFOTAG}install-doxygen)
         else()
 
             #------------------------------------------------------------------#
