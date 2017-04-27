@@ -16,6 +16,63 @@ function(cinch_add_unit target)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
+    #------------------------------------------------------------------#
+    # Set output directory information
+    #------------------------------------------------------------------#
+
+    if("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
+        set(_TEST_PREFIX)
+    else()
+        set(_TEST_PREFIX "${PROJECT_NAME}:")
+    endif()
+    
+    #------------------------------------------------------------------#
+    # Check to see if the user has specified a runtime and
+    # process it
+    #------------------------------------------------------------------#
+    
+    if(NOT unit_POLICY)
+        set(unit_POLICY "SERIAL")
+    endif(NOT unit_POLICY)
+           
+    if(NOT ${unit_POLICY}_TEST_POLICY_LIST)
+        return()
+    endif()
+
+
+
+    # Get policy information
+    string(REPLACE ":" ";" unit_policy_list
+        "${${unit_POLICY}_TEST_POLICY_LIST}")
+
+    list(GET unit_policy_list 0 unit_policy_name)
+    list(GET unit_policy_list 1 unit_policy_runtime)
+    list(GET unit_policy_list 2 unit_policy_flags)
+    list(GET unit_policy_list 3 unit_policy_includes)
+    list(GET unit_policy_list 4 unit_policy_defines)
+    list(GET unit_policy_list 5 unit_policy_libraries)
+    list(GET unit_policy_list 6 unit_policy_exec)
+    list(GET unit_policy_list 7 unit_policy_exec_threads)
+
+    # Convert stored values back into lists
+    string(REPLACE "|" ";" unit_policy_runtime
+        "${unit_policy_runtime}")
+    string(REPLACE "|" ";" unit_policy_flags
+        "${unit_policy_flags}")
+    string(REPLACE "|" ";" unit_policy_includes
+        "${unit_policy_includes}")
+    string(REPLACE "|" ";" unit_policy_defines
+        "${unit_policy_defines}")
+    string(REPLACE "|" ";" unit_policy_libraries
+        "${unit_policy_libraries}")
+
+
+    get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
+    set(_TARGET_MAIN ${target}_${_RUNTIME_MAIN})
+    configure_file(${unit_policy_runtime}
+        ${_TARGET_MAIN} COPYONLY)
+
+
     #--------------------------------------------------------------------------#
     # Make sure that the user specified sources.
     #--------------------------------------------------------------------------#
@@ -23,84 +80,71 @@ function(cinch_add_unit target)
     if(NOT unit_SOURCES)
         message(FATAL_ERROR
             "You must specify unit test source files using SOURCES")
-    else()
-        string(REPLACE ";" "|" unit_SOURCES "${unit_SOURCES}")
     endif(NOT unit_SOURCES)
+
+    add_executable( ${target} ${unit_SOURCES} ${_TARGET_MAIN})
 
     #--------------------------------------------------------------------------#
     # Check for defines.
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_DEFINES)
-        set(unit_DEFINES "None")
-    else()
-        string(REPLACE ";" "|" unit_DEFINES "${unit_DEFINES}")
-    endif(NOT unit_DEFINES)
+    if(unit_DEFINES)
+      target_compile_definitions(${target} PRIVATE ${unit_DEFINES})
+    endif()
+
+    if(NOT "${unit_policy_defines}" STREQUAL "None")
+      target_compile_definitions(${target} PRIVATE ${unit_policy_defines})
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for explicit dependencies. This flag is necessary for
     # preprocessor header includes.
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_DEPENDS)
-        set(unit_DEPENDS "None")
-    else()
-        string(REPLACE ";" "|" unit_DEPENDS "${unit_DEPENDS}")
-    endif(NOT unit_DEPENDS)
+    if(unit_DEPENDS)
+      add_dependencies( ${target} ${unit_DEPENDENCIES} )
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for files. 
     #--------------------------------------------------------------------------#
-
-    if(NOT unit_INPUTS)
-        set(unit_INPUTS "None")
-    else()
-        string(REPLACE ";" "|" unit_INPUTS "${unit_INPUTS}")
-    endif(NOT unit_INPUTS)
+    
+    if (unit_INPUTS)
+        set(_OUTPUT_FILES)
+        foreach(input ${unit_INPUTS})
+            get_filename_component(_OUTPUT_NAME ${input} NAME)
+            add_custom_command(OUTPUT ${_OUTPUT_NAME}
+                COMMAND ${CMAKE_COMMAND} -E copy 
+                ${CMAKE_CURRENT_SOURCE_DIR}/${input}
+                ${_OUTPUT_NAME}
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${input}
+                COMMENT "Copying ${input} for ${target}")
+            list(APPEND _OUTPUT_FILES ${_OUTPUT_NAME})
+        endforeach()
+        add_custom_target(${target}_inputs
+            DEPENDS ${_OUTPUT_FILES})
+        add_dependencies(${target} ${target}_inputs)
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for library dependencies.
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_LIBRARIES)
-        set(unit_LIBRARIES "None")
-    else()
-        string(REPLACE ";" "|" unit_LIBRARIES "${unit_LIBRARIES}")
-    endif(NOT unit_LIBRARIES)
+    target_link_libraries( ${target} ${unit_LIBRARIES} ${GTEST_LIBRARIES} )
 
-    #--------------------------------------------------------------------------#
-    # Capture include directories
-    #--------------------------------------------------------------------------#
-    
-    get_property(unit_INCLUDE_DIRS
-                  DIRECTORY ${PROJECT_SOURCE_DIR}
-                  PROPERTY INCLUDE_DIRECTORIES)
-    if(NOT unit_INCLUDE_DIRS)
-        set(unit_INCLUDE_DIRS "None")
-    else()
-        string(REPLACE ";" "|" unit_INCLUDE_DIRS "${unit_INCLUDE_DIRS}")
+    if(ENABLE_GFLAGS)
+        target_link_libraries(${target} ${GFLAGS_LIBRARIES})
     endif()
 
-    #--------------------------------------------------------------------------#
-    # Capture compile definitions
-    #--------------------------------------------------------------------------#
-    
-    get_property(unit_COMPILE_DEFS
-                  DIRECTORY ${PROJECT_SOURCE_DIR}
-                  PROPERTY COMPILE_DEFINITIONS)
-    if(NOT unit_COMPILE_DEFS)
-        set(unit_COMPILE_DEFS "None")
-    else()
-        string(REPLACE ";" "|" unit_COMPILE_DEFS "${unit_COMPILE_DEFS}")
+
+    if(NOT "${unit_policy_libraries}" STREQUAL "None")
+      target_link_libraries( ${target} ${unit_policy_libraries} )
     endif()
 
-    #--------------------------------------------------------------------------#
-    # Check for policy.
-    #--------------------------------------------------------------------------#
-
-    if(NOT unit_POLICY)
-        set(unit_POLICY "SERIAL")
-    endif(NOT unit_POLICY)
+    if(NOT "${unit_policy_includes}" STREQUAL "None")
+        target_include_directories(${target}
+            PRIVATE ${unit_policy_includes})
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for threads.
@@ -111,18 +155,82 @@ function(cinch_add_unit target)
 
     if(NOT unit_THREADS)
         set(unit_THREADS 1)
-    else()
-        string(REPLACE ";" "|" unit_THREADS "${unit_THREADS}")
     endif(NOT unit_THREADS)
 
-    #--------------------------------------------------------------------------#
-    # Add information to unit test targets.
-    #--------------------------------------------------------------------------#
+    #------------------------------------------------------------------#
+    # Add the test target to CTest
+    #------------------------------------------------------------------#
 
-    list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_DEFINES}:${unit_DEPENDS}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}:${PROJECT_NAME}")
-    set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
-        CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
+    list(LENGTH unit_THREADS thread_instances)
+
+    string(REGEX MATCH "DEVEL" _IS_DEVEL
+        ${unit_POLICY})
+
+    set(_IS_GTEST)
+    if(NOT "${unit_POLICY}" STREQUAL "FORTRAN"
+        AND NOT _IS_DEVEL)
+        set(_IS_GTEST TRUE)
+    endif()
+
+    if(_IS_GTEST)
+        set(UNIT_FLAGS --gtest_color=no)
+        if(ENABLE_COLOR_UNIT_TESTS)
+            set(UNIT_FLAGS --gtest_color=yes)
+        endif(ENABLE_COLOR_UNIT_TESTS)
+    else()
+        set(UNIT_FLAGS)
+    endif()
+
+    if(${thread_instances} GREATER 1)
+
+        foreach(instance ${unit_THREADS})
+            if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
+                set(_OUTPUT
+                    ${target}_${instance}.xml)
+                set(UNIT_FLAGS ${UNIT_FLAGS}
+                    --gtest_output=xml:${_OUTPUT})
+            endif()
+
+            add_test(
+                NAME
+                    "${_TEST_PREFIX}${target}_${instance}"
+                COMMAND
+                    ${unit_policy_exec}
+                    ${unit_policy_exec_threads} ${instance}
+                    ${target}
+                    ${UNIT_FLAGS} )
+        endforeach(instance)
+
+    else()
+
+        if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
+            set(_OUTPUT
+                ${target}.xml)
+            set(UNIT_FLAGS ${UNIT_FLAGS}
+                --gtest_output=xml:${_OUTPUT})
+        endif()
+
+        if(NOT "${unit_policy_exec}" STREQUAL "None")
+            add_test(
+                NAME
+                    "${_TEST_PREFIX}${target}"
+                COMMAND
+                    ${unit_policy_exec}
+                    ${unit_policy_exec_threads}
+                    ${unit_target_execution_threads}
+                    ${_OUTPUT_DIR}/${unit_target_name}
+                    ${UNIT_FLAGS})
+        else()
+            add_test(
+                NAME
+                    "${_TEST_PREFIX}${target}"
+                COMMAND
+                    ${target}
+                    ${UNIT_FLAGS})
+        endif(NOT "${unit_policy_exec}" STREQUAL "None")
+
+    endif(${thread_instances} GREATER 1)
+
 
 endfunction(cinch_add_unit)
 
