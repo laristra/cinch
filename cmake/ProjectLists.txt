@@ -581,6 +581,9 @@ if(CINCH_LIBRARY_TARGETS)
                 ${${library_target_name}_SOURCES})
             target_include_directories(${library_target_name} PRIVATE
                 ${CMAKE_BINARY_DIR}/include/${library_target_name})
+            if(CINCH_RUNTIME_LIBRARIES)
+                target_link_libraries( ${library_target_name} ${CINCH_RUNTIME_LIBRARIES} )
+            endif()
         endif()
 
         #----------------------------------------------------------------------#
