@@ -102,6 +102,7 @@ endif(CMAKE_FORTRAN_FLAGS)
 
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
+unset(CINCH_TARGET_LIBRARIES)
 unset(CINCH_SUBPROJECTS)
 unset(CINCH_UNIT_EXECUTION_POLICIES)
 
@@ -579,6 +580,9 @@ if(CINCH_LIBRARY_TARGETS)
                 ${${library_target_name}_SOURCES})
             target_include_directories(${library_target_name} PRIVATE
                 ${CMAKE_BINARY_DIR}/include/${library_target_name})
+            if(CINCH_RUNTIME_LIBRARIES)
+                target_link_libraries( ${library_target_name} ${CINCH_RUNTIME_LIBRARIES} )
+            endif()
         endif()
 
         #----------------------------------------------------------------------#
@@ -615,6 +619,27 @@ if(CINCH_LIBRARY_TARGETS)
     endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
 
 endif(CINCH_LIBRARY_TARGETS)
+
+#------------------------------------------------------------------------------#
+# Target Libraries
+#------------------------------------------------------------------------------#
+
+if(CINCH_TARGET_LIBRARIES)
+
+    foreach(target_library ${CINCH_TARGET_LIBRARIES})
+
+        string(REPLACE ":" ";" target_library_list ${target_library})
+
+        list(GET target_library_list 0 target_name)
+        list(GET target_library_list 1 target_libraries)
+
+        string(REPLACE "|" ";" library_list ${target_libraries})
+
+        target_link_libraries( ${target_name} ${library_list} )
+
+    endforeach()
+
+endif()
 
 #------------------------------------------------------------------------------#
 # Add unit tests.
