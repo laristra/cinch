@@ -100,7 +100,6 @@ endif(CMAKE_FORTRAN_FLAGS)
 # Initialize these to avoid capture of parent state
 #------------------------------------------------------------------------------#
 
-unset(CINCH_TOP_LEVEL_PROJECT)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
 unset(CINCH_SUBPROJECTS)
@@ -113,9 +112,9 @@ unset(CINCH_UNIT_TEST_TARGETS CACHE)
 # Set top-level flag
 #------------------------------------------------------------------------------#
 
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    set(CINCH_TOP_LEVEL_PROJECT True)
-endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+if (NOT CINCH_TOP_LEVEL_PROJECT) 
+  set(CINCH_TOP_LEVEL_PROJECT True)
+endif()
 
 #------------------------------------------------------------------------------#
 # Include project configuration
@@ -291,7 +290,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
 
         if(GTEST_FOUND)
           include_directories(${GTEST_INCLUDE_DIRS})
-        else()
+        elseif(NOT TARGET gtest)
           find_package(Threads)
           add_library(gtest
             ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)

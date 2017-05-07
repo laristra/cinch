@@ -36,11 +36,9 @@ list(APPEND CMAKE_MODULE_PATH ${CINCH_SOURCE_DIR}/cmake)
 # Cinch includes
 #------------------------------------------------------------------------------#
 
-include(cinch_install_headers)
 include(cinch_minimum_required)
 include(insource)
 include(test-execution-policy)
-include(unit)
 include(version)
 
 #------------------------------------------------------------------------------#
