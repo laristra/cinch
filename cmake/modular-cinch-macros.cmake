@@ -4,18 +4,18 @@
 #------------------------------------------------------------------------------#
 
 #[=============================================================================[
-cinch-modular-macros
+modular-cinch-macros
 --------------------
 
 Provides a set of useful macros to the user to make creating cmake 
 projects easier.
 
-.. command:: cinch_add_unit
+.. command:: mcinch_add_unit
 
-  The ``cinch_add_init`` function creates a custom unit test with
+  The ``mcinch_add_unit`` function creates a custom unit test with
   various different runtime policies::
 
-   cinch_add_unit( <name> [<option>...] )
+   mcinch_add_unit( <name> [<option>...] )
 
   General options are:
 
@@ -35,7 +35,7 @@ projects easier.
     The number of threads to run the test with
 #]=============================================================================]
 
-function(cinch_add_unit name)
+function(mcinch_add_unit name)
 
     #--------------------------------------------------------------------------#
     # Setup argument options.
@@ -264,16 +264,16 @@ function(cinch_add_unit name)
     endif(${thread_instances} GREATER 1)
 
 
-endfunction(cinch_add_unit)
+endfunction(mcinch_add_unit)
 
 #[=============================================================================[
-.. command:: cinch_intall_headers
+.. command:: mcinch_install_headers
 
-  The ``cinch_install_headers`` function installs a list of files,
+  The ``mcinch_install_headers`` function installs a list of files,
   preserving the relative paths.  Normal use of ``install`` does
   not.  The command is used as follows::
 
-   cinch_install_headers( [<option>...] )
+   mcinch_install_headers( [<option>...] )
 
   General options are:
 
@@ -283,7 +283,7 @@ endfunction(cinch_add_unit)
     The location to install the files to
 #]=============================================================================]
 
-function(cinch_install_headers)
+function(mcinch_install_headers)
 
     set(options)
     set(one_value_args DESTINATION)
