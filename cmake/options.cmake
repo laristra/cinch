@@ -1,3 +1,7 @@
+#------------------------------------------------------------------------------#
+# Copyright (c) 2017 Los Alamos National Security, LLC
+# All rights reserved.
+#------------------------------------------------------------------------------#
 
 if (NOT CINCH_PACKAGES_INCLUDED)
 
@@ -268,3 +272,9 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     endif(ENABLE_UNIT_TESTS)
 
 endif () # CINCH_PACKAGES_INCLUDED
+
+
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 filetype=cmake expandtab :
+#------------------------------------------------------------------------------#
