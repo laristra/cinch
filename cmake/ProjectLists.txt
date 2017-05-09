@@ -58,6 +58,7 @@ include(openmp)
 # Initialize these to avoid capture of parent state
 #------------------------------------------------------------------------------#
 
+unset(CINCH_TOP_LEVEL_PARSER)
 unset(CINCH_TOP_LEVEL_PROJECT)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
@@ -108,11 +109,12 @@ endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 
 if(NOT CINCH_PARSED_TOP_LEVEL_PROJECT)
 
-    set( CINCH_PARSED_TOP_LEVEL_PROJECT True )
-
     #--------------------------------------------------------------------------#
     # This is a top-level build
     #--------------------------------------------------------------------------#
+
+    set( CINCH_TOP_LEVEL_PARSER True )
+    set( CINCH_PARSED_TOP_LEVEL_PROJECT True )
 
     add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
     set(CINCH_CONFIG_INFOTAG)
@@ -215,10 +217,10 @@ if(CINCH_LIBRARY_TARGETS)
         # without including the entire submodule.
         #----------------------------------------------------------------------#
 
-        if(NOT ${CINCH_TOP_LEVEL_PROJECT})
+        if(NOT ${CINCH_TOP_LEVEL_PARSER})
             set(${library_target_name}_LINKLIBS ${library_target_name}
                 PARENT_SCOPE)
-        endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
+        endif(NOT ${CINCH_TOP_LEVEL_PARSER})
 
         #----------------------------------------------------------------------#
         # Add target to global link libraries
@@ -290,11 +292,11 @@ if(CINCH_LIBRARY_TARGETS)
     # Set these for parent level build
     #--------------------------------------------------------------------------#
 
-    if(NOT ${CINCH_TOP_LEVEL_PROJECT})
+    if(NOT ${CINCH_TOP_LEVEL_PARSER})
         set(${PROJECT_NAME}_LINKLIBS ${${PROJECT_NAME}_LINKLIBS} PARENT_SCOPE)
     else()
         set(CINCH_LINK_LIBRARIES ${${PROJECT_NAME}_LINKLIBS})
-    endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
+    endif(NOT ${CINCH_TOP_LEVEL_PARSER})
 
 endif(CINCH_LIBRARY_TARGETS)
 
@@ -323,7 +325,7 @@ endif()
 # Add unit tests.
 #------------------------------------------------------------------------------#
 
-if(${CINCH_TOP_LEVEL_PROJECT})
+if(${CINCH_TOP_LEVEL_PARSER})
 
     foreach(unit ${CINCH_UNIT_TEST_TARGETS})
         
@@ -704,7 +706,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
         DESTINATION include)
 
-endif(${CINCH_TOP_LEVEL_PROJECT})
+endif(${CINCH_TOP_LEVEL_PARSER})
 
 #------------------------------------------------------------------------------#
 # Application directories
