@@ -21,6 +21,30 @@ function(cinch_add_library_target target directory)
 
 endfunction(cinch_add_library_target)
 
+#
+# Link libraries to a target
+#
+
+function(cinch_target_link_libraries target)
+
+    if (NOT ARGN)
+        message( 
+            FATAL_ERROR
+            "The list of libaries provided to link to target '${target}' is "
+            "empty" 
+        )
+    endif()
+
+    string(REPLACE ";" "|" libraries_ "${ARGN}")
+
+    message(STATUS
+      "Linking target ${target} with libraries ${ARGN}")
+
+    list(APPEND CINCH_TARGET_LIBRARIES "${target}:${libraries_}")
+    set(CINCH_TARGET_LIBRARIES ${CINCH_TARGET_LIBRARIES} PARENT_SCOPE)
+
+endfunction()
+
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 # vim: set tabstop=4 shiftwidth=4 expandtab :

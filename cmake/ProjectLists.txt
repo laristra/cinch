@@ -20,22 +20,16 @@
 ################################################################################
 
 #------------------------------------------------------------------------------#
-# Require some version of cmake
-#------------------------------------------------------------------------------#
-
-# We are using target_include_directories, which is a cmake-3.0 feature
-set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
-
-if(CMAKE_VERSION VERSION_LESS CINCH_REQUIRED_CMAKE_VERSION)
-    message(FATAL_ERROR
-        "Cinch needs at least cmake ${CINCH_REQUIRED_CMAKE_VERSION}")
-endif()
-
-#------------------------------------------------------------------------------#
 # Add path for cinch modules
 #------------------------------------------------------------------------------#
 
 list(APPEND CMAKE_MODULE_PATH ${CINCH_SOURCE_DIR}/cmake)
+
+#------------------------------------------------------------------------------#
+# Main setup
+#------------------------------------------------------------------------------#
+
+include(globals)
 
 #------------------------------------------------------------------------------#
 # Cinch includes
@@ -59,50 +53,16 @@ include(application)
 include(subproject)
 include(doxygen)
 include(openmp)
-include(version)
-
-#------------------------------------------------------------------------------#
-# Set to release if no build type has been specified
-#------------------------------------------------------------------------------#
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING
-        "CMake build type <Debug|Release|RelWithDebInfo|MinSizeRel>" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    add_definitions(-DDEBUG)
-endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-
-#------------------------------------------------------------------------------#
-# Print useful information
-#------------------------------------------------------------------------------#
-
-if(CMAKE_INSTALL_PREFIX)
-    message(STATUS "Install prefix set to ${CMAKE_INSTALL_PREFIX}")
-endif(CMAKE_INSTALL_PREFIX)
-
-if(CMAKE_CXX_FLAGS)
-    message(STATUS "C++ compiler flags set to ${CMAKE_CXX_FLAGS}")
-endif(CMAKE_CXX_FLAGS)
-
-if(CMAKE_C_FLAGS)
-    message(STATUS "C compiler flags set to ${CMAKE_C_FLAGS}")
-endif(CMAKE_C_FLAGS)
-
-if(CMAKE_FORTRAN_FLAGS)
-    message(STATUS "Fortran compiler flags set to ${CMAKE_FORTRAN_FLAGS}")
-endif(CMAKE_FORTRAN_FLAGS)
 
 #------------------------------------------------------------------------------#
 # Initialize these to avoid capture of parent state
 #------------------------------------------------------------------------------#
 
+unset(CINCH_TOP_LEVEL_PARSER)
 unset(CINCH_TOP_LEVEL_PROJECT)
 unset(CINCH_APPLICATION_DIRECTORIES)
 unset(CINCH_LIBRARY_TARGETS)
+unset(CINCH_TARGET_LIBRARIES)
 unset(CINCH_SUBPROJECTS)
 unset(CINCH_UNIT_EXECUTION_POLICIES)
 
@@ -130,27 +90,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 include(mpi)
 
 #------------------------------------------------------------------------------#
-# Create a version for the project
-#------------------------------------------------------------------------------#
-
-set(VERSION_CREATION "git describe" CACHE STRING "Set a static version")
-
-if(NOT "${VERSION_CREATION}" STREQUAL "git describe")
-    set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
-else()
-    cinch_make_version()
-endif(NOT "${VERSION_CREATION}" STREQUAL "git describe")
-
-message(STATUS "Creating build for version "
-    "${PROJECT_NAME}-${${PROJECT_NAME}_VERSION}")
-
-#------------------------------------------------------------------------------#
-# Keep users from creating insource builds.
-#------------------------------------------------------------------------------#
-
-cinch_prevent_insource_builds()
-
-#------------------------------------------------------------------------------#
 # Include package requirements
 #------------------------------------------------------------------------------#
 
@@ -168,11 +107,14 @@ endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 # Add top-level targets
 #------------------------------------------------------------------------------#
 
-if(${CINCH_TOP_LEVEL_PROJECT})
+if(NOT CINCH_PARSED_TOP_LEVEL_PROJECT)
 
     #--------------------------------------------------------------------------#
     # This is a top-level build
     #--------------------------------------------------------------------------#
+
+    set( CINCH_TOP_LEVEL_PARSER True )
+    set( CINCH_PARSED_TOP_LEVEL_PROJECT True )
 
     add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
     set(CINCH_CONFIG_INFOTAG)
@@ -185,276 +127,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/include)
     endif(EXISTS ${CMAKE_BINARY_DIR}/include)
 
-    #--------------------------------------------------------------------------#
-    # Global options 
-    #--------------------------------------------------------------------------#
-
-    option(ENABLE_COVERAGE_BUILD "Do a coverage build" OFF)
-    if(ENABLE_COVERAGE_BUILD)
-        message(STATUS "Enabling coverage build")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage -O0")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -O0")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
-    endif()
-    option(BUILD_SHARED_LIBS "Build shared libs" ON)
-    if (NOT DEFINED LIBDIR)
-        include(GNUInstallDirs)
-        set(LIBDIR "${CMAKE_INSTALL_LIBDIR}")
-    endif(NOT DEFINED LIBDIR)
-
-    #--------------------------------------------------------------------------#
-    # Add support for Boost preprocessor.
-    #--------------------------------------------------------------------------#
-
-    option(ENABLE_BOOST_PREPROCESSOR "Enable Boost.Preprocessor subset" OFF)
-
-    if(ENABLE_BOOST_PREPROCESSOR)
-        include_directories(${CINCH_SOURCE_DIR}/boost/preprocessor/include)
-    endif()
-
-    #--------------------------------------------------------------------------#
-    # Add support for GFlags
-    #--------------------------------------------------------------------------#
-
-    option(ENABLE_GFLAGS "Enable command-line flag support" OFF)
-
-    if(ENABLE_GFLAGS)
-        find_package(GFlags)
-
-        if(GFlags_FOUND)
-            # We found a system or local installation
-            include_directories(${GFlags_INCLUDE_DIRS})
-        else()
-            # Build it ourselves
-            add_subdirectory(${CINCH_SOURCE_DIR}/gflags
-                ${CMAKE_BINARY_DIR}/cinch/gflags)
-            include_directories(${CMAKE_BINARY_DIR}/cinch/gflags/include)
-            set(GFLAGS_LIBRARIES gflags)
-        endif()
-
-        # Add this to the compile definitions
-        add_definitions(-DENABLE_GFLAGS)
-    endif()
-
-    #--------------------------------------------------------------------------#
-    # Add clog logging
-    #--------------------------------------------------------------------------#
-
-    include_directories(${CINCH_SOURCE_DIR}/logging)
-
-    # Add an option to set the strip level
-    set(CLOG_STRIP_LEVEL "0" CACHE STRING "Set the clog strip level")
-    add_definitions(-DCLOG_STRIP_LEVEL=${CLOG_STRIP_LEVEL})
-
-    # Allow color output
-    option(CLOG_COLOR_OUTPUT "Enable colorized clog logging" ON)
-    if(CLOG_COLOR_OUTPUT)
-        add_definitions(-DCLOG_COLOR_OUTPUT)
-    endif()
-
-    # Enable tag groups
-    option(CLOG_ENABLE_TAGS "Enable tag groups" OFF)
-    if(CLOG_ENABLE_TAGS)
-        set(CLOG_TAG_BITS "16" CACHE STRING
-            "Select the number of bits to use for tag groups.")
-        add_definitions(-DCLOG_ENABLE_TAGS)
-        add_definitions(-DCLOG_TAG_BITS=${CLOG_TAG_BITS})
-    endif()
-
-    # MPI
-    if(MPI_${MPI_LANGUAGE}_FOUND)
-        option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
-        if(CLOG_ENABLE_MPI)
-            add_definitions(-DCLOG_ENABLE_MPI)
-        endif()
-    endif()
-
-    # CLOG Debugging
-    option(CLOG_DEBUG "Enable clog debugging" OFF)
-    if(CLOG_DEBUG)
-        add_definitions(-DCLOG_DEBUG)
-    endif()
-
-
-    #--------------------------------------------------------------------------#
-    # Add support for ctest, GTest, and pFUnit
-    #--------------------------------------------------------------------------#
-
-    option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
-    option(ENABLE_COLOR_UNIT_TESTS "Enable colorized unit testing output" OFF)
-    option(ENABLE_JENKINS_OUTPUT
-        "Generate jenkins xml output for every test" OFF)
-
-    if(ENABLE_UNIT_TESTS)
-
-        enable_testing()
-
-        #----------------------------------------------------------------------#
-        # Google Test
-        #----------------------------------------------------------------------#
-
-        find_package(GTest QUIET)
-
-        if(GTEST_FOUND)
-          include_directories(${GTEST_INCLUDE_DIRS})
-        else()
-          find_package(Threads)
-          add_library(gtest
-            ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
-          target_include_directories(gtest PRIVATE
-            ${CINCH_SOURCE_DIR}/gtest/googletest)
-          target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
-          include_directories(${CINCH_SOURCE_DIR}/gtest/googlemock/include)
-          include_directories(${CINCH_SOURCE_DIR}/gtest/googletest)
-          include_directories(${CINCH_SOURCE_DIR}/gtest/googletest/include)
-          set(GTEST_LIBRARIES gtest)
-        endif()
-
-        include_directories(${CINCH_SOURCE_DIR}/auxiliary)
-
-        #----------------------------------------------------------------------#
-        # pFUnit
-        #----------------------------------------------------------------------#
-
-        get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
-
-        list(FIND LANGUAGES "Fortran" FORTRAN_ENABLED)
-
-        if(FORTRAN_ENABLED EQUAL -1)
-            set(FORTRAN_ENABLED FALSE)
-        endif(FORTRAN_ENABLED EQUAL -1)
-
-        if(FORTRAN_ENABLED)
-            find_package(PythonInterp QUIET)
-            find_package(pFUnit QUIET)
-
-            if(PFUNIT_FOUND)
-                include_directories(${PFUNIT_INCLUDE_DIR})
-            else()
-                include(${CINCH_SOURCE_DIR}/cmake/PFUnitLists.txt)
-            endif()
-        endif()
-
-        #----------------------------------------------------------------------#
-        # Add default execution polices
-        #----------------------------------------------------------------------#
-
-        cinch_add_test_execution_policy(SERIAL
-            ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc
-        )
-
-        cinch_add_test_execution_policy(SERIAL_DEVEL
-            ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc
-            DEFINES "-DCINCH_DEVEL_TEST"
-        )
-
-        if(FORTRAN_ENABLED)
-            cinch_add_test_execution_policy(FORTRAN
-                ${PFUNIT_DRIVER}
-                LIBRARIES ${PFUNIT_LIBRARY})
-        endif(FORTRAN_ENABLED)
-
-        # Need to collect extra runtime libraries into a standard variable
-        # that users can add to their unit test defines if needed.
-        set(CINCH_RUNTIME_INCLUDES)
-        set(CINCH_RUNTIME_FLAGS)
-        set(CINCH_RUNTIME_LIBRARIES)
-
-        # MPI Runtime
-        if(MPI_${MPI_LANGUAGE}_FOUND)
-            cinch_add_test_execution_policy(MPI
-                ${CINCH_SOURCE_DIR}/auxiliary/test-mpi.cc
-                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-                EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}
-            )
-
-            cinch_add_test_execution_policy(MPI_DEVEL
-                ${CINCH_SOURCE_DIR}/auxiliary/test-mpi.cc
-                FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                DEFINES "-DCINCH_DEVEL_TEST"
-                LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-                EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}
-            )
-
-            set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS}
-                ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-            )
-            set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
-                ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-            )
-            set(CINCH_RUNTIME_LIBRARIES ${CINCH_RUNTIME_LIBRARIES}
-                ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-            )
-        endif()
-
-        # Legion Runtime
-        if(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND)
-            add_definitions(-DLEGION_CMAKE)
-            cinch_add_test_execution_policy(LEGION
-                ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc
-                FLAGS ${Legion_CXX_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${Legion_INCLUDE_DIRS}
-                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-                EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG}) 
-
-            cinch_add_test_execution_policy(LEGION_DEVEL
-                ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-legion.cc
-                FLAGS ${Legion_CXX_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}
-                INCLUDES ${Legion_INCLUDE_DIRS}
-                    ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH}
-                DEFINES "-DCINCH_DEVEL_TEST"
-                LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-                    ${MPI_${MPI_LANGUAGE}_LIBRARIES}
-                EXEC ${MPIEXEC}
-                EXEC_THREADS ${MPIEXEC_NUMPROC_FLAG})
-
-            set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS}
-                ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS} ${Legion_CXX_FLAGS}
-            )
-            set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
-                ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH} ${Legion_INCLUDE_DIRS}
-            )
-            set(CINCH_RUNTIME_LIBRARIES ${CINCH_RUNTIME_LIBRARIES}
-                ${MPI_${MPI_LANGUAGE}_LIBRARIES} 
-                ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-            )
-
-        elseif(Legion_FOUND)
-            add_definitions(-DLEGION_CMAKE)
-            cinch_add_test_execution_policy(LEGION
-               ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc
-               FLAGS ${Legion_CXX_FLAGS}
-               INCLUDES ${Legion_INCLUDE_DIRS}
-               LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
-
-            cinch_add_test_execution_policy(LEGION_DEVEL
-               ${CMAKE_SOURCE_DIR}/cinch/auxiliary/test-legion.cc
-               FLAGS ${Legion_CXX_FLAGS}
-               DEFINES "-DCINCH_DEVEL_TEST"
-               INCLUDES ${Legion_INCLUDE_DIRS}
-               LIBRARIES ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
-
-            set(CINCH_RUNTIME_FLAGS ${CINCH_RUNTIME_FLAGS} ${Legion_CXX_FLAGS})
-            set(CINCH_RUNTIME_INCLUDES ${CINCH_RUNTIME_INCLUDES}
-                ${Legion_INCLUDE_DIRS})
-            set(CINCH_RUNTIME_LIBRARIES ${CINCH_RUNTIME_LIBRARIES}
-                ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
-            )
-
-        endif()
-
-    endif(ENABLE_UNIT_TESTS)
+    include(options) 
 
 else()
 
@@ -464,7 +137,7 @@ else()
 
     set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
 
-endif(${CINCH_TOP_LEVEL_PROJECT})
+endif() # CINCH_PARSED_TOP_LEVEL_PROJECT
 
 #------------------------------------------------------------------------------#
 # Add support for Doxygen documentation
@@ -544,10 +217,10 @@ if(CINCH_LIBRARY_TARGETS)
         # without including the entire submodule.
         #----------------------------------------------------------------------#
 
-        if(NOT ${CINCH_TOP_LEVEL_PROJECT})
+        if(NOT ${CINCH_TOP_LEVEL_PARSER})
             set(${library_target_name}_LINKLIBS ${library_target_name}
                 PARENT_SCOPE)
-        endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
+        endif(NOT ${CINCH_TOP_LEVEL_PARSER})
 
         #----------------------------------------------------------------------#
         # Add target to global link libraries
@@ -587,6 +260,9 @@ if(CINCH_LIBRARY_TARGETS)
                 ${${library_target_name}_SOURCES})
             target_include_directories(${library_target_name} PRIVATE
                 ${CMAKE_BINARY_DIR}/include/${library_target_name})
+            if(CINCH_RUNTIME_LIBRARIES)
+                target_link_libraries( ${library_target_name} ${CINCH_RUNTIME_LIBRARIES} )
+            endif()
         endif()
 
         #----------------------------------------------------------------------#
@@ -616,19 +292,40 @@ if(CINCH_LIBRARY_TARGETS)
     # Set these for parent level build
     #--------------------------------------------------------------------------#
 
-    if(NOT ${CINCH_TOP_LEVEL_PROJECT})
+    if(NOT ${CINCH_TOP_LEVEL_PARSER})
         set(${PROJECT_NAME}_LINKLIBS ${${PROJECT_NAME}_LINKLIBS} PARENT_SCOPE)
     else()
         set(CINCH_LINK_LIBRARIES ${${PROJECT_NAME}_LINKLIBS})
-    endif(NOT ${CINCH_TOP_LEVEL_PROJECT})
+    endif(NOT ${CINCH_TOP_LEVEL_PARSER})
 
 endif(CINCH_LIBRARY_TARGETS)
+
+#------------------------------------------------------------------------------#
+# Target Libraries
+#------------------------------------------------------------------------------#
+
+if(CINCH_TARGET_LIBRARIES)
+
+    foreach(target_library ${CINCH_TARGET_LIBRARIES})
+
+        string(REPLACE ":" ";" target_library_list ${target_library})
+
+        list(GET target_library_list 0 target_name)
+        list(GET target_library_list 1 target_libraries)
+
+        string(REPLACE "|" ";" library_list ${target_libraries})
+
+        target_link_libraries( ${target_name} ${library_list} )
+
+    endforeach()
+
+endif()
 
 #------------------------------------------------------------------------------#
 # Add unit tests.
 #------------------------------------------------------------------------------#
 
-if(${CINCH_TOP_LEVEL_PROJECT})
+if(${CINCH_TOP_LEVEL_PARSER})
 
     foreach(unit ${CINCH_UNIT_TEST_TARGETS})
         
@@ -1009,7 +706,7 @@ if(${CINCH_TOP_LEVEL_PROJECT})
     install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
         DESTINATION include)
 
-endif(${CINCH_TOP_LEVEL_PROJECT})
+endif(${CINCH_TOP_LEVEL_PARSER})
 
 #------------------------------------------------------------------------------#
 # Application directories

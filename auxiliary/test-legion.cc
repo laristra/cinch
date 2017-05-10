@@ -3,7 +3,9 @@
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
+#ifdef ENABLE_MPI
 #include <mpi.h>
+#endif
 #include <legion.h>
 
 // Include and flag definitions for GFlags.

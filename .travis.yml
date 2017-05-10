@@ -12,7 +12,6 @@ addons:
       - cmake
       - cmake-data
       - libopenmpi-dev
-#      - libcereal-dev
       - openmpi-bin
       - gcc-4.9
       - g++-4.9
@@ -35,8 +34,8 @@ env: #maybe add mpich later
     - MPI=OFF TEST=laristra/cinch-nested-example
     - MPI=ON  TEST=losalamos/vpic
     - MPI=OFF TEST=losalamos/vpic
-#    - MPI=ON  TEST=laristra/flecsi GVER=5
-#    - MPI=OFF TEST=laristra/flecsi GVER=5
+    - MPI=ON  TEST=laristra/flecsi GVER=5
+    - MPI=OFF TEST=laristra/flecsi GVER=5
 
 script:
   - git checkout -b cinch_current_commit
