@@ -39,7 +39,7 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     # Add support for GFlags
     #--------------------------------------------------------------------------#
 
-    option(ENABLE_GFLAGS "Enable command-line flag support" OFF)
+    option(ENABLE_GFLAGS "Enable command-line flag support" ON)
 
     if(ENABLE_GFLAGS)
         find_package(GFlags)
