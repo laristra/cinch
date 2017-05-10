@@ -79,7 +79,7 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     option(CLOG_ENABLE_TAGS "Enable tag groups" OFF)
     if(CLOG_ENABLE_TAGS)
         set(CLOG_TAG_BITS "16" CACHE STRING
-            "Select the number of bits to use for tag groups.")
+            "Select the number of bits to use for tag groups")
         add_definitions(-DCLOG_ENABLE_TAGS)
         add_definitions(-DCLOG_TAG_BITS=${CLOG_TAG_BITS})
     endif()
@@ -97,6 +97,10 @@ if (NOT CINCH_PACKAGES_INCLUDED)
         if(CLOG_ENABLE_MPI)
             add_definitions(-DCLOG_ENABLE_MPI)
         endif()
+
+        set(CLOG_TURNSTILE_NWAY "1" CACHE STRING
+            "Set the turnstile rotation for MPI messages")
+        add_definitions(-DCLOG_TURNSTILE_NWAY=${CLOG_TURNSTILE_NWAY})
     endif()
 
     # Enable debugging

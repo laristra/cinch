@@ -825,8 +825,8 @@ private:
 
 #else
 
-#define begin_turnstile(nway)
-#define end_turnstile
+#define begin_turnstile(nway, enabled)
+#define end_turnstile(enabled)
 
 #endif
 
@@ -1063,7 +1063,9 @@ struct severity ## _log_message_t                                              \
 #define message_stamp \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
+#if !defined(CLOG_TURNSTILE_NWAY)
 #define CLOG_TURNSTILE_NWAY 1
+#endif
 
 // Trace
 severity_message_t(trace, decltype(cinch::true_state),
