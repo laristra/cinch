@@ -6,6 +6,11 @@
 #ifndef cinch_cinchlog_h
 #define cinch_cinchlog_h
 
+///
+/// \file
+/// \date Initial file creation: Dec 15, 2016
+///
+
 #if defined __GNUC__
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -20,15 +25,11 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-///
-/// \file
-/// \date Initial file creation: Dec 15, 2016
-///
 
 //----------------------------------------------------------------------------//
 // Runtime configuration parameters.
@@ -556,6 +557,11 @@ public:
   void
   init(std::string active = "none")
   {
+    #if defined(CLOG_DEBUG)
+      std::cerr << COLOR_LTGRAY << "CLOG: initializing runtime" <<
+        COLOR_PLAIN << std::endl;
+    #endif
+
     // Because active tags are specified at runtime, it is
     // necessary to maintain a map of the compile-time registered
     // tag names to the id that they get assigned after the clog_t
@@ -580,6 +586,11 @@ public:
       // output for this tag, make sure to scope all CLOG output.
       tag_bitset_.set(0);
 
+      #if defined(CLOG_DEBUG)
+        std::cerr << COLOR_LTGRAY << "CLOG: active tags (" <<
+          active << ")" << COLOR_PLAIN << std::endl;
+      #endif
+
       std::istringstream is(active);
       std::string tag;
       while(std::getline(is, tag, ',')) {
@@ -592,6 +603,8 @@ public:
         } // if
       } // while
     } // if
+
+    initialized_ = true;
   } // clog_t
 
   ///
@@ -646,11 +659,21 @@ public:
   /// Return the next tag id.
   ///
   size_t
-  register_tag(const char * name)
+  register_tag(const char * tag)
   {
+    // If the tag is already registered, just return the previously
+    // assigned id. This allows tags to be registered in headers.
+    if(tag_map_.find(tag) != tag_map_.end()) {
+      return tag_map_[tag];
+    } // if
+
     const size_t id = ++tag_id_;
     assert(id < CLOG_TAG_BITS && "Tag bits overflow! Increase CLOG_TAG_BITS");
-    tag_map_[name] = id;
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: registering tag " << tag <<
+      ": " << id << COLOR_PLAIN << std::endl;
+#endif
+    tag_map_[tag] = id;
     return id;
   } // next_tag
 
@@ -676,11 +699,47 @@ public:
   tag_enabled()
   {
 #if defined(CLOG_ENABLE_TAGS)
+
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: tag " << active_tag_ << " is " <<
+      tag_bitset_.test(active_tag_) << COLOR_PLAIN << std::endl;
+#endif
+
+    // If the runtime context hasn't been initialized, always return true.
+    if(!initialized_) {
+      return true;
+    } // if
+
     return tag_bitset_.test(active_tag_);
 #else
     return true;
 #endif // CLOG_ENABLE_TAGS
   } // tag_enabled
+
+  size_t
+  lookup_tag(const char * tag)
+  {
+    if(tag_map_.find(tag) == tag_map_.end()) {
+      std::cerr << COLOR_YELLOW << "CLOG: !!!WARNING " << tag <<
+        " has not been registered. Ignoring this group..." <<
+        COLOR_PLAIN << std::endl;
+      return 0;
+    } // if
+
+    return tag_map_[tag];
+  } // lookup_tag
+
+  std::mutex &
+  mutex()
+  {
+    return mutex_;
+  } // mutex
+
+  bool
+  initialized()
+  {
+    return initialized_;
+  } // initialized
 
 private:
 
@@ -695,6 +754,8 @@ private:
 
   ~clog_t() {}
 
+  bool initialized_ = false;
+
   tee_stream_t stream_;
   std::ostream null_stream_;
 
@@ -702,6 +763,7 @@ private:
   size_t active_tag_;
   std::bitset<CLOG_TAG_BITS> tag_bitset_;
   std::unordered_map<std::string, size_t> tag_map_;
+  std::mutex mutex_;
 
 }; // class clog_t
 
@@ -724,6 +786,18 @@ struct clog_tag_scope_t
   :
     stash_(clog_t::instance().active_tag())
   {
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: activating tag " << tag <<
+      COLOR_PLAIN << std::endl;
+#endif
+
+    // Warn users about externally-scoped messages
+    if(!clog_t::instance().initialized()) {
+      std::cerr << COLOR_YELLOW << "CLOG: !!!WARNING You cannot use " <<
+        "tag guards for externally scoped messages!!!" <<
+        "This message will be active!!!" << COLOR_PLAIN << std::endl;
+    } // if
+
     clog_t::instance().active_tag() = tag;
   } // clog_tag_scope_t
 
@@ -752,9 +826,9 @@ private:
   static size_t name ## _clog_tag_id =                                         \
   cinch::clog_t::instance().register_tag(_clog_stringify(name))
 
-// Return the static variable created in the clog_register_tag macro above.
+// Lookup the tag id
 #define clog_tag_lookup(name)                                                  \
-  name ## _clog_tag_id
+  cinch::clog_t::instance().lookup_tag(_clog_stringify(name))
 
 // Create a new tag scope.
 #define clog_tag_guard(name)                                                   \
@@ -812,6 +886,10 @@ struct log_message_t
     file_(file), line_(line), predicate_(predicate),
     clean_color_(false), fatal_(false)
   {
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
+      file << " " << line << COLOR_PLAIN << std::endl;
+#endif
   } // log_message_t
 
   virtual
@@ -921,6 +999,7 @@ struct severity ## _log_message_t                                              \
 // Trace
 severity_message_t(trace, decltype(cinch::true_state),
   {
+    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 1 &&
         predicate_() && clog_t::instance().tag_enabled());
@@ -932,6 +1011,7 @@ severity_message_t(trace, decltype(cinch::true_state),
 // Info
 severity_message_t(info, decltype(cinch::true_state),
   {
+    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 2 &&
         predicate_() && clog_t::instance().tag_enabled());
@@ -943,6 +1023,7 @@ severity_message_t(info, decltype(cinch::true_state),
 // Warn
 severity_message_t(warn, decltype(cinch::true_state),
   {
+    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 3 &&
         predicate_() && clog_t::instance().tag_enabled());
@@ -955,6 +1036,7 @@ severity_message_t(warn, decltype(cinch::true_state),
 // Error
 severity_message_t(error, decltype(cinch::true_state),
   {
+    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 4 &&
         predicate_() && clog_t::instance().tag_enabled());
@@ -969,6 +1051,7 @@ severity_message_t(error, decltype(cinch::true_state),
 // Fatal
 severity_message_t(fatal, decltype(cinch::true_state),
   {
+    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 5 &&
         predicate_() && clog_t::instance().tag_enabled());

@@ -66,7 +66,7 @@ int main(int argc, char ** argv) {
   int version, subversion;
   MPI_Get_version(&version, &subversion);
 
-#ifdef GASNET_CONDUIT_MPI
+#if defined(GASNET_CONDUIT_MPI)
   if(version==3 && subversion>0) {
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);

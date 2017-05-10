@@ -92,6 +92,12 @@ if (NOT CINCH_PACKAGES_INCLUDED)
         endif()
     endif()
 
+    # Enable debugging
+    option(CLOG_DEBUG "Enable clog debugging" ON)
+    if(CLOG_DEBUG)
+        add_definitions(-DCLOG_DEBUG)
+    endif()
+
     #--------------------------------------------------------------------------#
     # Add support for ctest, GTest, and pFUnit
     #--------------------------------------------------------------------------#
