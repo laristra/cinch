@@ -117,7 +117,6 @@ if(NOT CINCH_PARSED_TOP_LEVEL_PROJECT)
     set( CINCH_PARSED_TOP_LEVEL_PROJECT True )
 
     add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
-    set(CINCH_CONFIG_INFOTAG)
 
     #--------------------------------------------------------------------------#
     # Remove include links
@@ -127,17 +126,24 @@ if(NOT CINCH_PARSED_TOP_LEVEL_PROJECT)
         file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/include)
     endif(EXISTS ${CMAKE_BINARY_DIR}/include)
 
+    #--------------------------------------------------------------------------#
+    # Include main options
+    #--------------------------------------------------------------------------#
+
     include(options) 
 
-else()
-
-    #--------------------------------------------------------------------------#
-    # This is a submodule
-    #--------------------------------------------------------------------------#
-
-    set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
-
 endif() # CINCH_PARSED_TOP_LEVEL_PROJECT
+
+#------------------------------------------------------------------------------#
+# Set the info tag
+#------------------------------------------------------------------------------#
+
+if (CINCH_TOP_LEVEL_PROJECT)
+    set(CINCH_CONFIG_INFOTAG)
+else()
+    set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
+endif()
+
 
 #------------------------------------------------------------------------------#
 # Add support for Doxygen documentation
@@ -325,7 +331,7 @@ endif()
 # Add unit tests.
 #------------------------------------------------------------------------------#
 
-if(${CINCH_TOP_LEVEL_PARSER})
+if(CINCH_TOP_LEVEL_PARSER)
 
     foreach(unit ${CINCH_UNIT_TEST_TARGETS})
         
@@ -706,7 +712,7 @@ if(${CINCH_TOP_LEVEL_PARSER})
     install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
         DESTINATION include)
 
-endif(${CINCH_TOP_LEVEL_PARSER})
+endif(CINCH_TOP_LEVEL_PARSER)
 
 #------------------------------------------------------------------------------#
 # Application directories
