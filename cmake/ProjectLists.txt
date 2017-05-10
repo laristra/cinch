@@ -270,6 +270,13 @@ if(${CINCH_TOP_LEVEL_PROJECT})
         endif()
     endif()
 
+    # CLOG Debugging
+    option(CLOG_DEBUG "Enable clog debugging" OFF)
+    if(CLOG_DEBUG)
+        add_definitions(-DCLOG_DEBUG)
+    endif()
+
+
     #--------------------------------------------------------------------------#
     # Add support for ctest, GTest, and pFUnit
     #--------------------------------------------------------------------------#
