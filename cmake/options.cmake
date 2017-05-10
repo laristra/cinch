@@ -84,6 +84,13 @@ if (NOT CINCH_PACKAGES_INCLUDED)
         add_definitions(-DCLOG_TAG_BITS=${CLOG_TAG_BITS})
     endif()
 
+    # Externally scoped messages
+    option(CLOG_ENABLE_EXTERNAL
+        "Enable messages that are defined at external scope" OFF)
+    if(CLOG_ENABLE_EXTERNAL)
+        add_definitions(-DCLOG_ENABLE_EXTERNAL)
+    endif()
+
     # MPI
     if(MPI_${MPI_LANGUAGE}_FOUND)
         option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
@@ -163,11 +170,12 @@ if (NOT CINCH_PACKAGES_INCLUDED)
 
         cinch_add_test_execution_policy(SERIAL
             ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc
+            DEFINES "-DSERIAL"
         )
 
         cinch_add_test_execution_policy(SERIAL_DEVEL
             ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc
-            DEFINES "-DCINCH_DEVEL_TEST"
+            DEFINES "-DCINCH_DEVEL_TEST -DSERIAL"
         )
 
         if(FORTRAN_ENABLED)

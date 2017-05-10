@@ -98,7 +98,6 @@ function(mcinch_add_unit name)
     string(REPLACE "|" ";" unit_policy_libraries
         "${unit_policy_libraries}")
 
-
     get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
     set(_TARGET_MAIN ${name}_${_RUNTIME_MAIN})
     configure_file(${unit_policy_runtime}

@@ -25,6 +25,11 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+  #include <mpi.h>
+#endif
+
 #include <mutex>
 #include <sstream>
 #include <unordered_map>
@@ -604,6 +609,11 @@ public:
       } // while
     } // if
 
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
+    MPI_Comm_size(MPI_COMM_WORLD, &size_);
+#endif
+
     initialized_ = true;
   } // clog_t
 
@@ -705,9 +715,14 @@ public:
       tag_bitset_.test(active_tag_) << COLOR_PLAIN << std::endl;
 #endif
 
-    // If the runtime context hasn't been initialized, always return true.
+    // If the runtime context hasn't been initialized, return true only
+    // if the user has enabled externally-scoped messages.
     if(!initialized_) {
+#if defined(CLOG_ENABLE_EXTERNAL)
       return true;
+#else
+      return false;
+#endif
     } // if
 
     return tag_bitset_.test(active_tag_);
@@ -741,6 +756,20 @@ public:
     return initialized_;
   } // initialized
 
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+  int
+  rank()
+  {
+    return rank_;
+  } // rank
+
+  int
+  size()
+  {
+    return size_;
+  } // rank
+#endif
+
 private:
 
   ///
@@ -765,7 +794,41 @@ private:
   std::unordered_map<std::string, size_t> tag_map_;
   std::mutex mutex_;
 
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+  int rank_;
+  int size_;
+#endif
+
 }; // class clog_t
+
+// Add turnstile capability to cleanup output during MPI execution
+// Attribution: This was adapted from Kevin Bower's implementation
+// in VPIC.
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+
+#define begin_turnstile(nway, enabled) do {                                    \
+  int _nway = (nway), _baton;                                                  \
+  if(enabled && clog_t::instance().initialized() &&                            \
+    clog_t::instance().rank() >= _nway) { \
+    MPI_Recv(&_baton, 1, MPI_INT, clog_t::instance().rank()-_nway,             \
+      0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);                                   \
+  } /* if */                                                                   \
+  do
+
+#define end_turnstile(enabled) while(0);                                       \
+  if(enabled && clog_t::instance().initialized() &&                            \
+    clog_t::instance().rank() + _nway < clog_t::instance().size()) {           \
+    MPI_Send(&_baton, 1, MPI_INT, clog_t::instance().rank()+_nway,             \
+      0, MPI_COMM_WORLD);                                                      \
+  } /* if */                                                                   \
+} while(0)
+
+#else
+
+#define begin_turnstile(nway)
+#define end_turnstile
+
+#endif
 
 //----------------------------------------------------------------------------//
 // Tag scope.
@@ -795,7 +858,8 @@ struct clog_tag_scope_t
     if(!clog_t::instance().initialized()) {
       std::cerr << COLOR_YELLOW << "CLOG: !!!WARNING You cannot use " <<
         "tag guards for externally scoped messages!!!" <<
-        "This message will be active!!!" << COLOR_PLAIN << std::endl;
+        "This message will be active if CLOG_ENABLE_EXTERNAL is defined!!!" <<
+        COLOR_PLAIN << std::endl;
     } // if
 
     clog_t::instance().active_tag() = tag;
@@ -880,11 +944,12 @@ struct log_message_t
   log_message_t(
     const char * file,
     int line,
+    bool can_turnstile,
     P && predicate
   )
   :
-    file_(file), line_(line), predicate_(predicate),
-    clean_color_(false), fatal_(false)
+    file_(file), line_(line), can_turnstile_(can_turnstile),
+      predicate_(predicate), clean_color_(false), fatal_(false)
   {
 #if defined(CLOG_DEBUG)
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
@@ -952,6 +1017,7 @@ protected:
 
   const char * file_;
   int line_;
+  bool can_turnstile_;
   P & predicate_;
   bool clean_color_;
   bool fatal_;
@@ -972,8 +1038,9 @@ struct severity ## _log_message_t                                              \
   severity ## _log_message_t(                                                  \
     const char * file,                                                         \
     int line,                                                                  \
+    bool can_turnstile,                                                        \
     P && predicate = true_state)                                               \
-    : log_message_t<P>(file, line, predicate) {}                               \
+    : log_message_t<P>(file, line, can_turnstile, predicate) {}                \
                                                                                \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
@@ -996,27 +1063,37 @@ struct severity ## _log_message_t                                              \
 #define message_stamp \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
+#define CLOG_TURNSTILE_NWAY 1
+
 // Trace
 severity_message_t(trace, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 1 &&
         predicate_() && clog_t::instance().tag_enabled());
-    stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
-    stream << OUTPUT_CYAN("] ");
+
+    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
+      std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
+      stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_CYAN("] ");
+    } end_turnstile(can_turnstile_);
+
     return stream;
   });
 
 // Info
 severity_message_t(info, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 2 &&
         predicate_() && clog_t::instance().tag_enabled());
-    stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
-    stream << OUTPUT_GREEN("] ");
+
+    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
+      std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
+      stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_GREEN("] ");
+    } end_turnstile(can_turnstile_);
+
     return stream;
   });
 
@@ -1027,8 +1104,12 @@ severity_message_t(warn, decltype(cinch::true_state),
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 3 &&
         predicate_() && clog_t::instance().tag_enabled());
-    stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
-    stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+
+    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
+      stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+    } end_turnstile(can_turnstile_);
+
     clean_color_ = true;
     return stream;
   });
@@ -1040,8 +1121,12 @@ severity_message_t(error, decltype(cinch::true_state),
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 4 &&
         predicate_() && clog_t::instance().tag_enabled());
-    stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
-    stream << OUTPUT_RED("] ") << COLOR_LTRED;
+
+    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
+      stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
+      stream << OUTPUT_RED("] ") << COLOR_LTRED;
+    } end_turnstile(can_turnstile_);
+
     clean_color_ = true;
     return stream;
   });
@@ -1055,7 +1140,11 @@ severity_message_t(fatal, decltype(cinch::true_state),
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 5 &&
         predicate_() && clog_t::instance().tag_enabled());
-    stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+
+    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
+      stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+    } end_turnstile(can_turnstile_);
+
     clean_color_ = true;
     fatal_ = true;
     return stream;
@@ -1081,7 +1170,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 ///       function can be implicitly converted to an int.
 ///
 #define clog(severity)                                                         \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__).stream()
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true).stream()
 
 ///
 /// Method style interface for trace level severity log entries.
@@ -1200,9 +1289,7 @@ namespace clog {
   }
 
 // Enable MPI
-#if defined(CLOG_ENABLE_MPI)
-
-#include <mpi.h>
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
 
 namespace cinch {
 
@@ -1275,7 +1362,7 @@ is_active_rank()
 ///       function can be implicitly converted to an int.
 ///
 #define clog_rank(severity, rank)                                              \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true,          \
     cinch::is_static_rank<rank>).stream()
 
 // Set the output rank for clog_one calls.
@@ -1284,7 +1371,7 @@ is_active_rank()
 
 // Output to the rank set by clog_set_output_rank()
 #define clog_one(severity)                                                     \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, false,         \
     cinch::is_active_rank).stream()
 
 ///
@@ -1359,7 +1446,7 @@ is_active_rank()
 #define clog_container_one(severity, banner, container, delimiter)             \
   std::cout
 
-#endif // CLOG_ENABLE_MPI
+#endif // !SERIAL && CLOG_ENABLE_MPI
 
 #endif // cinch_cinchlog_h
 
