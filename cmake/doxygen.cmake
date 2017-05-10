@@ -52,10 +52,14 @@ function(cinch_add_doxygen)
             #------------------------------------------------------------------#
             # Add dependency for sub doxygen targets
             #------------------------------------------------------------------#
-
-            add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
-            add_dependencies(install-doxygen
-                ${CINCH_CONFIG_INFOTAG}install-doxygen)
+            
+            if ( TARGET doxygen )
+                add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
+            endif()
+            if ( TARGET install-doxygen )
+                add_dependencies(install-doxygen
+                    ${CINCH_CONFIG_INFOTAG}install-doxygen)
+            endif()
         else()
 
             #------------------------------------------------------------------#
