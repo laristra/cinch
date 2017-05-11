@@ -7,6 +7,6 @@
 [submodule "boost/preprocessor"]
 	path = boost/preprocessor
 	url = ../../boostorg/preprocessor.git
-[submodule "gflags"]
-	path = gflags
-	url = ../../laristra/gflags.git
+[submodule "boost/program_options"]
+	path = boost/program_options
+	url = ../../boostorg/program_options.git

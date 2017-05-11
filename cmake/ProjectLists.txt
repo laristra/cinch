@@ -564,8 +564,12 @@ if(CINCH_TOP_LEVEL_PARSER)
 
             target_link_libraries(${unit_target_name} ${GTEST_LIBRARIES})
 
-            if(ENABLE_GFLAGS)
-                target_link_libraries(${unit_target_name} ${GFLAGS_LIBRARIES})
+#            if(ENABLE_GFLAGS)
+#                target_link_libraries(${unit_target_name} ${GFLAGS_LIBRARIES})
+#            endif()
+
+            if(ENABLE_BOOST_PROGRAM_OPTIONS)
+                target_link_libraries(${unit_target_name} ${Boost_LIBRARIES})
             endif()
 
             if(NOT "${unit_policy_libraries}" STREQUAL "None")

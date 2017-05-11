@@ -163,10 +163,13 @@ function(mcinch_add_unit name)
 
     target_link_libraries( ${name} ${unit_LIBRARIES} ${GTEST_LIBRARIES} )
 
-    if(ENABLE_GFLAGS)
-        target_link_libraries(${name} ${GFLAGS_LIBRARIES})
-    endif()
+#    if(ENABLE_GFLAGS)
+#        target_link_libraries(${name} ${GFLAGS_LIBRARIES})
+#    endif()
 
+    if(ENABLE_BOOST_PROGRAM_OPTIONS)
+        target_link_libraries(${name} ${Boost_LIBRARIES})
+    endif()
 
     if(NOT "${unit_policy_libraries}" STREQUAL "None")
       target_link_libraries( ${name} ${unit_policy_libraries} )

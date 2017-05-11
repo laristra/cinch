@@ -36,28 +36,54 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     endif()
 
     #--------------------------------------------------------------------------#
+    # Add support for Boost program options.
+    #--------------------------------------------------------------------------#
+
+    option(ENABLE_BOOST_PROGRAM_OPTIONS
+        "Enable Boost program options for command-line flags" ON)
+
+    if(ENABLE_BOOST_PROGRAM_OPTIONS)
+        find_package(Boost 1.58.0 COMPONENTS program_options QUIET)
+
+        if(Boost_FOUND)
+            include_directories(${Boost_INCLUDE_DIRS})
+        else()
+            file(GLOB program_options_SRC
+                ${CINCH_SOURCE_DIR}/boost/program_options/src/*.cpp)
+            add_library(boost_program_options ${program_options_SRC})
+            target_include_directories(boost_program_options PRIVATE
+              ${CINCH_SOURCE_DIR}/boost/program_options/include)
+            include_directories(
+                ${CINCH_SOURCE_DIR}/boost/program_options/include)
+            set(BOOST_LIBRARIES boost_program_options)
+        endif()
+
+        add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Add support for GFlags
     #--------------------------------------------------------------------------#
 
-    option(ENABLE_GFLAGS "Enable command-line flag support" ON)
-
-    if(ENABLE_GFLAGS)
-        find_package(GFlags)
-
-        if(GFlags_FOUND)
-            # We found a system or local installation
-            include_directories(${GFlags_INCLUDE_DIRS})
-        else()
-            # Build it ourselves
-            add_subdirectory(${CINCH_SOURCE_DIR}/gflags
-                ${CMAKE_BINARY_DIR}/cinch/gflags)
-            include_directories(${CMAKE_BINARY_DIR}/cinch/gflags/include)
-            set(GFLAGS_LIBRARIES gflags)
-        endif()
-
-        # Add this to the compile definitions
-        add_definitions(-DENABLE_GFLAGS)
-    endif()
+#    option(ENABLE_GFLAGS "Enable command-line flag support" ON)
+#
+#    if(ENABLE_GFLAGS)
+#        find_package(GFlags)
+#
+#        if(GFlags_FOUND)
+#            # We found a system or local installation
+#            include_directories(${GFlags_INCLUDE_DIRS})
+#        else()
+#            # Build it ourselves
+#            add_subdirectory(${CINCH_SOURCE_DIR}/gflags
+#                ${CMAKE_BINARY_DIR}/cinch/gflags)
+#            include_directories(${CMAKE_BINARY_DIR}/cinch/gflags/include)
+#            set(GFLAGS_LIBRARIES gflags)
+#        endif()
+#
+#        # Add this to the compile definitions
+#        add_definitions(-DENABLE_GFLAGS)
+#    endif()
 
     #--------------------------------------------------------------------------#
     # Add clog logging
@@ -129,18 +155,18 @@ if (NOT CINCH_PACKAGES_INCLUDED)
         find_package(GTest QUIET)
 
         if(GTEST_FOUND)
-          include_directories(${GTEST_INCLUDE_DIRS})
+            include_directories(${GTEST_INCLUDE_DIRS})
         elseif(NOT TARGET gtest)
-          find_package(Threads)
-          add_library(gtest
-            ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
-          target_include_directories(gtest PRIVATE
-            ${CINCH_SOURCE_DIR}/gtest/googletest)
-          target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
-          include_directories(${CINCH_SOURCE_DIR}/gtest/googlemock/include)
-          include_directories(${CINCH_SOURCE_DIR}/gtest/googletest)
-          include_directories(${CINCH_SOURCE_DIR}/gtest/googletest/include)
-          set(GTEST_LIBRARIES gtest)
+            find_package(Threads)
+            add_library(gtest
+                ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
+            target_include_directories(gtest PRIVATE
+                ${CINCH_SOURCE_DIR}/gtest/googletest)
+            target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
+            include_directories(${CINCH_SOURCE_DIR}/gtest/googlemock/include)
+            include_directories(${CINCH_SOURCE_DIR}/gtest/googletest)
+            include_directories(${CINCH_SOURCE_DIR}/gtest/googletest/include)
+            set(GTEST_LIBRARIES gtest)
         endif()
 
         include_directories(${CINCH_SOURCE_DIR}/auxiliary)
