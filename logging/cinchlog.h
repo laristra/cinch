@@ -809,9 +809,9 @@ private:
 #define begin_turnstile(nway, enabled) do {                                    \
   int _nway = (nway), _baton;                                                  \
   if(enabled && clog_t::instance().initialized() &&                            \
-    clog_t::instance().rank() >= _nway) { \
+    clog_t::instance().rank() >= _nway) {                                      \
     MPI_Recv(&_baton, 1, MPI_INT, clog_t::instance().rank()-_nway,             \
-      0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);                                   \
+      42, MPI_COMM_WORLD, MPI_STATUS_IGNORE);                                  \
   } /* if */                                                                   \
   do
 
@@ -819,9 +819,9 @@ private:
   if(enabled && clog_t::instance().initialized() &&                            \
     clog_t::instance().rank() + _nway < clog_t::instance().size()) {           \
     MPI_Send(&_baton, 1, MPI_INT, clog_t::instance().rank()+_nway,             \
-      0, MPI_COMM_WORLD);                                                      \
+      42, MPI_COMM_WORLD);                                                     \
   } /* if */                                                                   \
-} while(0)
+} while(0);
 
 #else
 
@@ -1078,7 +1078,7 @@ severity_message_t(trace, decltype(cinch::true_state),
       std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
       stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_CYAN("] ");
-    } end_turnstile(can_turnstile_);
+    } end_turnstile(can_turnstile_)
 
     return stream;
   });
@@ -1094,7 +1094,7 @@ severity_message_t(info, decltype(cinch::true_state),
       std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
       stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_GREEN("] ");
-    } end_turnstile(can_turnstile_);
+    } end_turnstile(can_turnstile_)
 
     return stream;
   });
@@ -1110,7 +1110,7 @@ severity_message_t(warn, decltype(cinch::true_state),
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
-    } end_turnstile(can_turnstile_);
+    } end_turnstile(can_turnstile_)
 
     clean_color_ = true;
     return stream;
@@ -1127,7 +1127,7 @@ severity_message_t(error, decltype(cinch::true_state),
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
       stream << OUTPUT_RED("] ") << COLOR_LTRED;
-    } end_turnstile(can_turnstile_);
+    } end_turnstile(can_turnstile_)
 
     clean_color_ = true;
     return stream;
@@ -1145,7 +1145,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
-    } end_turnstile(can_turnstile_);
+    } end_turnstile(can_turnstile_)
 
     clean_color_ = true;
     fatal_ = true;
