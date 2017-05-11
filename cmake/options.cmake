@@ -62,30 +62,6 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     endif()
 
     #--------------------------------------------------------------------------#
-    # Add support for GFlags
-    #--------------------------------------------------------------------------#
-
-#    option(ENABLE_GFLAGS "Enable command-line flag support" ON)
-#
-#    if(ENABLE_GFLAGS)
-#        find_package(GFlags)
-#
-#        if(GFlags_FOUND)
-#            # We found a system or local installation
-#            include_directories(${GFlags_INCLUDE_DIRS})
-#        else()
-#            # Build it ourselves
-#            add_subdirectory(${CINCH_SOURCE_DIR}/gflags
-#                ${CMAKE_BINARY_DIR}/cinch/gflags)
-#            include_directories(${CMAKE_BINARY_DIR}/cinch/gflags/include)
-#            set(GFLAGS_LIBRARIES gflags)
-#        endif()
-#
-#        # Add this to the compile definitions
-#        add_definitions(-DENABLE_GFLAGS)
-#    endif()
-
-    #--------------------------------------------------------------------------#
     # Add clog logging
     #--------------------------------------------------------------------------#
 
