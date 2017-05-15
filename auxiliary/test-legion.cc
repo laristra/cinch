@@ -8,12 +8,11 @@
 #endif
 #include <legion.h>
 
-// Include and flag definitions for GFlags.
-#if defined(ENABLE_GFLAGS)
-  #include <gflags/gflags.h>
-  DEFINE_string(active, "none", "Specify the active tag groups");
-  DEFINE_bool(tags, false, "List available tag groups and exit.");
-#endif // ENABLE_GFLAGS
+// Boost command-line options
+#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+  #include <boost/program_options.hpp>
+  using namespace boost::program_options;
+#endif
 
 // This define lets us use the same test driver for gtest and internal
 // devel tests.
@@ -110,42 +109,41 @@ int main(int argc, char ** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 #endif
 
-  // This is used for initialization of clog if gflags is not enabled.
-  std::string active("all");
-  bool tags(false);
+  // Initialize tags to output all tag groups from CLOG
+  std::string tags("all");
 
-#if defined(ENABLE_GFLAGS)
-  // Usage
-  gflags::SetUsageMessage("[options]");
+#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+  options_description desc("Cinch test options");  
 
-  // Send any unprocessed arguments to GFlags
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
-
-  // Get the flags
-  active = FLAGS_active;
-  tags = FLAGS_tags;
-#endif // ENABLE_GFLAGS
+  // Add command-line options
+  desc.add_options()
+    ("tags,t", value(&tags)->implicit_value("0"),
+      "--tags=tag1,tag2 --tags by itself will print the available tags.")
+    ;
+  variables_map vm;
+  store(parse_command_line(argc, argv, desc), vm);
+  notify(vm);
+#endif // ENABLE_BOOST_PROGRAM_OPTIONS
 
   int result(0);
 
-  if(tags != false) {
-
+  if(tags == "0") {
 #if defined(ENABLE_MPI)
     // Output the available tags
-		if(rank == 0) {
+    if(rank == 0) {
 #endif
-			std::cout << "Available tags (CLOG):" << std::endl;
+      std::cout << "Available tags (CLOG):" << std::endl;
 
-			for(auto t: clog_tag_map()) {
-				std::cout << "  " << t.first << std::endl;
-			} // for
+      for(auto t: clog_tag_map()) {
+        std::cout << "  " << t.first << std::endl;
+      } // for
 #if defined(ENABLE_MPI)
-		} // if
+    } // if
 #endif
   }
   else {
     // Initialize the cinchlog runtime
-    clog_init(active);
+    clog_init(tags);
 
     // Call the user-provided initialization function
     test_init(argc, argv);

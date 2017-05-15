@@ -40,7 +40,7 @@ env: #maybe add mpich later
 script:
   - git checkout -b cinch_current_commit
   - cd $HOME && git clone --recursive https://github.com/${TEST} ${TEST} && cd ${TEST} &&
-    for i in $(find . -type d -name cinch); do [ -e ${i}/.git ] || continue; git -C ${i} fetch ${HOME}/build/${TRAVIS_REPO_SLUG} cinch_current_commit && git -C ${i} checkout -f FETCH_HEAD; done &&
+    for i in $(find . -type d -name cinch); do [ -e ${i}/.git ] || continue; git -C ${i} fetch ${HOME}/build/${TRAVIS_REPO_SLUG} cinch_current_commit && git -C ${i} checkout -f FETCH_HEAD && git -C ${i} submodule update --init --recursive; done &&
     mkdir build && cd build && 
     FC=gfortran-${GVER} CC=gcc-${GVER} CXX=g++-${GVER} cmake -DENABLE_MPI=$MPI -DENABLE_UNIT_TESTS=ON .. && 
     make -j4 && make test ARGS="-V" && make install DESTDIR="${HOME}"
