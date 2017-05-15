@@ -40,7 +40,7 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     #--------------------------------------------------------------------------#
 
     option(ENABLE_BOOST_PROGRAM_OPTIONS
-        "Enable Boost program options for command-line flags" ON)
+        "Enable Boost program options for command-line flags" OFF)
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
         find_package(Boost 1.58.0 COMPONENTS program_options REQUIRED)
