@@ -7,3 +7,6 @@
 [submodule "boost/preprocessor"]
 	path = boost/preprocessor
 	url = ../../boostorg/preprocessor.git
+[submodule "boost/program_options"]
+	path = boost/program_options
+	url = ../../boostorg/program_options.git
