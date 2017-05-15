@@ -43,21 +43,9 @@ if (NOT CINCH_PACKAGES_INCLUDED)
         "Enable Boost program options for command-line flags" ON)
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
-        find_package(Boost 1.58.0 COMPONENTS program_options QUIET)
+        find_package(Boost 1.58.0 COMPONENTS program_options REQUIRED)
 
-        if(Boost_FOUND)
-            include_directories(${Boost_INCLUDE_DIRS})
-        else()
-            file(GLOB program_options_SRC
-                ${CINCH_SOURCE_DIR}/boost/program_options/src/*.cpp)
-            add_library(boost_program_options ${program_options_SRC})
-            target_include_directories(boost_program_options PRIVATE
-              ${CINCH_SOURCE_DIR}/boost/program_options/include)
-            include_directories(
-                ${CINCH_SOURCE_DIR}/boost/program_options/include)
-            set(BOOST_LIBRARIES boost_program_options)
-        endif()
-
+        include_directories(${Boost_INCLUDE_DIRS})
         add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
     endif()
 
@@ -106,7 +94,7 @@ if (NOT CINCH_PACKAGES_INCLUDED)
     endif()
 
     # Enable debugging
-    option(CLOG_DEBUG "Enable clog debugging" ON)
+    option(CLOG_DEBUG "Enable clog debugging" OFF)
     if(CLOG_DEBUG)
         add_definitions(-DCLOG_DEBUG)
     endif()
