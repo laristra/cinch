@@ -4,8 +4,9 @@
  *~-------------------------------------------------------------------------~~*/
 
 #ifdef ENABLE_MPI
-#include <mpi.h>
+  #include <mpi.h>
 #endif
+
 #include <legion.h>
 
 // Boost command-line options
