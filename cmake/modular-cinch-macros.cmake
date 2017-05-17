@@ -43,8 +43,8 @@ function(mcinch_add_unit name)
 
     set(options)
     set(one_value_args)
-    set(multi_value_args SOURCES DEFINES DEPENDS INPUTS
-        LIBRARIES POLICY THREADS)
+    set(multi_value_args SOURCES INPUTS
+        POLICY THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -67,6 +67,7 @@ function(mcinch_add_unit name)
         set(unit_POLICY "SERIAL")
     endif(NOT unit_POLICY)
            
+    # Don't create the unit test if its policy is not defined
     if(NOT ${unit_POLICY}_TEST_POLICY_LIST)
         return()
     endif()
@@ -113,27 +114,75 @@ function(mcinch_add_unit name)
             "You must specify unit test source files using SOURCES")
     endif(NOT unit_SOURCES)
 
-    add_executable( ${name} ${unit_SOURCES} ${_TARGET_MAIN})
+    #--------------------------------------------------------------------------#
+    # Add the executable
+    #--------------------------------------------------------------------------#
+
+    if("${unit_POLICY}" STREQUAL "FORTRAN")
+        set(_FORTRAN_SOURCES)
+        set(_FORTRAN_SPECIALS)
+
+        # Run pFUnit preprocessor on .pf files
+        foreach(source ${unit_SOURCES})
+            get_filename_component(_EXT ${source} EXT)
+
+            if("${_EXT}" STREQUAL ".pf")
+                get_filename_component(_BASE ${source} NAME_WE)
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_BASE}.F90
+                    COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
+                    ${_OUTPUT_DIR}/${_BASE}.F90
+                    DEPENDS ${source}
+                    COMMENT "Generating ${_OUTPUT_DIR}/${_BASE}.F90 using pfunit")
+                list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}/${_BASE}.F90)
+            elseif("${_EXT}" STREQUAL ".inc")
+                get_filename_component(_OUTPUT_NAME ${source} NAME)
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${source}
+                    ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                    DEPENDS ${source}
+                    COMMENT "Copying ${source} for ${unit_target_name}")
+                add_custom_target(${unit_target_name}_inc_file DEPENDS
+                    ${_OUTPUT_DIR}/${_OUTPUT_NAME})
+                list(APPEND _FORTRAN_SPECIALS
+                    ${unit_target_name}_inc_file)
+            else()
+                list(APPEND _FORTRAN_SOURCES ${source})
+            endif()
+        endforeach()
+
+        add_executable(${name} ${_FORTRAN_SOURCES}
+            ${unit_policy_runtime})
+        target_include_directories(${unit_target_name} PRIVATE
+            ${unit_target_directory})
+        target_include_directories(${unit_target_name} PRIVATE
+            ${CMAKE_BINARY_DIR})
+        target_include_directories(${unit_target_name} PRIVATE
+            ${_OUTPUT_DIR})
+        add_dependencies(${unit_target_name} pfunit)
+        add_dependencies(${unit_target_name} ${_FORTRAN_SPECIALS})
+
+        set(_PFUNIT_DEFINES)
+        list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
+        list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
+
+        set_target_properties(${unit_target_name}
+            PROPERTIES COMPILE_DEFINITIONS "${_PFUNIT_DEFINES}")
+    else()
+        add_executable(${name} ${unit_SOURCES} ${_TARGET_MAIN})
+        target_link_libraries( ${name} ${GTEST_LIBRARIES} )
+    endif()
+
+    if(NOT "${unit_policy_flags}" STREQUAL "None")
+        target_compile_options(${name}
+            PRIVATE ${unit_policy_flags})
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for defines.
     #--------------------------------------------------------------------------#
 
-    if(unit_DEFINES)
-      target_compile_definitions(${name} PRIVATE ${unit_DEFINES})
-    endif()
-
     if(NOT "${unit_policy_defines}" STREQUAL "None")
       target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
-    endif()
-
-    #--------------------------------------------------------------------------#
-    # Check for explicit dependencies. This flag is necessary for
-    # preprocessor header includes.
-    #--------------------------------------------------------------------------#
-
-    if(unit_DEPENDS)
-      add_dependencies( ${name} ${unit_DEPENDENCIES} )
     endif()
 
     #--------------------------------------------------------------------------#
@@ -160,8 +209,6 @@ function(mcinch_add_unit name)
     #--------------------------------------------------------------------------#
     # Check for library dependencies.
     #--------------------------------------------------------------------------#
-
-    target_link_libraries( ${name} ${unit_LIBRARIES} ${GTEST_LIBRARIES} )
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
         target_link_libraries(${name} ${Boost_LIBRARIES})
