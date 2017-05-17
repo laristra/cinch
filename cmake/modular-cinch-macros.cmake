@@ -136,7 +136,7 @@ function(mcinch_add_unit name)
 
             if("${_EXT}" STREQUAL ".pf")
                 get_filename_component(_BASE ${source} NAME_WE)
-                add_custom_command(OUTPUT ${_OUTPUT_PATH}${_BASE}.F90
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_BASE}.F90
                     COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
                     ${_OUTPUT_DIR}${_BASE}.F90
                     DEPENDS ${source}
@@ -158,7 +158,6 @@ function(mcinch_add_unit name)
             endif()
         endforeach()
 
-        MESSAGE( STATUS ${_FORTRAN_SOURCES} )
         add_executable(${name} ${_FORTRAN_SOURCES}
             ${unit_policy_runtime})
 
