@@ -42,11 +42,18 @@ function(mcinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     set(options)
-    set(one_value_args)
+    set(one_value_args WORKING_DIRECTORY)
     set(multi_value_args SOURCES INPUTS
         POLICY THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    # add a slash on the end of working dir if its not empty
+    if (unit_WORKING_DIRECTORY)
+      set(_OUTPUT_DIR  "${unit_WORKING_DIRECTORY}/" )
+    else()
+      set( _OUTPUT_DIR )
+    endif()
 
     #------------------------------------------------------------------#
     # Set output directory information
@@ -102,7 +109,7 @@ function(mcinch_add_unit name)
     get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
     set(_TARGET_MAIN ${name}_${_RUNTIME_MAIN})
     configure_file(${unit_policy_runtime}
-        ${_TARGET_MAIN} COPYONLY)
+      ${_OUTPUT_DIR}${_TARGET_MAIN} COPYONLY)
 
 
     #--------------------------------------------------------------------------#
@@ -125,50 +132,53 @@ function(mcinch_add_unit name)
         # Run pFUnit preprocessor on .pf files
         foreach(source ${unit_SOURCES})
             get_filename_component(_EXT ${source} EXT)
+            get_filename_component(_PATH ${source} ABSOLUTE)
 
             if("${_EXT}" STREQUAL ".pf")
                 get_filename_component(_BASE ${source} NAME_WE)
-                add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_BASE}.F90
-                    COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
-                    ${_OUTPUT_DIR}/${_BASE}.F90
+                add_custom_command(OUTPUT ${_OUTPUT_PATH}${_BASE}.F90
+                    COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
+                    ${_OUTPUT_DIR}${_BASE}.F90
                     DEPENDS ${source}
-                    COMMENT "Generating ${_OUTPUT_DIR}/${_BASE}.F90 using pfunit")
-                list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}/${_BASE}.F90)
+                    COMMENT "Generating ${_OUTPUT_DIR}${_BASE}.F90 using pfunit")
+                list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}${_BASE}.F90)
             elseif("${_EXT}" STREQUAL ".inc")
                 get_filename_component(_OUTPUT_NAME ${source} NAME)
-                add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                    COMMAND ${CMAKE_COMMAND} -E copy ${source}
-                    ${_OUTPUT_DIR}/${_OUTPUT_NAME}
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${_PATH}
+                    ${_OUTPUT_DIR}${_OUTPUT_NAME}
                     DEPENDS ${source}
-                    COMMENT "Copying ${source} for ${unit_target_name}")
-                add_custom_target(${unit_target_name}_inc_file DEPENDS
-                    ${_OUTPUT_DIR}/${_OUTPUT_NAME})
+                    COMMENT "Copying ${source} for ${name}")
+                add_custom_target(${name}_inc_file DEPENDS
+                    ${_OUTPUT_DIR}${_OUTPUT_NAME})
                 list(APPEND _FORTRAN_SPECIALS
-                    ${unit_target_name}_inc_file)
+                    ${name}_inc_file)
             else()
                 list(APPEND _FORTRAN_SOURCES ${source})
             endif()
         endforeach()
 
+        MESSAGE( STATUS ${_FORTRAN_SOURCES} )
         add_executable(${name} ${_FORTRAN_SOURCES}
             ${unit_policy_runtime})
-        target_include_directories(${unit_target_name} PRIVATE
-            ${unit_target_directory})
-        target_include_directories(${unit_target_name} PRIVATE
-            ${CMAKE_BINARY_DIR})
-        target_include_directories(${unit_target_name} PRIVATE
-            ${_OUTPUT_DIR})
-        add_dependencies(${unit_target_name} pfunit)
-        add_dependencies(${unit_target_name} ${_FORTRAN_SPECIALS})
+
+        if ( _OUTPUT_DIR ) 
+          target_include_directories(${name} PRIVATE ${_OUTPUT_DIR})
+        else()
+          target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        endif()
+
+        add_dependencies(${name} pfunit)
+        add_dependencies(${name} ${_FORTRAN_SPECIALS})
 
         set(_PFUNIT_DEFINES)
         list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
         list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
 
-        set_target_properties(${unit_target_name}
+        set_target_properties(${name}
             PROPERTIES COMPILE_DEFINITIONS "${_PFUNIT_DEFINES}")
     else()
-        add_executable(${name} ${unit_SOURCES} ${_TARGET_MAIN})
+        add_executable(${name} ${unit_SOURCES} ${_OUTPUT_DIR}${_TARGET_MAIN})
         target_link_libraries( ${name} ${GTEST_LIBRARIES} )
     endif()
 
@@ -186,20 +196,21 @@ function(mcinch_add_unit name)
     endif()
 
     #--------------------------------------------------------------------------#
-    # Check for files. 
+    # Check for input files. 
     #--------------------------------------------------------------------------#
     
     if (unit_INPUTS)
         set(_OUTPUT_FILES)
         foreach(input ${unit_INPUTS})
             get_filename_component(_OUTPUT_NAME ${input} NAME)
-            add_custom_command(OUTPUT ${_OUTPUT_NAME}
+            get_filename_component(_PATH ${input} ABSOLUTE)
+            add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
                 COMMAND ${CMAKE_COMMAND} -E copy 
-                ${CMAKE_CURRENT_SOURCE_DIR}/${input}
-                ${_OUTPUT_NAME}
-                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${input}
+                ${_PATH}
+                ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                DEPENDS ${input}
                 COMMENT "Copying ${input} for ${name}")
-            list(APPEND _OUTPUT_FILES ${_OUTPUT_NAME})
+            list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}${_OUTPUT_NAME})
         endforeach()
         add_custom_target(${name}_inputs
             DEPENDS ${_OUTPUT_FILES})
@@ -263,7 +274,7 @@ function(mcinch_add_unit name)
         foreach(instance ${unit_THREADS})
             if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
                 set(_OUTPUT
-                    ${name}_${instance}.xml)
+                    ${_OUTPUT_DIR}${name}_${instance}.xml)
                 set(UNIT_FLAGS ${UNIT_FLAGS}
                     --gtest_output=xml:${_OUTPUT})
             endif()
@@ -274,15 +285,16 @@ function(mcinch_add_unit name)
                 COMMAND
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads} ${instance}
-                    ${name}
-                    ${UNIT_FLAGS} )
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS} 
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
         endforeach(instance)
 
     else()
 
         if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
             set(_OUTPUT
-                ${name}.xml)
+                ${_OUTPUT_DIR}${name}.xml)
             set(UNIT_FLAGS ${UNIT_FLAGS}
                 --gtest_output=xml:${_OUTPUT})
         endif()
@@ -295,15 +307,17 @@ function(mcinch_add_unit name)
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
                     ${unit_target_execution_threads}
-                    ${_OUTPUT_DIR}/${unit_target_name}
-                    ${UNIT_FLAGS})
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS}
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
         else()
             add_test(
                 NAME
                     "${_TEST_PREFIX}${name}"
                 COMMAND
-                    ${name}
-                    ${UNIT_FLAGS})
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS}
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
         endif(NOT "${unit_policy_exec}" STREQUAL "None")
 
     endif(${thread_instances} GREATER 1)
