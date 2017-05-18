@@ -1248,6 +1248,13 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_disable_buffer(name)                                              \
   cinch::clog_t::instance().config_stream().disable_buffer(name)
 
+///
+/// Convenience macro for debugging.
+///
+#define clg(X)                                                                 \
+  clog(info) << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__     \
+             << ": " << #X << " = " << (X) << std::endl
+
 namespace clog {
 
   ///
