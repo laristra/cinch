@@ -21,18 +21,16 @@ projects easier.
 
   ``SOURCES <sources>...``
     The sources necessary to build the test executable
-  ``DEFINES <defines>...``
-    The defines used to build the executable
-  ``DEPENDS <dependancies>...``
-    The dependancies of the test target
   ``INPUTS <inputs>...``
     The input files used to run the test
-  ``LIBRARIES <libraries>...``
-    The libraries needed to link to the executable
-  ``POLICY <policies>...``
-    The runtime policies to use when executing the test 
+  ``POLICY <policy>``
+    The runtime policy to use when executing the test 
   ``THREADS <threads>...``
     The number of threads to run the test with
+    ``WORKING_DIRECTORY <working_dir>``
+    The working directory to build the tests in.  If you are using this
+    macro directly, you most likely shouldn't use this input.  It should
+    only be used by an experienced developper.
 #]=============================================================================]
 
 function(mcinch_add_unit name)
@@ -42,9 +40,8 @@ function(mcinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     set(options)
-    set(one_value_args WORKING_DIRECTORY)
-    set(multi_value_args SOURCES INPUTS
-        POLICY THREADS)
+    set(one_value_args POLICY WORKING_DIRECTORY)
+    set(multi_value_args SOURCES INPUTS THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -136,7 +133,7 @@ function(mcinch_add_unit name)
 
             if("${_EXT}" STREQUAL ".pf")
                 get_filename_component(_BASE ${source} NAME_WE)
-                add_custom_command(OUTPUT ${_OUTPUT_PATH}${_BASE}.F90
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_BASE}.F90
                     COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
                     ${_OUTPUT_DIR}${_BASE}.F90
                     DEPENDS ${source}
