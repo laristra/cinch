@@ -53,6 +53,7 @@ include(application)
 include(subproject)
 include(doxygen)
 include(openmp)
+include(modular-cinch-macros)
 
 #------------------------------------------------------------------------------#
 # Initialize these to avoid capture of parent state
@@ -369,149 +370,69 @@ if(CINCH_TOP_LEVEL_PARSER)
             "${unit_target_include_dirs}")
         string(REPLACE "|" ";" unit_target_compile_defs
             "${unit_target_compile_defs}")
+        string(REPLACE "|" ";" unit_target_execution_threads
+            ${unit_target_execution_threads})
+
 
         # Get relative path
         get_filename_component(_RELATIVE_PATH ${unit_target_directory} NAME)
 
-        #----------------------------------------------------------------------#
-        # Don't create the unit test if its policy is not defined
-        #----------------------------------------------------------------------#
+        #------------------------------------------------------------------#
+        # Create the full path to the source files
+        #------------------------------------------------------------------#
 
-        if(${unit_target_execution_policy}_TEST_POLICY_LIST)
+        set(_UNIT_SOURCES)
+        foreach(source ${unit_target_sources})
+            list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
+        endforeach(source)
 
-            #------------------------------------------------------------------#
-            # Create the full path to the source files
-            #------------------------------------------------------------------#
+        #------------------------------------------------------------------#
+        # Set output directory information
+        #------------------------------------------------------------------#
 
-            set(_UNIT_SOURCES)
-            foreach(source ${unit_target_sources})
-                list(APPEND _UNIT_SOURCES "${unit_target_directory}/${source}")
-            endforeach(source)
+        if("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
+            set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
+        else()
+            set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${unit_project_name}/${_RELATIVE_PATH})
+        endif("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
 
-            #------------------------------------------------------------------#
-            # Check to see if the user has specified a runtime and
-            # process it
-            #------------------------------------------------------------------#
 
-            # Get policy information
-            string(REPLACE ":" ";" unit_policy_list
-                "${${unit_target_execution_policy}_TEST_POLICY_LIST}")
+       #------------------------------------------------------------------#
+       # Add user-specified defines
+       #------------------------------------------------------------------#
 
-            list(GET unit_policy_list 0 unit_policy_name)
-            list(GET unit_policy_list 1 unit_policy_runtime)
-            list(GET unit_policy_list 2 unit_policy_flags)
-            list(GET unit_policy_list 3 unit_policy_includes)
-            list(GET unit_policy_list 4 unit_policy_defines)
-            list(GET unit_policy_list 5 unit_policy_libraries)
-            list(GET unit_policy_list 6 unit_policy_exec)
-            list(GET unit_policy_list 7 unit_policy_exec_threads)
+       if (NOT "${unit_target_compile_defs}" STREQUAL "None")
+           foreach(def ${unit_target_compile_defs})
+             add_definitions( -D${def} )
+           endforeach()
+       endif()
 
-            # Convert stored values back into lists
-            string(REPLACE "|" ";" unit_policy_runtime
-                "${unit_policy_runtime}")
-            string(REPLACE "|" ";" unit_policy_flags
-                "${unit_policy_flags}")
-            string(REPLACE "|" ";" unit_policy_includes
-                "${unit_policy_includes}")
-            string(REPLACE "|" ";" unit_policy_defines
-                "${unit_policy_defines}")
-            string(REPLACE "|" ";" unit_policy_libraries
-                "${unit_policy_libraries}")
+        #------------------------------------------------------------------#
+        # Add the executable
+        #------------------------------------------------------------------#
 
-            #------------------------------------------------------------------#
-            # Set output directory information
-            #------------------------------------------------------------------#
+        # first, clear some variables that are filled with "None" instead
+        # of just empty
+        if (NOT "${unit_target_inputs}" STREQUAL "None")
+          string(REGEX REPLACE "([^;]+)" "${unit_target_directory}/\\1" _INPUTS "${unit_target_inputs}")
+        endif()
 
-            if("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
-                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${_RELATIVE_PATH})
-                set(_TEST_PREFIX)
-            else()
-                set(_OUTPUT_DIR ${CMAKE_BINARY_DIR}/test/${unit_project_name}/${_RELATIVE_PATH})
-                set(_TEST_PREFIX "${unit_project_name}:")
-            endif("${CMAKE_PROJECT_NAME}" STREQUAL "${unit_project_name}")
+        if ("${unit_target_execution_threads}" STREQUAL "None")
+          set( unit_target_inputs )
+        endif()
 
-            #------------------------------------------------------------------#
-            # Create target-specific main file for preprocessor header
-            # dependency problem.
-            #------------------------------------------------------------------#
- 
-            get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
-            set(_TARGET_MAIN ${unit_target_name}_${_RUNTIME_MAIN})
-            configure_file(${unit_policy_runtime}
-                ${_OUTPUT_DIR}/${_TARGET_MAIN} COPYONLY)
+        mcinch_add_unit( ${unit_target_name}
+          SOURCES ${_UNIT_SOURCES}
+          INPUTS ${_INPUTS}
+          POLICY ${unit_target_execution_policy}
+          THREADS ${unit_target_execution_threads}
+          WORKING_DIRECTORY ${_OUTPUT_DIR}
+        )
 
-            #------------------------------------------------------------------#
-            # Add user-specified defines
-            #------------------------------------------------------------------#
-
-            if (NOT "${unit_target_compile_defs}" STREQUAL "None")
-                foreach(def ${unit_target_compile_defs})
-                  add_definitions( -D${def} )
-                endforeach()
-            endif()
-
-            #------------------------------------------------------------------#
-            # Add the executable
-            #------------------------------------------------------------------#
-
-            if("${unit_target_execution_policy}" STREQUAL "FORTRAN")
-                set(_FORTRAN_SOURCES)
-                set(_FORTRAN_SPECIALS)
-
-                # Run pFUnit preprocessor on .pf files
-                foreach(source ${_UNIT_SOURCES})
-                    get_filename_component(_EXT ${source} EXT)
-
-                    if("${_EXT}" STREQUAL ".pf")
-                        get_filename_component(_BASE ${source} NAME_WE)
-                        add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_BASE}.F90
-                            COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${source}
-                            ${_OUTPUT_DIR}/${_BASE}.F90
-                            DEPENDS ${source}
-                            COMMENT "Generating ${_OUTPUT_DIR}/${_BASE}.F90 using pfunit")
-                        list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}/${_BASE}.F90)
-                    elseif("${_EXT}" STREQUAL ".inc")
-                        get_filename_component(_OUTPUT_NAME ${source} NAME)
-                        add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                            COMMAND ${CMAKE_COMMAND} -E copy ${source}
-                            ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                            DEPENDS ${source}
-                            COMMENT "Copying ${source} for ${unit_target_name}")
-                        add_custom_target(${unit_target_name}_inc_file DEPENDS
-                            ${_OUTPUT_DIR}/${_OUTPUT_NAME})
-                        list(APPEND _FORTRAN_SPECIALS
-                            ${unit_target_name}_inc_file)
-                    else()
-                        list(APPEND _FORTRAN_SOURCES ${source})
-                    endif()
-                endforeach()
-
-                add_executable(${unit_target_name} ${_FORTRAN_SOURCES}
-                    ${unit_policy_runtime})
-                target_include_directories(${unit_target_name} PRIVATE
-                    ${unit_target_directory})
-                target_include_directories(${unit_target_name} PRIVATE
-                    ${CMAKE_BINARY_DIR})
-                target_include_directories(${unit_target_name} PRIVATE
-                    ${_OUTPUT_DIR})
-                add_dependencies(${unit_target_name} pfunit)
-                add_dependencies(${unit_target_name} ${_FORTRAN_SPECIALS})
-
-                set(_PFUNIT_DEFINES)
-                list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
-                list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
-
-                set_target_properties(${unit_target_name}
-                    PROPERTIES COMPILE_DEFINITIONS "${_PFUNIT_DEFINES}")
-            else()
-                add_executable(${unit_target_name} ${_UNIT_SOURCES}
-                    ${_OUTPUT_DIR}/${_TARGET_MAIN})
-            endif()
-
-            if(NOT "${unit_policy_flags}" STREQUAL "None")
-                target_compile_options(${unit_target_name}
-                    PRIVATE ${unit_policy_flags})
-            endif(NOT "${unit_policy_flags}" STREQUAL "None")
+        #------------------------------------------------------------------#
+        # check if the target was actually made
+        #------------------------------------------------------------------#
+        if (TARGET ${unit_target_name})
 
             #------------------------------------------------------------------#
             # Add compile definitions
@@ -520,11 +441,6 @@ if(CINCH_TOP_LEVEL_PARSER)
             if(NOT "${unit_target_defines}" STREQUAL "None")
                 target_compile_definitions(${unit_target_name} PRIVATE
                     ${unit_target_defines})
-            endif()
-
-            if(NOT "${unit_policy_defines}" STREQUAL "None")
-                target_compile_definitions(${unit_target_name} PRIVATE
-                    ${unit_policy_defines})
             endif()
 
             #------------------------------------------------------------------#
@@ -554,26 +470,6 @@ if(CINCH_TOP_LEVEL_PARSER)
             endif()
 
             #------------------------------------------------------------------#
-            # Add include and link options
-            #------------------------------------------------------------------#
-
-            if(NOT "${unit_policy_includes}" STREQUAL "None")
-                target_include_directories(${unit_target_name}
-                    PRIVATE ${unit_policy_includes})
-            endif(NOT "${unit_policy_includes}" STREQUAL "None")
-
-            target_link_libraries(${unit_target_name} ${GTEST_LIBRARIES})
-
-            if(ENABLE_BOOST_PROGRAM_OPTIONS)
-                target_link_libraries(${unit_target_name} ${Boost_LIBRARIES})
-            endif()
-
-            if(NOT "${unit_policy_libraries}" STREQUAL "None")
-                target_link_libraries(${unit_target_name}
-                    ${unit_policy_libraries})
-            endif(NOT "${unit_policy_libraries}" STREQUAL "None")
-
-            #------------------------------------------------------------------#
             # Change the output directory to the test subdirectory
             #------------------------------------------------------------------#
 
@@ -600,108 +496,7 @@ if(CINCH_TOP_LEVEL_PARSER)
                 endforeach(depend)
             endif()
 
-            #------------------------------------------------------------------#
-            # Copy dependency file to test directory
-            #------------------------------------------------------------------#
-
-            if(NOT "${unit_target_inputs}" STREQUAL "None")
-                set(_OUTPUT_FILES)
-                foreach(input ${unit_target_inputs})
-                    get_filename_component(_OUTPUT_NAME ${input} NAME)
-                    add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                        COMMAND ${CMAKE_COMMAND} -E copy 
-                        ${unit_target_directory}/${input}
-                        ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                        DEPENDS ${unit_target_directory}/${input}
-                        COMMENT "Copying ${input} for ${unit_target_name}")
-                    list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}/${_OUTPUT_NAME})
-                endforeach()
-                add_custom_target(${unit_target_name}_inputs
-                    DEPENDS ${_OUTPUT_FILES})
-                add_dependencies(${unit_target_name} ${unit_target_name}_inputs)
-            endif()
-
-            #------------------------------------------------------------------#
-            # Add the test target to CTest
-            #------------------------------------------------------------------#
-
-            string(REPLACE "|" ";" thread_instance_list
-                ${unit_target_execution_threads})
-
-            list(LENGTH thread_instance_list thread_instances)
-
-            string(REGEX MATCH "DEVEL" _IS_DEVEL
-                ${unit_target_execution_policy})
-
-            set(_IS_GTEST)
-            if(NOT "${unit_target_execution_policy}" STREQUAL "FORTRAN"
-                AND NOT _IS_DEVEL)
-                set(_IS_GTEST TRUE)
-            endif()
-
-            if(_IS_GTEST)
-                set(UNIT_FLAGS --gtest_color=no)
-                if(ENABLE_COLOR_UNIT_TESTS)
-                    set(UNIT_FLAGS --gtest_color=yes)
-                endif(ENABLE_COLOR_UNIT_TESTS)
-            else()
-                set(UNIT_FLAGS)
-            endif()
-
-            if(${thread_instances} GREATER 1)
-
-                foreach(instance ${thread_instance_list})
-                    if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
-                        set(_OUTPUT
-                            ${_OUTPUT_DIR}/${unit_target_name}_${instance}.xml)
-                        set(UNIT_FLAGS ${UNIT_FLAGS}
-                            --gtest_output=xml:${_OUTPUT})
-                    endif()
-
-                    add_test(
-                        NAME
-                            "${_TEST_PREFIX}${unit_target_name}_${instance}"
-                        COMMAND
-                            ${unit_policy_exec}
-                            ${unit_policy_exec_threads} ${instance}
-                            ${_OUTPUT_DIR}/${unit_target_name}
-                            ${UNIT_FLAGS}
-                        WORKING_DIRECTORY ${_OUTPUT_DIR})
-                endforeach(instance)
-
-            else()
-
-                if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
-                    set(_OUTPUT
-                        ${_OUTPUT_DIR}/${unit_target_name}.xml)
-                    set(UNIT_FLAGS ${UNIT_FLAGS}
-                        --gtest_output=xml:${_OUTPUT})
-                endif()
-
-                if(NOT "${unit_policy_exec}" STREQUAL "None")
-                    add_test(
-                        NAME
-                            "${_TEST_PREFIX}${unit_target_name}"
-                        COMMAND
-                            ${unit_policy_exec}
-                            ${unit_policy_exec_threads}
-                            ${unit_target_execution_threads}
-                            ${_OUTPUT_DIR}/${unit_target_name}
-                            ${UNIT_FLAGS}
-                        WORKING_DIRECTORY ${_OUTPUT_DIR})
-                else()
-                    add_test(
-                        NAME
-                            "${_TEST_PREFIX}${unit_target_name}"
-                        COMMAND
-                            ${_OUTPUT_DIR}/${unit_target_name}
-                            ${UNIT_FLAGS}
-                        WORKING_DIRECTORY ${_OUTPUT_DIR})
-                endif(NOT "${unit_policy_exec}" STREQUAL "None")
-
-            endif(${thread_instances} GREATER 1)
-
-        endif(${unit_target_execution_policy}_TEST_POLICY_LIST)
+        endif() # TARGET ${unit_target_name}
 
     endforeach(unit)
 
