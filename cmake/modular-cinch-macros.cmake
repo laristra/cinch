@@ -21,18 +21,16 @@ projects easier.
 
   ``SOURCES <sources>...``
     The sources necessary to build the test executable
-  ``DEFINES <defines>...``
-    The defines used to build the executable
-  ``DEPENDS <dependancies>...``
-    The dependancies of the test target
   ``INPUTS <inputs>...``
     The input files used to run the test
-  ``LIBRARIES <libraries>...``
-    The libraries needed to link to the executable
-  ``POLICY <policies>...``
-    The runtime policies to use when executing the test 
+  ``POLICY <policy>``
+    The runtime policy to use when executing the test 
   ``THREADS <threads>...``
     The number of threads to run the test with
+    ``WORKING_DIRECTORY <working_dir>``
+    The working directory to build the tests in.  If you are using this
+    macro directly, you most likely shouldn't use this input.  It should
+    only be used by an experienced developper.
 #]=============================================================================]
 
 function(mcinch_add_unit name)
@@ -42,11 +40,17 @@ function(mcinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     set(options)
-    set(one_value_args)
-    set(multi_value_args SOURCES DEFINES DEPENDS INPUTS
-        LIBRARIES POLICY THREADS)
+    set(one_value_args POLICY WORKING_DIRECTORY)
+    set(multi_value_args SOURCES INPUTS THREADS)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    # add a slash on the end of working dir if its not empty
+    if (unit_WORKING_DIRECTORY)
+      set(_OUTPUT_DIR  "${unit_WORKING_DIRECTORY}/" )
+    else()
+      set( _OUTPUT_DIR )
+    endif()
 
     #------------------------------------------------------------------#
     # Set output directory information
@@ -67,6 +71,7 @@ function(mcinch_add_unit name)
         set(unit_POLICY "SERIAL")
     endif(NOT unit_POLICY)
            
+    # Don't create the unit test if its policy is not defined
     if(NOT ${unit_POLICY}_TEST_POLICY_LIST)
         return()
     endif()
@@ -101,7 +106,7 @@ function(mcinch_add_unit name)
     get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
     set(_TARGET_MAIN ${name}_${_RUNTIME_MAIN})
     configure_file(${unit_policy_runtime}
-        ${_TARGET_MAIN} COPYONLY)
+      ${_OUTPUT_DIR}${_TARGET_MAIN} COPYONLY)
 
 
     #--------------------------------------------------------------------------#
@@ -113,44 +118,95 @@ function(mcinch_add_unit name)
             "You must specify unit test source files using SOURCES")
     endif(NOT unit_SOURCES)
 
-    add_executable( ${name} ${unit_SOURCES} ${_TARGET_MAIN})
+    #--------------------------------------------------------------------------#
+    # Add the executable
+    #--------------------------------------------------------------------------#
+
+    if("${unit_POLICY}" STREQUAL "FORTRAN")
+        set(_FORTRAN_SOURCES)
+        set(_FORTRAN_SPECIALS)
+
+        # Run pFUnit preprocessor on .pf files
+        foreach(source ${unit_SOURCES})
+            get_filename_component(_EXT ${source} EXT)
+            get_filename_component(_PATH ${source} ABSOLUTE)
+
+            if("${_EXT}" STREQUAL ".pf")
+                get_filename_component(_BASE ${source} NAME_WE)
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_BASE}.F90
+                    COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
+                    ${_OUTPUT_DIR}${_BASE}.F90
+                    DEPENDS ${source}
+                    COMMENT "Generating ${_OUTPUT_DIR}${_BASE}.F90 using pfunit")
+                list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}${_BASE}.F90)
+            elseif("${_EXT}" STREQUAL ".inc")
+                get_filename_component(_OUTPUT_NAME ${source} NAME)
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${_PATH}
+                    ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                    DEPENDS ${source}
+                    COMMENT "Copying ${source} for ${name}")
+                add_custom_target(${name}_inc_file DEPENDS
+                    ${_OUTPUT_DIR}${_OUTPUT_NAME})
+                list(APPEND _FORTRAN_SPECIALS
+                    ${name}_inc_file)
+            else()
+                list(APPEND _FORTRAN_SOURCES ${source})
+            endif()
+        endforeach()
+
+        add_executable(${name} ${_FORTRAN_SOURCES}
+            ${unit_policy_runtime})
+
+        if ( _OUTPUT_DIR ) 
+          target_include_directories(${name} PRIVATE ${_OUTPUT_DIR})
+        else()
+          target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        endif()
+
+        add_dependencies(${name} pfunit)
+        add_dependencies(${name} ${_FORTRAN_SPECIALS})
+
+        set(_PFUNIT_DEFINES)
+        list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
+        list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
+
+        set_target_properties(${name}
+            PROPERTIES COMPILE_DEFINITIONS "${_PFUNIT_DEFINES}")
+    else()
+        add_executable(${name} ${unit_SOURCES} ${_OUTPUT_DIR}${_TARGET_MAIN})
+        target_link_libraries( ${name} ${GTEST_LIBRARIES} )
+    endif()
+
+    if(NOT "${unit_policy_flags}" STREQUAL "None")
+        target_compile_options(${name}
+            PRIVATE ${unit_policy_flags})
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for defines.
     #--------------------------------------------------------------------------#
-
-    if(unit_DEFINES)
-      target_compile_definitions(${name} PRIVATE ${unit_DEFINES})
-    endif()
 
     if(NOT "${unit_policy_defines}" STREQUAL "None")
       target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
     endif()
 
     #--------------------------------------------------------------------------#
-    # Check for explicit dependencies. This flag is necessary for
-    # preprocessor header includes.
-    #--------------------------------------------------------------------------#
-
-    if(unit_DEPENDS)
-      add_dependencies( ${name} ${unit_DEPENDENCIES} )
-    endif()
-
-    #--------------------------------------------------------------------------#
-    # Check for files. 
+    # Check for input files. 
     #--------------------------------------------------------------------------#
     
     if (unit_INPUTS)
         set(_OUTPUT_FILES)
         foreach(input ${unit_INPUTS})
             get_filename_component(_OUTPUT_NAME ${input} NAME)
-            add_custom_command(OUTPUT ${_OUTPUT_NAME}
+            get_filename_component(_PATH ${input} ABSOLUTE)
+            add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
                 COMMAND ${CMAKE_COMMAND} -E copy 
-                ${CMAKE_CURRENT_SOURCE_DIR}/${input}
-                ${_OUTPUT_NAME}
-                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${input}
+                ${_PATH}
+                ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                DEPENDS ${input}
                 COMMENT "Copying ${input} for ${name}")
-            list(APPEND _OUTPUT_FILES ${_OUTPUT_NAME})
+            list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}${_OUTPUT_NAME})
         endforeach()
         add_custom_target(${name}_inputs
             DEPENDS ${_OUTPUT_FILES})
@@ -160,8 +216,6 @@ function(mcinch_add_unit name)
     #--------------------------------------------------------------------------#
     # Check for library dependencies.
     #--------------------------------------------------------------------------#
-
-    target_link_libraries( ${name} ${unit_LIBRARIES} ${GTEST_LIBRARIES} )
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
         target_link_libraries(${name} ${Boost_LIBRARIES})
@@ -216,7 +270,7 @@ function(mcinch_add_unit name)
         foreach(instance ${unit_THREADS})
             if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
                 set(_OUTPUT
-                    ${name}_${instance}.xml)
+                    ${_OUTPUT_DIR}${name}_${instance}.xml)
                 set(UNIT_FLAGS ${UNIT_FLAGS}
                     --gtest_output=xml:${_OUTPUT})
             endif()
@@ -227,15 +281,16 @@ function(mcinch_add_unit name)
                 COMMAND
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads} ${instance}
-                    ${name}
-                    ${UNIT_FLAGS} )
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS} 
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
         endforeach(instance)
 
     else()
 
         if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
             set(_OUTPUT
-                ${name}.xml)
+                ${_OUTPUT_DIR}${name}.xml)
             set(UNIT_FLAGS ${UNIT_FLAGS}
                 --gtest_output=xml:${_OUTPUT})
         endif()
@@ -248,15 +303,17 @@ function(mcinch_add_unit name)
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
                     ${unit_target_execution_threads}
-                    ${_OUTPUT_DIR}/${unit_target_name}
-                    ${UNIT_FLAGS})
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS}
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
         else()
             add_test(
                 NAME
                     "${_TEST_PREFIX}${name}"
                 COMMAND
-                    ${name}
-                    ${UNIT_FLAGS})
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS}
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
         endif(NOT "${unit_policy_exec}" STREQUAL "None")
 
     endif(${thread_instances} GREATER 1)
