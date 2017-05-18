@@ -158,7 +158,6 @@ function(mcinch_add_unit name)
             endif()
         endforeach()
 
-        MESSAGE( STATUS ${_FORTRAN_SOURCES} )
         add_executable(${name} ${_FORTRAN_SOURCES}
             ${unit_policy_runtime})
 
