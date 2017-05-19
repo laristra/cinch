@@ -16,8 +16,75 @@ function(cinch_add_library_target target directory)
     message(STATUS
         "Adding library target ${target} with source directory ${directory}")
 
-    list(APPEND CINCH_LIBRARY_TARGETS "${target}:${directory}")
-    set(CINCH_LIBRARY_TARGETS ${CINCH_LIBRARY_TARGETS} PARENT_SCOPE)
+    #------------------------------------------------------------------------------#
+    # Add public headers
+    #------------------------------------------------------------------------------#
+    
+    set( _SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${directory} )
+
+    if(EXISTS ${_SOURCE_DIR}/library.cmake)
+      include(${_SOURCE_DIR}/library.cmake)
+    endif()
+    
+    #------------------------------------------------------------------------------#
+    # add some random includes for convinience
+    #------------------------------------------------------------------------------#
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${directory})
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/${directory})
+    
+    #------------------------------------------------------------------------------#
+    # Add subdirectories
+    #
+    # This uses a glob, i.e., all sub-directories will be added at this level.
+    # This is not true for levels below this one.  This allows some flexibility
+    # while keeping the generic case as simple as possible.
+    #------------------------------------------------------------------------------#
+    
+    cinch_subdirlist(_SUBDIRECTORIES ${_SOURCE_DIR} False)
+
+    #------------------------------------------------------------------------------#
+    # Add subdirectory files
+    #------------------------------------------------------------------------------#
+    
+    # This loop adds header and source files for each listed sub-directory
+    # to the main header and source file lists.  Additionally, it adds the
+    # listed sub-directories to the include search path.  Lastly, it creates
+    # a catalog for each sub-directory with information on the source and
+    # headers files from the directory using the 'info.cmake' script that is
+    # located in the top-level 'cmake' directory.
+    
+    foreach(_SUBDIR ${_SUBDIRECTORIES})
+   
+        if(NOT EXISTS ${_SOURCE_DIR}/${_SUBDIR}/CMakeLists.txt)
+           continue()
+        endif()
+    
+        message(STATUS
+            "Adding source subdirectory '${_SUBDIR}' to ${target}")
+    
+        unset(${_SUBDIR}_HEADERS)
+        unset(${_SUBDIR}_SOURCES)
+    
+        add_subdirectory(${directory}/${_SUBDIR})
+    
+        foreach(_HEADER ${${_SUBDIR}_HEADERS})
+            if(NOT EXISTS ${_SOURCE_DIR}/${_SUBDIR}/${_HEADER})
+                message(FATAL_ERROR "Header '${_HEADER}' from ${_SUBDIR}_HEADERS does not exist.")
+            endif()
+            list(APPEND HEADERS
+                ${_SOURCE_DIR}/${_SUBDIR}/${_HEADER})
+        endforeach()
+    
+        foreach(_SOURCE ${${_SUBDIR}_SOURCES})
+            list(APPEND SOURCES
+                ${_SOURCE_DIR}/${_SUBDIR}/${_SOURCE})
+        endforeach()
+    
+    endforeach(_SUBDIR)
+    
+    #set(${library_target_name}_HEADERS ${HEADERS} PARENT_SCOPE)
+    add_library(${target} ${SOURCES})
+
 
 endfunction(cinch_add_library_target)
 

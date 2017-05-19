@@ -41,7 +41,7 @@ function(mcinch_add_unit name)
 
     set(options)
     set(one_value_args POLICY WORKING_DIRECTORY)
-    set(multi_value_args SOURCES INPUTS THREADS)
+    set(multi_value_args SOURCES INPUTS THREADS LIBRARIES DEFINES)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -75,7 +75,6 @@ function(mcinch_add_unit name)
     if(NOT ${unit_POLICY}_TEST_POLICY_LIST)
         return()
     endif()
-
 
 
     # Get policy information
@@ -189,6 +188,10 @@ function(mcinch_add_unit name)
 
     if(NOT "${unit_policy_defines}" STREQUAL "None")
       target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
+    endif()
+
+    if(unit_DEFINES)
+      target_compile_definitions(${name} PRIVATE ${unit_DEFINES})
     endif()
 
     #--------------------------------------------------------------------------#
@@ -318,6 +321,12 @@ function(mcinch_add_unit name)
 
     endif(${thread_instances} GREATER 1)
 
+    #------------------------------------------------------------------#
+    # Link to librariest
+    #------------------------------------------------------------------#
+    if (unit_LIBRARIES)
+      target_link_libraries( ${name} ${unit_LIBRARIES} )
+    endif()
 
 endfunction(mcinch_add_unit)
 

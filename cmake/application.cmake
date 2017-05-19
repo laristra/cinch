@@ -14,10 +14,7 @@ function(cinch_add_application_directory directory)
     #--------------------------------------------------------------------------#
 
     message(STATUS "Adding application directory ${directory}")
-
-    list(APPEND CINCH_APPLICATION_DIRECTORIES "${directory}")
-    set(CINCH_APPLICATION_DIRECTORIES ${CINCH_APPLICATION_DIRECTORIES}
-        PARENT_SCOPE)
+    add_subdirectory( ${directory} )
 
 endfunction(cinch_add_application_directory)
 
