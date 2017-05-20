@@ -3,18 +3,221 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_add_unit target)
+#--------------------------------------------------------------------------#
+# Add support for ctest, GTest, and pFUnit
+#--------------------------------------------------------------------------#
+
+option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
+option(ENABLE_COLOR_UNIT_TESTS "Enable colorized unit testing output" OFF)
+option(ENABLE_JENKINS_OUTPUT
+    "Generate jenkins xml output for every test" OFF)
+
+if(ENABLE_UNIT_TESTS)
+
+    enable_testing()
+
+    #----------------------------------------------------------------------#
+    # Google Test
+    #----------------------------------------------------------------------#
+
+    find_package(GTest QUIET)
+
+    if(GTEST_FOUND)
+        include_directories(${GTEST_INCLUDE_DIRS})
+    elseif(NOT TARGET gtest)
+        find_package(Threads)
+        add_library(gtest
+            ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
+        target_include_directories(gtest PRIVATE
+            ${CINCH_SOURCE_DIR}/gtest/googletest)
+        target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
+        set(GTEST_INCLUDE_DIRS 
+          ${CINCH_SOURCE_DIR}/gtest/googlemock/include
+          ${CINCH_SOURCE_DIR}/gtest/googletest
+          ${CINCH_SOURCE_DIR}/gtest/googletest/include)
+        target_include_directories(gtest PRIVATE ${GTEST_INCLUDE_DIRS})
+        set(GTEST_LIBRARIES gtest)
+    endif()
+
+    #----------------------------------------------------------------------#
+    # pFUnit
+    #----------------------------------------------------------------------#
+
+    get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+    list(FIND LANGUAGES "Fortran" FORTRAN_ENABLED)
+
+    if(FORTRAN_ENABLED EQUAL -1)
+        set(FORTRAN_ENABLED FALSE)
+    endif(FORTRAN_ENABLED EQUAL -1)
+
+    if(FORTRAN_ENABLED)
+        find_package(PythonInterp QUIET)
+        find_package(pFUnit QUIET)
+
+        if(NOT PFUNIT_FOUND)
+            include(${CINCH_SOURCE_DIR}/cmake/PFUnitLists.txt)
+        endif()
+    endif()
+
+endif(ENABLE_UNIT_TESTS)
+
+
+#[=============================================================================[
+modular-cinch-macros
+--------------------
+
+Provides a set of useful macros to the user to make creating cmake 
+projects easier.
+
+.. command:: mcinch_add_unit
+
+  The ``mcinch_add_unit`` function creates a custom unit test with
+  various different runtime policies::
+
+   mcinch_add_unit( <name> [<option>...] )
+
+  General options are:
+
+  ``SOURCES <sources>...``
+    The sources necessary to build the test executable
+  ``INPUTS <inputs>...``
+    The input files used to run the test
+  ``POLICY <policy>``
+    The runtime policy to use when executing the test 
+  ``THREADS <threads>...``
+    The number of threads to run the test with
+    ``WORKING_DIRECTORY <working_dir>``
+    The working directory to build the tests in.  If you are using this
+    macro directly, you most likely shouldn't use this input.  It should
+    only be used by an experienced developper.
+#]=============================================================================]
+
+function(cinch_add_unit name)
+
+
+    if (NOT ENABLE_UNIT_TESTS)
+      return()
+    endif()
 
     #--------------------------------------------------------------------------#
     # Setup argument options.
     #--------------------------------------------------------------------------#
 
     set(options)
-    set(one_value_args)
-    set(multi_value_args SOURCES DEFINES DEPENDS INPUTS
-        LIBRARIES POLICY THREADS)
+    set(one_value_args POLICY WORKING_DIRECTORY)
+    set(multi_value_args SOURCES INPUTS THREADS LIBRARIES DEFINES)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    # add a slash on the end of working dir if its not empty
+    if (unit_WORKING_DIRECTORY)
+      set(_OUTPUT_DIR  "${unit_WORKING_DIRECTORY}/" )
+    else()
+      set( _OUTPUT_DIR )
+    endif()
+    
+    
+    #------------------------------------------------------------------#
+    # check if fortran is enabled
+    #------------------------------------------------------------------#
+
+    get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+    list(FIND LANGUAGES "Fortran" FORTRAN_ENABLED)
+
+    if(FORTRAN_ENABLED EQUAL -1)
+        set(FORTRAN_ENABLED FALSE)
+    endif(FORTRAN_ENABLED EQUAL -1)
+
+    #------------------------------------------------------------------#
+    # Make sure that MPI_LANGUAGE is set.  
+    # This is not a standard variable set by FindMPI.  But cinch
+    # might set it.
+    #
+    # Right now, the MPI policy only works with C/C++.
+    #------------------------------------------------------------------#
+
+    if (NOT MPI_LANGUAGE) 
+      set( MPI_LANGUAGE C )
+    endif()
+
+    #------------------------------------------------------------------#
+    # Set output directory information
+    #------------------------------------------------------------------#
+
+    if("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
+        set(_TEST_PREFIX)
+    else()
+        set(_TEST_PREFIX "${PROJECT_NAME}:")
+    endif()
+    
+    #------------------------------------------------------------------#
+    # Check to see if the user has specified a runtime and
+    # process it
+    #------------------------------------------------------------------#
+   
+    if ( unit_POLICY )
+      string(REPLACE "_" ";" unit_policies ${unit_POLICY})
+      list(GET unit_policies 0 unit_policy_main)
+      string(REGEX MATCH "DEVEL" _IS_DEVEL ${unit_POLICY})
+    endif()
+
+    if ( NOT unit_policy_main OR unit_policy_main STREQUAL "SERIAL" )
+      set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc )
+      set( unit_policy_defines -DSERIAL )
+
+    elseif ( FORTRAN_ENABLED AND unit_policy_main STREQUAL "FORTRAN" )
+      set( unit_policy_runtime ${PFUNIT_DRIVER} )
+      set( unit_policy_libraries ${PFUNIT_LIBRARY} )
+      set( unit_policy_definitions ${PFUNIT_DEFINES} )
+
+    elseif ( MPI_${MPI_LANGUAGE}_FOUND AND unit_policy_main STREQUAL "MPI" )
+      set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-mpi.cc )
+      set( unit_policy_flags ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS} )
+      set( unit_policy_includes ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH} )
+      set( unit_policy_libraries ${MPI_${MPI_LANGUAGE}_LIBRARIES} )
+      set( unit_policy_exec ${MPIEXEC} )
+      set( unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG} )
+
+    elseif ( MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND 
+        unit_policy_main STREQUAL "LEGION" )
+
+      set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc )
+      set( unit_policy_flags ${Legion_CXX_FLAGS} 
+        ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS} )
+      set( unit_policy_includes ${Legion_INCLUDE_DIRS} 
+        ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH} )
+      set( unit_policy_libraries ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
+        ${MPI_${MPI_LANGUAGE}_LIBRARIES} )
+      set( unit_policy_exec ${MPIEXEC} )
+      set( unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG} ) 
+      set( unit_policy_definitions -DENABLE_MPI )
+
+    elseif ( Legion_FOUND AND unit_policy_main STREQUAL "LEGION" )
+      set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc )
+      set( unit_policy_flags ${Legion_CXX_FLAGS} )
+      set( unit_policy_includes ${Legion_INCLUDE_DIRS} )
+      set( unit_policy_libraries ${Legion_LIBRARIES} ${Legion_LIB_FLAGS} )
+  
+    else()
+
+      return()
+
+    endif()
+
+    # add the devel flag if requested
+    if ( _IS_DEVEL )
+      list( APPEND unit_policy_defines -DCINCH_DEVEL_TEST ) 
+    endif()
+
+
+    # copy the main driver for the runtime policy
+    get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
+    set(_TARGET_MAIN ${name}_${_RUNTIME_MAIN})
+    configure_file(${unit_policy_runtime}
+      ${_OUTPUT_DIR}${_TARGET_MAIN} COPYONLY)
+
 
     #--------------------------------------------------------------------------#
     # Make sure that the user specified sources.
@@ -23,84 +226,117 @@ function(cinch_add_unit target)
     if(NOT unit_SOURCES)
         message(FATAL_ERROR
             "You must specify unit test source files using SOURCES")
-    else()
-        string(REPLACE ";" "|" unit_SOURCES "${unit_SOURCES}")
     endif(NOT unit_SOURCES)
+
+    #--------------------------------------------------------------------------#
+    # Add the executable
+    #--------------------------------------------------------------------------#
+
+    if(unit_policy_main STREQUAL "FORTRAN")
+        set(_FORTRAN_SOURCES)
+        set(_FORTRAN_SPECIALS)
+
+        # Run pFUnit preprocessor on .pf files
+        foreach(source ${unit_SOURCES})
+            get_filename_component(_EXT ${source} EXT)
+            get_filename_component(_PATH ${source} ABSOLUTE)
+
+            if("${_EXT}" STREQUAL ".pf")
+                get_filename_component(_BASE ${source} NAME_WE)
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_BASE}.F90
+                    COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
+                    ${_OUTPUT_DIR}${_BASE}.F90
+                    DEPENDS ${source}
+                    COMMENT "Generating ${_OUTPUT_DIR}${_BASE}.F90 using pfunit")
+                list(APPEND _FORTRAN_SOURCES ${_OUTPUT_DIR}${_BASE}.F90)
+            elseif("${_EXT}" STREQUAL ".inc")
+                get_filename_component(_OUTPUT_NAME ${source} NAME)
+                add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                    COMMAND ${CMAKE_COMMAND} -E copy ${_PATH}
+                    ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                    DEPENDS ${source}
+                    COMMENT "Copying ${source} for ${name}")
+                add_custom_target(${name}_inc_file DEPENDS
+                    ${_OUTPUT_DIR}${_OUTPUT_NAME})
+                list(APPEND _FORTRAN_SPECIALS
+                    ${name}_inc_file)
+            else()
+                list(APPEND _FORTRAN_SOURCES ${source})
+            endif()
+        endforeach()
+
+        add_executable(${name} ${_FORTRAN_SOURCES} ${unit_policy_runtime})
+
+        if ( _OUTPUT_DIR ) 
+          target_include_directories(${name} PRIVATE ${_OUTPUT_DIR})
+        else()
+          target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        endif()
+
+        add_dependencies(${name} ${_FORTRAN_SPECIALS})
+
+    else()
+        add_executable(${name} ${unit_SOURCES} ${_OUTPUT_DIR}${_TARGET_MAIN})
+        target_link_libraries( ${name} ${GTEST_LIBRARIES} )
+        target_include_directories( ${name} PRIVATE ${GTEST_INCLUDE_DIRS})
+        target_include_directories( ${name} PRIVATE ${CINCH_SOURCE_DIR}/auxiliary)
+    endif()
+
+    if(NOT "${unit_policy_flags}" STREQUAL "None")
+        target_compile_options(${name}
+            PRIVATE ${unit_policy_flags})
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for defines.
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_DEFINES)
-        set(unit_DEFINES "None")
-    else()
-        string(REPLACE ";" "|" unit_DEFINES "${unit_DEFINES}")
-    endif(NOT unit_DEFINES)
+    if(NOT "${unit_policy_defines}" STREQUAL "None")
+      target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
+    endif()
+
+    if(unit_DEFINES)
+      target_compile_definitions(${name} PRIVATE ${unit_DEFINES})
+    endif()
 
     #--------------------------------------------------------------------------#
-    # Check for explicit dependencies. This flag is necessary for
-    # preprocessor header includes.
+    # Check for input files. 
     #--------------------------------------------------------------------------#
-
-    if(NOT unit_DEPENDS)
-        set(unit_DEPENDS "None")
-    else()
-        string(REPLACE ";" "|" unit_DEPENDS "${unit_DEPENDS}")
-    endif(NOT unit_DEPENDS)
-
-    #--------------------------------------------------------------------------#
-    # Check for files. 
-    #--------------------------------------------------------------------------#
-
-    if(NOT unit_INPUTS)
-        set(unit_INPUTS "None")
-    else()
-        string(REPLACE ";" "|" unit_INPUTS "${unit_INPUTS}")
-    endif(NOT unit_INPUTS)
+    
+    if (unit_INPUTS)
+        set(_OUTPUT_FILES)
+        foreach(input ${unit_INPUTS})
+            get_filename_component(_OUTPUT_NAME ${input} NAME)
+            get_filename_component(_PATH ${input} ABSOLUTE)
+            add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                COMMAND ${CMAKE_COMMAND} -E copy 
+                ${_PATH}
+                ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                DEPENDS ${input}
+                COMMENT "Copying ${input} for ${name}")
+            list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}${_OUTPUT_NAME})
+        endforeach()
+        add_custom_target(${name}_inputs
+            DEPENDS ${_OUTPUT_FILES})
+        add_dependencies(${name} ${name}_inputs)
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for library dependencies.
     #--------------------------------------------------------------------------#
 
-    if(NOT unit_LIBRARIES)
-        set(unit_LIBRARIES "None")
-    else()
-        string(REPLACE ";" "|" unit_LIBRARIES "${unit_LIBRARIES}")
-    endif(NOT unit_LIBRARIES)
-
-    #--------------------------------------------------------------------------#
-    # Capture include directories
-    #--------------------------------------------------------------------------#
-    
-    get_property(unit_INCLUDE_DIRS
-                  DIRECTORY ${PROJECT_SOURCE_DIR}
-                  PROPERTY INCLUDE_DIRECTORIES)
-    if(NOT unit_INCLUDE_DIRS)
-        set(unit_INCLUDE_DIRS "None")
-    else()
-        string(REPLACE ";" "|" unit_INCLUDE_DIRS "${unit_INCLUDE_DIRS}")
+    if(ENABLE_BOOST_PROGRAM_OPTIONS)
+        target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
 
-    #--------------------------------------------------------------------------#
-    # Capture compile definitions
-    #--------------------------------------------------------------------------#
-    
-    get_property(unit_COMPILE_DEFS
-                  DIRECTORY ${PROJECT_SOURCE_DIR}
-                  PROPERTY COMPILE_DEFINITIONS)
-    if(NOT unit_COMPILE_DEFS)
-        set(unit_COMPILE_DEFS "None")
-    else()
-        string(REPLACE ";" "|" unit_COMPILE_DEFS "${unit_COMPILE_DEFS}")
+    if(NOT "${unit_policy_libraries}" STREQUAL "None")
+      target_link_libraries( ${name} ${unit_policy_libraries} )
     endif()
 
-    #--------------------------------------------------------------------------#
-    # Check for policy.
-    #--------------------------------------------------------------------------#
-
-    if(NOT unit_POLICY)
-        set(unit_POLICY "SERIAL")
-    endif(NOT unit_POLICY)
+    if(NOT "${unit_policy_includes}" STREQUAL "None")
+        target_include_directories(${name}
+            PRIVATE ${unit_policy_includes})
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check for threads.
@@ -111,20 +347,91 @@ function(cinch_add_unit target)
 
     if(NOT unit_THREADS)
         set(unit_THREADS 1)
-    else()
-        string(REPLACE ";" "|" unit_THREADS "${unit_THREADS}")
     endif(NOT unit_THREADS)
 
-    #--------------------------------------------------------------------------#
-    # Add information to unit test targets.
-    #--------------------------------------------------------------------------#
+    #------------------------------------------------------------------#
+    # Add the test target to CTest
+    #------------------------------------------------------------------#
 
-    list(APPEND CINCH_UNIT_TEST_TARGETS
-        "${target}:${CMAKE_CURRENT_SOURCE_DIR}:${unit_SOURCES}:${unit_DEFINES}:${unit_DEPENDS}:${unit_INPUTS}:${unit_INCLUDE_DIRS}:${unit_LIBRARIES}:${unit_COMPILE_DEFS}:${unit_POLICY}:${unit_THREADS}:${PROJECT_NAME}")
-    set(CINCH_UNIT_TEST_TARGETS ${CINCH_UNIT_TEST_TARGETS}
-        CACHE INTERNAL CINCH_UNIT_TEST_TARGETS)
+    list(LENGTH unit_THREADS thread_instances)
+
+    set(_IS_GTEST)
+    if(NOT "${unit_POLICY}" STREQUAL "FORTRAN"
+        AND NOT _IS_DEVEL)
+        set(_IS_GTEST TRUE)
+    endif()
+
+    if(_IS_GTEST)
+        set(UNIT_FLAGS --gtest_color=no)
+        if(ENABLE_COLOR_UNIT_TESTS)
+            set(UNIT_FLAGS --gtest_color=yes)
+        endif(ENABLE_COLOR_UNIT_TESTS)
+    else()
+        set(UNIT_FLAGS)
+    endif()
+
+    if(${thread_instances} GREATER 1)
+
+        foreach(instance ${unit_THREADS})
+            if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
+                set(_OUTPUT
+                    ${_OUTPUT_DIR}${name}_${instance}.xml)
+                set(UNIT_FLAGS ${UNIT_FLAGS}
+                    --gtest_output=xml:${_OUTPUT})
+            endif()
+
+            add_test(
+                NAME
+                    "${_TEST_PREFIX}${name}_${instance}"
+                COMMAND
+                    ${unit_policy_exec}
+                    ${unit_policy_exec_threads} ${instance}
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS} 
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
+        endforeach(instance)
+
+    else()
+
+        if(ENABLE_JENKINS_OUTPUT AND _IS_GTEST)
+            set(_OUTPUT
+                ${_OUTPUT_DIR}${name}.xml)
+            set(UNIT_FLAGS ${UNIT_FLAGS}
+                --gtest_output=xml:${_OUTPUT})
+        endif()
+
+        if(NOT "${unit_policy_exec}" STREQUAL "None")
+            add_test(
+                NAME
+                    "${_TEST_PREFIX}${name}"
+                COMMAND
+                    ${unit_policy_exec}
+                    ${unit_policy_exec_threads}
+                    ${unit_target_execution_threads}
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS}
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
+        else()
+            add_test(
+                NAME
+                    "${_TEST_PREFIX}${name}"
+                COMMAND
+                    ${_OUTPUT_DIR}${name}
+                    ${UNIT_FLAGS}
+                WORKING_DIRECTORY ${_OUTPUT_DIR})
+        endif(NOT "${unit_policy_exec}" STREQUAL "None")
+
+    endif(${thread_instances} GREATER 1)
+
+    #------------------------------------------------------------------#
+    # Link to librariest
+    #------------------------------------------------------------------#
+    if (unit_LIBRARIES)
+      target_link_libraries( ${name} ${unit_LIBRARIES} )
+    endif()
 
 endfunction(cinch_add_unit)
+
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

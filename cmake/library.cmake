@@ -3,6 +3,8 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
+include(subdirlist)
+
 #
 # cinch_add_library
 #
@@ -107,8 +109,7 @@ function(cinch_target_link_libraries target)
     message(STATUS
       "Linking target ${target} with libraries ${ARGN}")
 
-    list(APPEND CINCH_TARGET_LIBRARIES "${target}:${libraries_}")
-    set(CINCH_TARGET_LIBRARIES ${CINCH_TARGET_LIBRARIES} PARENT_SCOPE)
+    target_link_libraries( ${target} ${libraries_} )
 
 endfunction()
 

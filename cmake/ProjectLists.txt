@@ -26,40 +26,10 @@
 list(APPEND CMAKE_MODULE_PATH ${CINCH_SOURCE_DIR}/cmake)
 
 #------------------------------------------------------------------------------#
-# Main setup
-#------------------------------------------------------------------------------#
-
-include(globals)
-
-#------------------------------------------------------------------------------#
 # Cinch includes
 #------------------------------------------------------------------------------#
 
-include(info)
-include(cinch_minimum_required)
-include(colors)
-include(common)
-include(conformance-init)
-include(conformance)
-include(include_links)
-include(insource)
-include(header_depends)
-include(subdirlist)
-include(unit)
-include(test-execution-policy)
-include(documentation)
-include(library)
-include(application)
-include(subproject)
-include(doxygen)
-include(openmp)
-include(modular-cinch-macros)
-
-#--------------------------------------------------------------------------#
-# Include main options
-#--------------------------------------------------------------------------#
-
-include(options) 
+include(common_includes)
 
 #--------------------------------------------------------------------------#
 # add some random includes for convinience
@@ -73,7 +43,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 #------------------------------------------------------------------------------#
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
-
 
 #------------------------------------------------------------------------------#
 # Include project documentation

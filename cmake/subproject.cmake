@@ -21,14 +21,7 @@ function(cinch_add_subproject directory)
 
     message(STATUS "Adding subproject in ${directory}")
 
-    if(extra_LIBRARIES)
-        set(libraries ${extra_LIBRARIES})
-    else()
-        set(libraries "ALL")
-    endif(extra_LIBRARIES)
-
-    list(APPEND CINCH_SUBPROJECTS "${directory}:${libraries}")
-    set(CINCH_SUBPROJECTS ${CINCH_SUBPROJECTS} PARENT_SCOPE)
+    add_subdirectory( ${directory} )
 
 endfunction(cinch_add_subproject)
 

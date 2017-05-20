@@ -74,12 +74,12 @@ add_library(pfunit
     ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/XmlPrinter.F90
 )
 
-set(_PFUNIT_DEFINES)
-list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
-list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
+set(PFUNIT_DEFINES)
+list(APPEND PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
+list(APPEND PFUNIT_DEFINES BUILD_ROBUST)
 
 set_target_properties(pfunit PROPERTIES COMPILE_DEFINITIONS
-    "${_PFUNIT_DEFINES}")
+    "${PFUNIT_DEFINES}")
 set_target_properties(pfunit PROPERTIES COMPILE_FLAGS -UDEBUG)
 set_target_properties(pfunit
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/lib)
@@ -93,8 +93,8 @@ set(PFUNIT_DRIVER ${CMAKE_SOURCE_DIR}/cinch/pfunit/include/driver.F90)
 set(PFUNIT_MODULE_DIR ${CMAKE_BINARY_DIR}/pfunit/mod)
 set(PFUNIT_PARSER ${CMAKE_SOURCE_DIR}/cinch/pfunit/bin/pFUnitParser.py)
 
-include_directories(${CMAKE_BINARY_DIR}/pfunit/generated)
-include_directories(${CMAKE_BINARY_DIR})
+#include_directories(${CMAKE_BINARY_DIR}/pfunit/generated)
+#include_directories(${CMAKE_BINARY_DIR})
 
 #------------------------------------------------------------------------------#
 # vim: set tabstop=4 shiftwidth=4 filetype=cmake expandtab :

@@ -3,8 +3,6 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-include(Findlegion)
-
 #------------------------------------------------------------------------------#
 # Add option to enable Legion
 #------------------------------------------------------------------------------#
@@ -17,19 +15,20 @@ if(ENABLE_LEGION)
 # Find Legion
 #------------------------------------------------------------------------------#
 
-find_package(legion REQUIRED NO_MODULE)
+find_package(Legion REQUIRED)
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
-  if(NOT legion_FOUND)
+  if(NOT Legion_FOUND)
       message(FATAL_ERROR "Legion is required
                      for this build configuration")
-  endif(NOT legion_FOUND)
+  endif(NOT Legion_FOUND)
 
   set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH}
      ${LEGION_INSTALL_DIRS})
   include_directories(${LEGION_INCLUDE_DIRS})
-  set(FLECSI_RUNTIME_LIBRARIES ${LEGION_LIBRARIES})
+  add_definition( -DLEGION_CMAKE )
+  message(STATUS "Legion found: ${Legion_FOUND}")
 
 
 endif(ENABLE_LEGION)
