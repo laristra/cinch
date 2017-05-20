@@ -9,18 +9,11 @@
 
 function(cinch_add_subproject directory)
 
-    #--------------------------------------------------------------------------#
-    #
-    #--------------------------------------------------------------------------#
-
-    set(options)
-    set(one_value_args)
-    set(multi_value_args LIBRARIES)
-    cmake_parse_arguments(extra "${options}" "${one_value_args}"
-        "${multi_value_args}" ${ARGN})
-
     message(STATUS "Adding subproject in ${directory}")
 
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${directory})
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/${directory})
+    
     add_subdirectory( ${directory} )
 
 endfunction(cinch_add_subproject)
