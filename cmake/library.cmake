@@ -32,6 +32,9 @@ function(cinch_add_library_target target directory)
     # add some random includes for convinience
     #------------------------------------------------------------------------------#
 
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${directory})
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/${directory})
+
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${directory}/..)
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/${directory}/..)
 
