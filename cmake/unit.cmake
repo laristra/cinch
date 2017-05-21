@@ -163,6 +163,8 @@ function(cinch_add_unit name)
       string(REGEX MATCH "DEVEL" _IS_DEVEL ${unit_POLICY})
     endif()
 
+    MESSAGE( STATUS "${unit_policy_main} ${unit_POLICY}" )
+
     if ( NOT unit_policy_main OR unit_policy_main STREQUAL "SERIAL" )
       set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc )
       set( unit_policy_defines -DSERIAL )
@@ -218,6 +220,7 @@ function(cinch_add_unit name)
     configure_file(${unit_policy_runtime}
       ${_OUTPUT_DIR}${_TARGET_MAIN} COPYONLY)
 
+  MESSAGE( STATUS  "${unit_policy_libraries} ${MPI_LANGUAGE} ${MPI_${MPI_LANGUAGE}_LIBRARIES}" )
 
     #--------------------------------------------------------------------------#
     # Make sure that the user specified sources.
