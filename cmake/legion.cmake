@@ -27,7 +27,7 @@ find_package(Legion REQUIRED)
   set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH}
      ${LEGION_INSTALL_DIRS})
   include_directories(${LEGION_INCLUDE_DIRS})
-  add_definition( -DLEGION_CMAKE )
+  add_definitions( -DLEGION_CMAKE )
   message(STATUS "Legion found: ${Legion_FOUND}")
 
 

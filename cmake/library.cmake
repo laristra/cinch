@@ -108,12 +108,10 @@ function(cinch_target_link_libraries target)
         )
     endif()
 
-    string(REPLACE ";" "|" libraries_ "${ARGN}")
-
     message(STATUS
       "Linking target ${target} with libraries ${ARGN}")
 
-    target_link_libraries( ${target} ${libraries_} )
+    target_link_libraries( ${target} ${ARGN} )
 
 endfunction()
 
