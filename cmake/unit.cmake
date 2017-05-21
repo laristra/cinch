@@ -174,7 +174,7 @@ function(cinch_add_unit name)
       MESSAGE( STATUS "Adding test ${name} with policy ${unit_policy_main}" )
       set( unit_policy_runtime ${PFUNIT_DRIVER} )
       set( unit_policy_libraries ${PFUNIT_LIBRARY} )
-      set( unit_policy_definitions ${PFUNIT_DEFINES} )
+      set( unit_policy_defines ${PFUNIT_DEFINES} )
 
     elseif ( MPI_${MPI_LANGUAGE}_FOUND AND unit_policy_main STREQUAL "MPI" )
       MESSAGE( STATUS "Adding test ${name} with policy ${unit_policy_main}" )
@@ -198,7 +198,7 @@ function(cinch_add_unit name)
         ${MPI_${MPI_LANGUAGE}_LIBRARIES} )
       set( unit_policy_exec ${MPIEXEC} )
       set( unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG} ) 
-      set( unit_policy_definitions -DENABLE_MPI )
+      set( unit_policy_defines -DENABLE_MPI )
 
     elseif ( Legion_FOUND AND unit_policy_main STREQUAL "LEGION" )
       MESSAGE( STATUS "Adding test ${name} with just legion policy" )
@@ -290,7 +290,7 @@ function(cinch_add_unit name)
         target_include_directories( ${name} PRIVATE ${CINCH_SOURCE_DIR}/auxiliary)
     endif()
 
-    if(NOT "${unit_policy_flags}" STREQUAL "None")
+    if(unit_policy_flags)
         target_compile_options(${name}
             PRIVATE ${unit_policy_flags})
     endif()
@@ -299,7 +299,7 @@ function(cinch_add_unit name)
     # Check for defines.
     #--------------------------------------------------------------------------#
 
-    if(NOT "${unit_policy_defines}" STREQUAL "None")
+    if(unit_policy_defines)
       target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
     endif()
 
@@ -337,11 +337,11 @@ function(cinch_add_unit name)
         target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
 
-    if(NOT "${unit_policy_libraries}" STREQUAL "None")
+    if(unit_policy_libraries)
       target_link_libraries( ${name} ${unit_policy_libraries} )
     endif()
 
-    if(NOT "${unit_policy_includes}" STREQUAL "None")
+    if(unit_policy_includes)
         target_include_directories(${name}
             PRIVATE ${unit_policy_includes})
     endif()
@@ -408,7 +408,7 @@ function(cinch_add_unit name)
                 --gtest_output=xml:${_OUTPUT})
         endif()
 
-        if(NOT "${unit_policy_exec}" STREQUAL "None")
+        if(unit_policy_exec)
             add_test(
                 NAME
                     "${_TEST_PREFIX}${name}"
@@ -427,7 +427,7 @@ function(cinch_add_unit name)
                     ${_OUTPUT_DIR}${name}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
-        endif(NOT "${unit_policy_exec}" STREQUAL "None")
+        endif()
 
     endif(${thread_instances} GREATER 1)
 
