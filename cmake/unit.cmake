@@ -410,7 +410,7 @@ function(cinch_add_unit name)
                 COMMAND
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
-                    ${unit_target_execution_threads}
+                    ${unit_THREADS}
                     ${_OUTPUT_DIR}${name}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
