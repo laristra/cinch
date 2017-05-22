@@ -356,7 +356,7 @@ function(cinch_add_unit name)
     # Add the test target to CTest
     #------------------------------------------------------------------#
 
-    MESSAGE( STATUS "${name} is located at ${_OUTPUT_DIR}"
+    MESSAGE( STATUS "${name} is located at ${_OUTPUT_DIR}" )
 
     list(LENGTH unit_THREADS thread_instances)
 
@@ -412,7 +412,7 @@ function(cinch_add_unit name)
                 COMMAND
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
-                    ${unit_THREADS}
+                    ${instance}
                     ${_OUTPUT_DIR}${name}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
