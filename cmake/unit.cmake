@@ -286,6 +286,7 @@ function(cinch_add_unit name)
     endif()
 
     if(unit_policy_flags)
+        MESSAGE( STATUS "${name} has flags ${unit_policy_flags}" )
         target_compile_options(${name}
             PRIVATE ${unit_policy_flags})
     endif()
