@@ -4,6 +4,14 @@
 
 include_directories(${CINCH_SOURCE_DIR}/logging)
 
+#--------------------------------------------------------------------------#
+# Install cinch logging utility
+#--------------------------------------------------------------------------#
+
+install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
+    DESTINATION include)
+
+
 # Add an option to set the strip level
 set(CLOG_STRIP_LEVEL "0" CACHE STRING "Set the clog strip level")
 add_definitions(-DCLOG_STRIP_LEVEL=${CLOG_STRIP_LEVEL})

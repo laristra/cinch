@@ -78,7 +78,7 @@ function(cinch_add_library_target target directory)
                 message(FATAL_ERROR "Header '${_HEADER}' from ${_SUBDIR}_HEADERS does not exist.")
             endif()
             list(APPEND HEADERS
-                ${_SOURCE_DIR}/${_SUBDIR}/${_HEADER})
+                ${_SUBDIR}/${_HEADER})
         endforeach()
     
         foreach(_SOURCE ${${_SUBDIR}_SOURCES})
@@ -87,10 +87,19 @@ function(cinch_add_library_target target directory)
         endforeach()
     
     endforeach(_SUBDIR)
-    
-    #set(${library_target_name}_HEADERS ${HEADERS} PARENT_SCOPE)
+   
     add_library(${target} ${SOURCES})
 
+    foreach(file ${HEADERS})
+        get_filename_component(DIR ${file} DIRECTORY)
+        install(FILES ${directory}/${file} DESTINATION include/${target}/${DIR})
+    endforeach()
+
+    install( TARGETS ${target} DESTINATION ${LIBDIR} )
+
+    foreach(file ${${target}_PUBLIC_HEADERS})
+        install(FILES ${directory}/${file} DESTINATION include)
+    endforeach()
 
 endfunction(cinch_add_library_target)
 
