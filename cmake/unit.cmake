@@ -299,7 +299,8 @@ function(cinch_add_unit name)
     # Check for defines.
     #--------------------------------------------------------------------------#
 
-    if(unit_policy_defines)
+    MESSAGE( STATUS "defines for ${name} are ${unit_policy_defines}" )
+     if(unit_policy_defines)
       target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
     endif()
 
