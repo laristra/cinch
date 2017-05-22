@@ -163,21 +163,19 @@ function(cinch_add_unit name)
       string(REGEX MATCH "DEVEL" _IS_DEVEL ${unit_POLICY})
     endif()
 
-    MESSAGE( STATUS "${unit_policy_main} ${unit_POLICY}" )
-
     if ( NOT unit_policy_main OR unit_policy_main STREQUAL "SERIAL" )
-      MESSAGE( STATUS "Adding test ${name} with policy ${unit_policy_main}" )
+
       set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc )
       set( unit_policy_defines -DSERIAL )
 
     elseif ( FORTRAN_ENABLED AND unit_policy_main STREQUAL "FORTRAN" )
-      MESSAGE( STATUS "Adding test ${name} with policy ${unit_policy_main}" )
+
       set( unit_policy_runtime ${PFUNIT_DRIVER} )
       set( unit_policy_libraries ${PFUNIT_LIBRARY} )
       set( unit_policy_defines ${PFUNIT_DEFINES} )
 
     elseif ( MPI_${MPI_LANGUAGE}_FOUND AND unit_policy_main STREQUAL "MPI" )
-      MESSAGE( STATUS "Adding test ${name} with policy ${unit_policy_main}" )
+
       set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-mpi.cc )
       set( unit_policy_flags ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS} )
       set( unit_policy_includes ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH} )
@@ -188,7 +186,6 @@ function(cinch_add_unit name)
     elseif ( MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND 
         unit_policy_main STREQUAL "LEGION" )
 
-      MESSAGE( STATUS "Adding test ${name} with policy legion and mpi" )
       set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc )
       set( unit_policy_flags ${Legion_CXX_FLAGS} 
         ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS} )
@@ -201,7 +198,7 @@ function(cinch_add_unit name)
       set( unit_policy_defines -DENABLE_MPI )
 
     elseif ( Legion_FOUND AND unit_policy_main STREQUAL "LEGION" )
-      MESSAGE( STATUS "Adding test ${name} with just legion policy" )
+
       set( unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc )
       set( unit_policy_flags ${Legion_CXX_FLAGS} )
       set( unit_policy_includes ${Legion_INCLUDE_DIRS} )
@@ -224,8 +221,6 @@ function(cinch_add_unit name)
     set(_TARGET_MAIN ${name}_${_RUNTIME_MAIN})
     configure_file(${unit_policy_runtime}
       ${_OUTPUT_DIR}${_TARGET_MAIN} COPYONLY)
-
-  MESSAGE( STATUS  "${unit_policy_libraries} ${MPI_LANGUAGE} ${MPI_${MPI_LANGUAGE}_LIBRARIES}" )
 
     #--------------------------------------------------------------------------#
     # Make sure that the user specified sources.
@@ -299,8 +294,7 @@ function(cinch_add_unit name)
     # Check for defines.
     #--------------------------------------------------------------------------#
 
-    MESSAGE( STATUS "defines for ${name} are ${unit_policy_defines}" )
-     if(unit_policy_defines)
+    if(unit_policy_defines)
       target_compile_definitions(${name} PRIVATE ${unit_policy_defines})
     endif()
 
