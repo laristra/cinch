@@ -356,6 +356,8 @@ function(cinch_add_unit name)
     # Add the test target to CTest
     #------------------------------------------------------------------#
 
+    MESSAGE( STATUS "${name} is located at ${_OUTPUT_DIR}"
+
     list(LENGTH unit_THREADS thread_instances)
 
     set(_IS_GTEST)
