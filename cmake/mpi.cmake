@@ -26,15 +26,17 @@ if(ENABLE_MPI_CXX_BINDINGS)
     set(MPI_LANGUAGE CXX)
 else()
     set(MPI_LANGUAGE C)
-    separate_arguments( MPI_C_COMPILE_FLAGS )
-    MESSAGE( STATUS "mpi flags: ${MPI_C_COMPILE_FLAGS}" )
-    set( MPI_C_COMPILE_FLAGS ${MPI_C_COMPILE_FLAGS} 
-         -DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX )
 endif(ENABLE_MPI_CXX_BINDINGS)
 
 if(MPI_${MPI_LANGUAGE}_FOUND)
+
     include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
     add_definitions(-DENABLE_MPI)
+    
+    if(NOT ENABLE_MPI_CXX_BINDINGS)
+        add_definitions( -DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX )
+    endif()
+
 endif(MPI_${MPI_LANGUAGE}_FOUND)
 
 endif(ENABLE_MPI)
