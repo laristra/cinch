@@ -391,7 +391,7 @@ function(cinch_add_unit name)
                 COMMAND
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads} ${instance}
-                    ${_OUTPUT_DIR}${name}
+                    $<TARGET_FILE:${name}>
                     ${UNIT_FLAGS} 
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endforeach(instance)
@@ -413,7 +413,7 @@ function(cinch_add_unit name)
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
                     ${instance}
-                    ${_OUTPUT_DIR}${name}
+                    $<TARGET_FILE:${name}>
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         else()
@@ -421,7 +421,7 @@ function(cinch_add_unit name)
                 NAME
                     "${_TEST_PREFIX}${name}"
                 COMMAND
-                    ${_OUTPUT_DIR}${name}
+                    $<TARGET_FILE:${name}>
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endif()
