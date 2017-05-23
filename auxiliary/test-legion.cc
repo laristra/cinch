@@ -23,17 +23,15 @@
   #include "cinchtest.h"
 #endif
 
-#define _UTIL_STRINGIFY(s) #s
-#define EXPAND_AND_STRINGIFY(s) _UTIL_STRINGIFY(s)
+//----------------------------------------------------------------------------//
+// Allow extra initialization steps to be added by the user.
+//----------------------------------------------------------------------------//
 
-#ifndef TEST_INIT
-  #include "test-init.h"
+#if defined(CINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER)
+  int driver_initialization(int argc, char ** argv);
 #else
-  #include EXPAND_AND_STRINGIFY(TEST_INIT)
+  inline int driver_initilization(int argc, char ** argv) {}
 #endif
-
-#undef EXPAND_AND_STRINGIFY
-#undef _UTIL_STRINGIFY
 
 //----------------------------------------------------------------------------//
 // Implement a function to print test information for the user.
@@ -118,8 +116,8 @@ int main(int argc, char ** argv) {
   // Add command-line options
   desc.add_options()
     ("tags,t", value(&tags)->implicit_value("0"),
-      "--tags=tag1,tag2 --tags by itself will print the available tags.")
-    ;
+      "--tags=tag1,tag2 --tags by itself will print the available tags.");
+
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
   notify(vm);
@@ -146,7 +144,7 @@ int main(int argc, char ** argv) {
     clog_init(tags);
 
     // Call the user-provided initialization function
-    test_init(argc, argv);
+    driver_initialization(argc, argv);
 
 #if defined(CINCH_DEVEL_TEST)
     // Perform test initialization.
