@@ -30,7 +30,7 @@
 #if defined(CINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER)
   int driver_initialization(int argc, char ** argv);
 #else
-  inline int driver_initilization(int argc, char ** argv) {}
+  inline int driver_initialization(int argc, char ** argv) {}
 #endif
 
 //----------------------------------------------------------------------------//
