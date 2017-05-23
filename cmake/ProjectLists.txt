@@ -52,8 +52,6 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 
-
-
 #------------------------------------------------------------------------------#
 # Add support for Doxygen documentation
 #
@@ -70,7 +68,6 @@ cinch_add_doxygen()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
