@@ -857,7 +857,7 @@ struct clog_tag_scope_t
     // Warn users about externally-scoped messages
     if(!clog_t::instance().initialized()) {
       std::cerr << COLOR_YELLOW << "CLOG: !!!WARNING You cannot use " <<
-        "tag guards for externally scoped messages!!!" <<
+        "tag guards for externally scoped messages!!! " <<
         "This message will be active if CLOG_ENABLE_EXTERNAL is defined!!!" <<
         COLOR_PLAIN << std::endl;
     } // if
