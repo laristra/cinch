@@ -9,9 +9,11 @@ macro(cinch_load_extras)
   include(coverage)
   include(doxygen)
   include(legion)
-  include(logging)
   include(mpi)
   include(openmp)
+  # load clog after mpi
+  include(logging)
+  # load unit after legion and mpi
   include(unit)
 
 endmacro()
