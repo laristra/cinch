@@ -112,7 +112,6 @@ function(cinch_add_unit name)
 
     get_filename_component(_SOURCE_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
     set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${_SOURCE_DIR_NAME}")
-    message(STATUS "_OUTPUT_DIR: ${_OUTPUT_DIR}")
 
     #--------------------------------------------------------------------------#
     # Check to see if fortran is enabled
@@ -307,13 +306,13 @@ function(cinch_add_unit name)
         foreach(input ${unit_INPUTS})
             get_filename_component(_OUTPUT_NAME ${input} NAME)
             get_filename_component(_PATH ${input} ABSOLUTE)
-            add_custom_command(OUTPUT ${_OUTPUT_DIR}${_OUTPUT_NAME}
+            add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
                 COMMAND ${CMAKE_COMMAND} -E copy 
                 ${_PATH}
-                ${_OUTPUT_DIR}${_OUTPUT_NAME}
+                ${_OUTPUT_DIR}/${_OUTPUT_NAME}
                 DEPENDS ${input}
                 COMMENT "Copying ${input} for ${name}")
-            list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}${_OUTPUT_NAME})
+            list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}/${_OUTPUT_NAME})
         endforeach()
         add_custom_target(${name}_inputs
             DEPENDS ${_OUTPUT_FILES})
