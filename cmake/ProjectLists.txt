@@ -413,8 +413,8 @@ if(CINCH_TOP_LEVEL_PARSER)
 
         # first, clear some variables that are filled with "None" instead
         # of just empty
-        if (NOT "${unit_target_inputs}" STREQUAL "None")
-          string(REGEX REPLACE "([^;]+)" "${unit_target_directory}/\\1" _INPUTS "${unit_target_inputs}")
+        if ("${unit_target_inputs}" STREQUAL "None")
+          set( unit_target_inputs )
         endif()
 
         if ("${unit_target_execution_threads}" STREQUAL "None")
@@ -423,7 +423,7 @@ if(CINCH_TOP_LEVEL_PARSER)
 
         mcinch_add_unit( ${unit_target_name}
           SOURCES ${_UNIT_SOURCES}
-          INPUTS ${_INPUTS}
+          INPUTS ${unit_target_inputs}
           POLICY ${unit_target_execution_policy}
           THREADS ${unit_target_execution_threads}
           WORKING_DIRECTORY ${_OUTPUT_DIR}
