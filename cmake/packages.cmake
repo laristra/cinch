@@ -11,6 +11,9 @@ macro(cinch_load_extras)
   include(legion)
   include(mpi)
   include(openmp)
+  # load clog after mpi
+  include(logging)
+  # load unit after legion and mpi
   include(unit)
   include(logging)
 
