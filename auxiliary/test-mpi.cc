@@ -24,6 +24,16 @@
 #endif
 
 //----------------------------------------------------------------------------//
+// Allow extra initialization steps to be added by the user.
+//----------------------------------------------------------------------------//
+
+#if defined(CINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER)
+  int driver_initialization(int argc, char ** argv);
+#else
+  inline int driver_initialization(int argc, char ** argv) {}
+#endif
+
+//----------------------------------------------------------------------------//
 // Implement a function to print test information for the user.
 //----------------------------------------------------------------------------//
 
@@ -101,6 +111,9 @@ int main(int argc, char ** argv) {
   else {
     // Initialize the cinchlog runtime
     clog_init(tags);
+
+    // Call the user-provided initialization function
+    driver_initialization(argc, argv);
 
 #if defined(CINCH_DEVEL_TEST)
     // Perform test initialization.
