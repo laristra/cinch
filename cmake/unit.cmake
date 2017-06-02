@@ -329,6 +329,10 @@ function(cinch_add_unit name)
     # Check for library dependencies.
     #--------------------------------------------------------------------------#
 
+    if(unit_LIBRARIES)
+      target_link_libraries(${name} ${unit_LIBRARIES})
+    endif()
+
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
         target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
@@ -426,14 +430,6 @@ function(cinch_add_unit name)
         endif()
 
     endif(${thread_instances} GREATER 1)
-
-    #--------------------------------------------------------------------------#
-    # Link to librariest
-    #--------------------------------------------------------------------------#
-
-    if(unit_LIBRARIES)
-      target_link_libraries(${name} ${unit_LIBRARIES})
-    endif()
 
 endfunction(cinch_add_unit)
 
