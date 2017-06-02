@@ -37,7 +37,7 @@ void print_devel_code_label(std::string name) {
 #if defined(CINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER)
   int driver_initialization(int argc, char ** argv);
 #else
-  inline int driver_initialization(int argc, char ** argv) {}
+  inline int driver_initialization(int argc, char ** argv) { return 0; }
 #endif
 
 //----------------------------------------------------------------------------//
