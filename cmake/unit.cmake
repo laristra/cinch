@@ -64,12 +64,6 @@ endif(ENABLE_UNIT_TESTS)
 
 
 #[=============================================================================[
-modular-cinch-macros
---------------------
-
-Provides a set of useful macros to the user to make creating cmake 
-projects easier.
-
 .. command:: mcinch_add_unit
 
   The ``mcinch_add_unit`` function creates a custom unit test with
@@ -87,6 +81,12 @@ projects easier.
     The runtime policy to use when executing the test 
   ``THREADS <threads>...``
     The number of threads to run the test with
+  ``LIBRARIES <libraries>...``
+    List of libraries to link target against
+  ``DEFINES <defines>...``
+    Defines to set when building target
+  ``DRIVER <driver_sources>...``
+    Source files to build custom runtime driver.
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -102,7 +102,9 @@ function(cinch_add_unit name)
 
     set(options)
     set(one_value_args POLICY)
-    set(multi_value_args SOURCES INPUTS THREADS LIBRARIES DEFINES)
+    set(multi_value_args 
+        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER
+    )
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -210,6 +212,10 @@ function(cinch_add_unit name)
       list(APPEND unit_policy_defines -DCINCH_DEVEL_TEST) 
     endif()
 
+    # if a custom runtime driver was provided, override it
+    if (unit_DRIVER) 
+        set( unit_policy_runtime ${unit_DRIVER} )
+    endif()
 
     # copy the main driver for the runtime policy
     get_filename_component(_RUNTIME_MAIN ${unit_policy_runtime} NAME)
