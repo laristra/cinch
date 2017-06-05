@@ -971,7 +971,8 @@ struct log_message_t
       size = size_t(backtrace(array, 100));  // backtrace returns int
       char ** symbols = backtrace_symbols(array, int(size));  // func. takes int
 
-      std::ostream & stream = clog_t::instance().stream();
+      std::ostream & stream = std::cerr;
+      if ( clean_color_ ) stream << COLOR_PLAIN;
 
       for(size_t i(0); i<size; ++i) {
         std::string re = symbols[i];
@@ -1120,9 +1121,7 @@ severity_message_t(warn, decltype(cinch::true_state),
 severity_message_t(error, decltype(cinch::true_state),
   {
     std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-    std::ostream & stream =
-      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 4 &&
-        predicate_() && clog_t::instance().tag_enabled());
+    std::ostream & stream = std::cerr;
 
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
@@ -1139,9 +1138,7 @@ severity_message_t(error, decltype(cinch::true_state),
 severity_message_t(fatal, decltype(cinch::true_state),
   {
     std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-    std::ostream & stream =
-      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 5 &&
-        predicate_() && clog_t::instance().tag_enabled());
+    std::ostream & stream = std::cerr;
 
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
