@@ -113,7 +113,11 @@ function(cinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     get_filename_component(_SOURCE_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-    set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${_SOURCE_DIR_NAME}")
+    if ( PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME ) 
+      set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${_SOURCE_DIR_NAME}")
+    else()
+      set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${PROJECT_NAME}/${_SOURCE_DIR_NAME}")
+    endif()
 
     #--------------------------------------------------------------------------#
     # Check to see if fortran is enabled
