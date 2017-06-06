@@ -55,7 +55,7 @@
 //----------------------------------------------------------------------------//
 
 // Set the default strip level. All severity levels that are strictly
-// less than hte strip level will be stripped...
+// less than the strip level will be stripped...
 //
 // TRACE 0
 // INFO  1
@@ -199,7 +199,7 @@ std::string rstrip(const char *file) {
 } // rstrip
 
 //----------------------------------------------------------------------------//
-// Auxilliary types.
+// Auxiliary types.
 //----------------------------------------------------------------------------//
 
 ///
@@ -288,7 +288,7 @@ protected:
       const size_t tbsize = test_buffer_.size();
 
       // Buffer the output for now...
-      test_buffer_.append(1, c);
+      test_buffer_.append(1, char(c));  // takes char
 
       switch(tbsize) {
 
@@ -434,7 +434,7 @@ private:
         } // for
       } // if
     } // for
-    
+
     // Clear the test buffer
     test_buffer_.clear();
 
@@ -571,7 +571,7 @@ public:
     // Because active tags are specified at runtime, it is
     // necessary to maintain a map of the compile-time registered
     // tag names to the id that they get assigned after the clog_t
-    // initialzation (register_tag). This map will be used to populate
+    // initialization (register_tag). This map will be used to populate
     // the tag_bitset_ for fast runtime comparisons of enabled tag groups.
 
     // Note: For the time being, the map uses actual strings rather than
@@ -931,7 +931,7 @@ struct log_message_t
   /// classes wishing to force exit should set this to true in their
   /// override of the stream method.
   ///
-  /// \tparam P Predicate funtion type.
+  /// \tparam P Predicate function type.
   ///
   /// \param file The current file (where the log message was created).
   ///             In general, this will always use the __FILE__ parameter
@@ -969,10 +969,11 @@ struct log_message_t
       void * array[100];
       size_t size;
 
-      size = backtrace(array, 100);
-      char ** symbols = backtrace_symbols(array, size);
+      size = size_t(backtrace(array, 100));  // backtrace returns int
+      char ** symbols = backtrace_symbols(array, int(size));  // func. takes int
 
-      std::ostream & stream = clog_t::instance().stream();
+      std::ostream & stream = std::cerr;
+      if ( clean_color_ ) stream << COLOR_PLAIN;
 
       for(size_t i(0); i<size; ++i) {
         std::string re = symbols[i];
@@ -1055,7 +1056,7 @@ struct severity ## _log_message_t                                              \
   stream() override                                                            \
     /* This is replaced by the scoped logic */                                 \
     format                                                                     \
-};
+}
 
 //----------------------------------------------------------------------------//
 // Define the insertion style severity levels.
@@ -1121,9 +1122,7 @@ severity_message_t(warn, decltype(cinch::true_state),
 severity_message_t(error, decltype(cinch::true_state),
   {
     std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-    std::ostream & stream =
-      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 4 &&
-        predicate_() && clog_t::instance().tag_enabled());
+    std::ostream & stream = std::cerr;
 
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
@@ -1140,9 +1139,7 @@ severity_message_t(error, decltype(cinch::true_state),
 severity_message_t(fatal, decltype(cinch::true_state),
   {
     std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-    std::ostream & stream =
-      clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 5 &&
-        predicate_() && clog_t::instance().tag_enabled());
+    std::ostream & stream = std::cerr;
 
     begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
       stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
@@ -1230,7 +1227,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
   !(test) && clog_fatal(message)
 
 ///
-/// Expose interface to add buffers. Added buffers are enabled 
+/// Expose interface to add buffers. Added buffers are enabled
 /// by default.
 ///
 #define clog_add_buffer(name, ostream, colorized)                              \
