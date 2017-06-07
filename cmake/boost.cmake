@@ -22,4 +22,7 @@ if(ENABLE_BOOST_PROGRAM_OPTIONS)
     add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
 endif()
 
-
+#------------------------------------------------------------------------------#
+# Formatting options for emacs and vim.
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#

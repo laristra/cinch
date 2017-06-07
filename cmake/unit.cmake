@@ -437,7 +437,6 @@ function(cinch_add_unit name)
 
 endfunction(cinch_add_unit)
 
-
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 # vim: set tabstop=4 shiftwidth=4 expandtab :
