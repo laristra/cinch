@@ -91,7 +91,6 @@ endif(ENABLE_UNIT_TESTS)
 
 function(cinch_add_unit name)
 
-
     if(NOT ENABLE_UNIT_TESTS)
       return()
     endif()

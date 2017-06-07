@@ -17,8 +17,6 @@ if(ENABLE_LEGION)
 
 find_package(Legion REQUIRED)
 
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
   if(NOT Legion_FOUND)
       message(FATAL_ERROR "Legion is required
                      for this build configuration")
