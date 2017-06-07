@@ -48,6 +48,10 @@
     #--------------------------------------------------------------------------#
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
+        find_package(Boost COMPONENTS program_options REQUIRED)
+        target_include_directories(${name} PRIVATE ${Boost_INCLUDE_DIRS})
+        target_compile_definitions(${name} PRIVATE
+            ENABLE_BOOST_PROGRAM_OPTIONS)
         target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
 
