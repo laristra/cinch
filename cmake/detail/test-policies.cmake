@@ -8,6 +8,7 @@
 #--------------------------------------------------------------------------#
 
     if(NOT test_POLICY OR test_POLICY STREQUAL "SERIAL") 
+
         set(test_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc)
         set(test_policy_defines -DSERIAL)
 
@@ -36,10 +37,7 @@
 
     else()
 
-        # The user specified something strange
-        message(WARNING "invalid test policy, skipping")
-        set(test_policy_runtime)
-        set(test_policy_defines)
+        return()
 
     endif()
 

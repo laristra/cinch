@@ -25,6 +25,10 @@ function(cinch_add_devel_target name)
 
     include(detail/test-policies)
 
+    if(NOT test_policy_runtime)
+        return()
+    endif()
+
     #--------------------------------------------------------------------------#
     # Add the executable
     #--------------------------------------------------------------------------#
