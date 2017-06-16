@@ -18,19 +18,19 @@ function(cinch_add_library_target target directory)
     message(STATUS
         "Adding library target ${target} with source directory ${directory}")
 
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     # Add public headers
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     
     set( _SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${directory} )
 
     if(EXISTS ${_SOURCE_DIR}/library.cmake)
-      include(${_SOURCE_DIR}/library.cmake)
+        include(${_SOURCE_DIR}/library.cmake)
     endif()
     
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     # add some random includes for convinience
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
 
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${directory})
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/${directory})
@@ -38,19 +38,19 @@ function(cinch_add_library_target target directory)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${directory}/..)
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/${directory}/..)
 
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     # Add subdirectories
     #
     # This uses a glob, i.e., all sub-directories will be added at this level.
     # This is not true for levels below this one.  This allows some flexibility
     # while keeping the generic case as simple as possible.
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     
     cinch_subdirlist(_SUBDIRECTORIES ${_SOURCE_DIR} False)
 
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     # Add subdirectory files
-    #------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------#
     
     # This loop adds header and source files for each listed sub-directory
     # to the main header and source file lists.  Additionally, it adds the
