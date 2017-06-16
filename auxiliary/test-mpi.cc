@@ -16,7 +16,7 @@
 
 // This define lets us use the same test driver for gtest and internal
 // devel tests.
-#if defined(CINCH_DEVEL_TEST)
+#if defined(CINCH_DEVEL_TARGET)
   #include "cinchdevel.h"
 #else
   #include <gtest/gtest.h>
@@ -37,11 +37,11 @@
 // Implement a function to print test information for the user.
 //----------------------------------------------------------------------------//
 
-#if defined(CINCH_DEVEL_TEST)
+#if defined(CINCH_DEVEL_TARGET)
 void print_devel_code_label(std::string name) {
   // Print some test information to the root rank.
   clog_rank(info, 0) <<
-    OUTPUT_LTGREEN("Executing development test " << name) << std::endl;
+    OUTPUT_LTGREEN("Executing development target " << name) << std::endl;
 
   // This is safe even if the user creates other comms, because we
   // execute this function before handing control over to the user
@@ -75,7 +75,7 @@ int main(int argc, char ** argv) {
   argc = args.size();
   argv = args.data();
 
-#if !defined(CINCH_DEVEL_TEST)
+#if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
   ::testing::InitGoogleTest(&argc, argv);
 #endif
@@ -88,12 +88,19 @@ int main(int argc, char ** argv) {
 
   // Add command-line options
   desc.add_options()
+    ("help,h", "Print this message and exit.")
     ("tags,t", value(&tags)->implicit_value("0"),
-      "--tags=tag1,tag2 --tags by itself will print the available tags.")
+      "Enable the specified output tags, e.g., --tags=tag1,tag2."
+      " Passing --tags by itself will print the available tags.")
     ;
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
   notify(vm);
+
+if(vm.count("help") && rank == 0) {
+  std::cout << desc << std::endl;
+  return 1;
+} // if
 #endif // ENABLE_BOOST_PROGRAM_OPTIONS
 
   int result(0);
@@ -115,7 +122,7 @@ int main(int argc, char ** argv) {
     // Call the user-provided initialization function
     driver_initialization(argc, argv);
 
-#if defined(CINCH_DEVEL_TEST)
+#if defined(CINCH_DEVEL_TARGET)
     // Perform test initialization.
     cinch_devel_code_init(print_devel_code_label);
 

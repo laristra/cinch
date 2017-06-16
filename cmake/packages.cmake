@@ -15,6 +15,7 @@ macro(cinch_load_extras)
   include(logging)
   # load unit after legion and mpi
   include(unit)
+  include(devel)
   include(logging)
 
 endmacro()

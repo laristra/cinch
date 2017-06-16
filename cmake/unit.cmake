@@ -91,7 +91,6 @@ endif(ENABLE_UNIT_TESTS)
 
 function(cinch_add_unit name)
 
-
     if(NOT ENABLE_UNIT_TESTS)
       return()
     endif()
@@ -436,7 +435,6 @@ function(cinch_add_unit name)
     endif(${thread_instances} GREATER 1)
 
 endfunction(cinch_add_unit)
-
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

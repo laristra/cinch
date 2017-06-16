@@ -43,6 +43,7 @@
 // Set CLOG_ENABLE_STDLOG to enable output to std::clog
 
 // Set CLOG_ENABLE_TAGS to enable tag groups
+
 // Set CLOG_TAG_BITS to enable TAG_BITS number of groups
 
 #ifndef CLOG_TAG_BITS

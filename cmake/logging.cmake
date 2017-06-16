@@ -25,7 +25,7 @@ endif()
 # Enable tag groups
 option(CLOG_ENABLE_TAGS "Enable tag groups" OFF)
 if(CLOG_ENABLE_TAGS)
-    set(CLOG_TAG_BITS "16" CACHE STRING
+    set(CLOG_TAG_BITS "64" CACHE STRING
         "Select the number of bits to use for tag groups")
     add_definitions(-DCLOG_ENABLE_TAGS)
     add_definitions(-DCLOG_TAG_BITS=${CLOG_TAG_BITS})
