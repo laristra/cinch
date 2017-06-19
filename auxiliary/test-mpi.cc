@@ -5,7 +5,6 @@
 
 #include <cstring>
 #include <mpi.h>
-
 #include <vector>
 
 // Boost command-line options
@@ -63,9 +62,9 @@ int main(int argc, char ** argv) {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   std::vector<char *> args(argv, argv+argc);
-  if (rank > 0) {
-    for (auto itr = args.begin(); itr != args.end(); ++itr) {
-      if (std::strncmp(*itr, "--gtest_output", 14) == 0) {
+  if(rank > 0) {
+    for(auto itr = args.begin(); itr != args.end(); ++itr) {
+      if(std::strncmp(*itr, "--gtest_output", 14) == 0) {
         args.erase(itr);
         break;
       } // if
@@ -94,13 +93,40 @@ int main(int argc, char ** argv) {
       " Passing --tags by itself will print the available tags.")
     ;
   variables_map vm;
-  store(parse_command_line(argc, argv, desc), vm);
+  parsed_options parsed =
+    command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+  store(parsed, vm);
+
   notify(vm);
 
-if(vm.count("help") && rank == 0) {
-  std::cout << desc << std::endl;
-  return 1;
-} // if
+  // Gather the unregistered options, if there are any, print a help message
+  // and die nicely.
+  std::vector<std::string> unrecog_options =
+    collect_unrecognized(parsed.options, include_positional);
+
+  if(unrecog_options.size()) {
+    if(rank == 0) {
+      std::cout << std::endl << "Unrecognized options: ";
+      for ( int i=0; i<unrecog_options.size(); ++i ) {
+        std::cout << unrecog_options[i] << " ";
+      }
+      std::cout << std::endl << std::endl << desc << std::endl;
+    } // if
+
+    MPI_Finalize();
+
+    return 1;
+  } // if
+
+  if(vm.count("help")) {
+    if(rank == 0) {
+      std::cout << desc << std::endl;
+    } // if
+
+    MPI_Finalize();
+
+    return 1;
+  } // if
 #endif // ENABLE_BOOST_PROGRAM_OPTIONS
 
   int result(0);
@@ -119,13 +145,15 @@ if(vm.count("help") && rank == 0) {
     // Initialize the cinchlog runtime
     clog_init(tags);
 
+#if defined(CINCH_DEVEL_TARGET)
+    // Perform test initialization.
+    cinch_devel_code_init(print_devel_code_label);
+#endif
+
     // Call the user-provided initialization function
     driver_initialization(argc, argv);
 
 #if defined(CINCH_DEVEL_TARGET)
-    // Perform test initialization.
-    cinch_devel_code_init(print_devel_code_label);
-
     // Run the devel test.
     user_devel_code_logic();  
 #else
@@ -145,7 +173,6 @@ if(vm.count("help") && rank == 0) {
   MPI_Finalize();
 
   return result;
-
 } // main
 
 /*~------------------------------------------------------------------------~--*

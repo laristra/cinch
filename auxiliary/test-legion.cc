@@ -7,6 +7,7 @@
 #include <mpi.h>
 #endif
 #include <legion.h>
+#include <vector>
 
 // Boost command-line options
 #if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
@@ -21,16 +22,6 @@
 #else
   #include <gtest/gtest.h>
   #include "cinchtest.h"
-#endif
-
-//----------------------------------------------------------------------------//
-// This function needs to be defined for devel targets. However, it doesn't
-// make sense for Legion-based devel targets. This empty implementation
-// fixes linkage issues.
-//----------------------------------------------------------------------------//
-
-#if defined(CINCH_DEVEL_TARGET)
-  DEVEL(DEVEL_TARGET_NAME) {}
 #endif
 
 //----------------------------------------------------------------------------//
@@ -218,7 +209,6 @@ int main(int argc, char ** argv) {
 #endif // ENABLE_MPI
 
   return result;
-
 } // main
 
 /*~------------------------------------------------------------------------~--*
