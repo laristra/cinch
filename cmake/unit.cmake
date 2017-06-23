@@ -87,6 +87,9 @@ endif(ENABLE_UNIT_TESTS)
     Defines to set when building target
   ``DRIVER <driver_sources>...``
     Source files to build custom runtime driver.
+  ``NOCI``
+    Test does NOT get run (but still build) if 
+    ENV{'CI'} is "TRUE".
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -99,7 +102,7 @@ function(cinch_add_unit name)
     # Setup argument options.
     #--------------------------------------------------------------------------#
 
-    set(options)
+    set(options NOCI)
     set(one_value_args POLICY)
     set(multi_value_args 
         SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER
@@ -379,6 +382,12 @@ function(cinch_add_unit name)
         endif(ENABLE_COLOR_UNIT_TESTS)
     else()
         set(UNIT_FLAGS)
+    endif()
+
+    if(unit_NOCI AND ( "$ENV{CI}" STREQUAL "true" )
+	AND (NOT DEFINED ENV{IGNORE_NOCI}) )
+	message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to CI enabled")
+	return()
     endif()
 
     if(${thread_instances} GREATER 1)
