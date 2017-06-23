@@ -385,7 +385,7 @@ function(cinch_add_unit name)
     endif()
 
     if(unit_NOCI AND ( "$ENV{CI}" STREQUAL "true" )
-	AND (NOT DEFINED ENV{IGNORE_NOCI}) )
+	AND ( NOT "$ENV{IGNORE_NOCI}" STREQUAL "true" ))
 	message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to CI enabled")
 	return()
     endif()
