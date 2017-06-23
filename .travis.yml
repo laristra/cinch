@@ -19,6 +19,7 @@ addons:
       - gcc-5
       - g++-5
       - gfortran-5
+      - libboost-all-dev
 
 before_install:
  - git fetch --unshallow && git fetch --tags #for versioning
