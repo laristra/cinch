@@ -387,9 +387,9 @@ function(cinch_add_unit name)
         set(UNIT_FLAGS)
     endif()
 
-    if(unit_NOOPENMPI AND ( "$ENV{NOOPENMPI}" STREQUAL "true" )
+    if(unit_NOOPENMPI AND ( "$ENV{OPENMPI}" STREQUAL "true" )
         AND ( NOT "$ENV{IGNORE_NOOPENMPI}" STREQUAL "true" ))
-        message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to NOOPENMPI enabled")
+        message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to OPENMPI enabled")
         return()
     endif()
 
