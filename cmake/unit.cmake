@@ -89,7 +89,10 @@ endif(ENABLE_UNIT_TESTS)
     Source files to build custom runtime driver.
   ``NOCI``
     Test does NOT get run (but still build) if 
-    ENV{'CI'} is "TRUE".
+    ENV{'CI'} is "true".
+  ``NOOPENMPI``
+    Test does NOT get run (but still build) if 
+    ENV{'OPENMPI'} is "true".
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -102,7 +105,7 @@ function(cinch_add_unit name)
     # Setup argument options.
     #--------------------------------------------------------------------------#
 
-    set(options NOCI)
+    set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
     set(multi_value_args 
         SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER
@@ -384,10 +387,16 @@ function(cinch_add_unit name)
         set(UNIT_FLAGS)
     endif()
 
+    if(unit_NOOPENMPI AND ( "$ENV{NOOPENMPI}" STREQUAL "true" )
+        AND ( NOT "$ENV{IGNORE_NOOPENMPI}" STREQUAL "true" ))
+        message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to NOOPENMPI enabled")
+        return()
+    endif()
+
     if(unit_NOCI AND ( "$ENV{CI}" STREQUAL "true" )
-	AND ( NOT "$ENV{IGNORE_NOCI}" STREQUAL "true" ))
-	message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to CI enabled")
-	return()
+        AND ( NOT "$ENV{IGNORE_NOCI}" STREQUAL "true" ))
+        message(STATUS "Skipping test ${_TEST_PREFIX}${name} due to CI enabled")
+        return()
     endif()
 
     if(${thread_instances} GREATER 1)
