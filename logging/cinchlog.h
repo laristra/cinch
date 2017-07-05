@@ -1264,6 +1264,10 @@ namespace clog {
 ///
 /// Output contents of a container.
 ///
+
+/// \TODO actual fix warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-compare"
 #define clog_container(severity, banner, container, delimiter)                 \
   {                                                                            \
   std::stringstream ss;                                                        \
@@ -1287,6 +1291,7 @@ namespace clog {
   }                                                                            \
   clog(severity) << ss.str() << std::endl;                                     \
   }
+#pragma clang diagnostic pop
 
 // Enable MPI
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
@@ -1443,8 +1448,12 @@ is_active_rank()
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
   std::cout
 
+/// \TODO actual fix warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
 #define clog_container_one(severity, banner, container, delimiter)             \
   std::cout
+#pragma clang diagnostic pop
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
 
