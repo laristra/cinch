@@ -3,20 +3,23 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-#
-# cinch_add_application_directory
-#
-
-function(cinch_add_application_directory directory)
-
     #--------------------------------------------------------------------------#
-    #
+    # Add testing options.
     #--------------------------------------------------------------------------#
 
-    message(STATUS "Adding application directory ${directory}")
-    add_subdirectory( ${directory} )
+    set(options)
+    set(one_value_args POLICY)
+    set(multi_value_args SOURCES INPUTS THREADS LIBRARIES DEFINES)
 
-endfunction(cinch_add_application_directory)
+    cmake_parse_arguments(test "${options}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
+    # Set output directory
+    #--------------------------------------------------------------------------#
+
+    get_filename_component(_SOURCE_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+    set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/${_TARGET_DIR}/${_SOURCE_DIR_NAME}")
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

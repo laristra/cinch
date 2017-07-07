@@ -29,7 +29,7 @@ FIND_LIBRARY(Caliper_LIBRARIES
 # handle the QUIETLY and REQUIRED arguments and set Caliper_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Caliper Caliper_LIBRARIES
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Caliper DEFAULT_MSG Caliper_LIBRARIES
 	Caliper_INCLUDE_DIRS)
 
 # Copy the results to the output variables.

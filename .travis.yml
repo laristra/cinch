@@ -19,6 +19,7 @@ addons:
       - gcc-5
       - g++-5
       - gfortran-5
+      - libboost-all-dev
 
 before_install:
  - git fetch --unshallow && git fetch --tags #for versioning
@@ -34,8 +35,9 @@ env: #maybe add mpich later
     - MPI=OFF TEST=laristra/cinch-nested-example
     - MPI=ON  TEST=losalamos/vpic
     - MPI=OFF TEST=losalamos/vpic
-    - MPI=ON  TEST=laristra/flecsi GVER=5
-    - MPI=OFF TEST=laristra/flecsi GVER=5
+# flecsi has no mimimal build currently
+#    - MPI=ON  TEST=laristra/flecsi GVER=5
+#    - MPI=OFF TEST=laristra/flecsi GVER=5
 
 script:
   - git checkout -b cinch_current_commit
