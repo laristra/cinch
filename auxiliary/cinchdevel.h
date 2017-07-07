@@ -7,6 +7,7 @@
 #define cinch_cinchdevel_h
 
 #include "../logging/cinchlog.h"
+#include <functional>
 
 ///
 /// \file

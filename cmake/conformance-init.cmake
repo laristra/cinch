@@ -18,6 +18,8 @@ set(CXX_CONFORMANCE_STANDARD "c++14"
 
 function(cinch_initialize_conformance_tests)
 
+  option( ENABLE_CONFORMANCE_TESTS "Enable cinch conformance tests" OFF ) 
+
     if(ENABLE_CONFORMANCE_TESTS)
 
         file(WRITE ${CMAKE_BINARY_DIR}/conformance-report.txt

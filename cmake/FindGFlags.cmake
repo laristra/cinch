@@ -18,7 +18,7 @@ FIND_LIBRARY(GFlags_LIBRARY NAMES gflags libgflags)
 # handle the QUIETLY and REQUIRED arguments and set GFlags_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GFlags GFlags_LIBRARY GFlags_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GFlags DEFAULT_MSG GFlags_LIBRARY GFlags_INCLUDE_DIR)
 
 # Copy the results to the output variables.
 SET(GFlags_LIBRARIES ${GFlags_LIBRARY})

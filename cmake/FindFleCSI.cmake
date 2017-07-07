@@ -28,7 +28,7 @@ FIND_PATH(FleCSI_RUNTIME
 # handle the QUIETLY and REQUIRED arguments and set FleCSI_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FleCSI FleCSI_INCLUDE_DIR FleCSI_LIBRARY
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FleCSI DEFAULT_MSG FleCSI_INCLUDE_DIR FleCSI_LIBRARY
 	FleCSI_RUNTIME)
 
 # Copy the results to the output variables.
