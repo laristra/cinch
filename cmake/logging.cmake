@@ -55,5 +55,3 @@ option(CLOG_DEBUG "Enable clog debugging" OFF)
 if(CLOG_DEBUG)
     add_definitions(-DCLOG_DEBUG)
 endif()
-
-
