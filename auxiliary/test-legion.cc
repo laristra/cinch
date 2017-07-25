@@ -84,7 +84,7 @@ int main(int argc, char ** argv) {
     MPI_Init(&argc, &argv);
   } // if
 #else
-   MPI_Init(&argc, &argv);
+  MPI_Init(&argc, &argv);
 #endif
 
   // Disable XML output, if requested, everywhere but rank 0
