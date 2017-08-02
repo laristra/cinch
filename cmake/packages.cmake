@@ -5,7 +5,7 @@
 
 macro(cinch_load_extras)
 
-  set(options MPI LEGION)
+  set(options MPI LEGION HPX)
   set(oneValueArgs)
   set(multiValueArgs)
   cmake_parse_arguments(opt_in "${options}" "${oneValueArgs}"
@@ -21,6 +21,10 @@ macro(cinch_load_extras)
 
   if(opt_in_MPI)
     include(mpi)
+  endif()
+
+  if(opt_in_HPX)
+    include(hpx)
   endif()
 
   include(openmp)
