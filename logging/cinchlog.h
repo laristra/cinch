@@ -581,16 +581,16 @@ public:
     // Initialize everything to false. This is the default, i.e., "none".
     tag_bitset_.reset();
 
+    // The default group is always active (unscoped). To avoid
+    // output for this tag, make sure to scope all CLOG output.
+    tag_bitset_.set(0);
+
     if(active == "all") {
       // Turn on all of the bits for "all".
       tag_bitset_.flip();
     }
     else if(active != "none") {
       // Turn on the bits for the selected groups.
-
-      // The default group is always active (unscoped). To avoid
-      // output for this tag, make sure to scope all CLOG output.
-      tag_bitset_.set(0);
 
       #if defined(CLOG_DEBUG)
         std::cerr << COLOR_LTGRAY << "CLOG: active tags (" <<
