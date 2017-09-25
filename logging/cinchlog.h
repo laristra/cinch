@@ -6,14 +6,14 @@
 #ifndef cinch_cinchlog_h
 #define cinch_cinchlog_h
 
-///
-/// \file
-/// \date Initial file creation: Dec 15, 2016
-///
+//----------------------------------------------------------------------------//
+//! @file
+//! @date Initial file creation: Dec 15, 2016
+//----------------------------------------------------------------------------//
 
 #if defined __GNUC__
-#include <cxxabi.h>
-#include <execinfo.h>
+  #include <cxxabi.h>
+  #include <execinfo.h>
 #endif // __GNUC__
 
 #include <cassert>
@@ -1156,19 +1156,49 @@ severity_message_t(fatal, decltype(cinch::true_state),
 // Macro Interface
 //----------------------------------------------------------------------------//
 
+///
+/// CLOG runtime intialization
+///
+
 #define clog_init(active)                                                      \
   cinch::clog_t::instance().init(active)
 
 ///
-/// This handles all of the different logging modes for the insertion
-/// style logging interface.
+/// The BYPASS_OUTPUT definition is used to completely turn off the
+/// insertion-style output interface.
 ///
-/// \param severity The severity level of the log entry.
-///
-/// \note The form "true && ..." is necessary for tertiary argument
-///       evaluation so that the std::ostream & returned by the stream()
-///       function can be implicitly converted to an int.
-///
+
+#if defined(ENABLE_CLOG)
+  #define BYPASS_OUTPUT false
+#else
+  #define BYPASS_OUTPUT true
+#endif
+
+//----------------------------------------------------------------------------//
+//! @def clog(severity)
+//!
+//! This handles all of the different logging modes for the insertion
+//! style logging interface.
+//!
+//! \param severity The severity level of the log entry.
+//!
+//! \note The form "true && ..." is necessary for tertiary argument
+//!       evaluation so that the std::ostream & returned by the stream()
+//!       function can be implicitly converted to an int.
+//!
+//! BYPASS_OUTPUT should allow users to completely turn off logging output
+//! for increased performance.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
+//#define clog(severity)                                                         \
+//  if(BYPASS_OUTPUT) {}                                                         \
+//  else true && cinch::severity ## _log_message_t(                              \
+//    __FILE__, __LINE__, true).stream()
+
+#if defined(ENABLE_CLOG)
+
 #define clog(severity)                                                         \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true).stream()
 
@@ -1176,40 +1206,69 @@ severity_message_t(fatal, decltype(cinch::true_state),
 /// Method style interface for trace level severity log entries.
 ///
 #define clog_trace(message)                                                    \
-  clog(trace) << message << std::endl
+  cinch::trace_log_message_t(__FILE__, __LINE__, true).stream() <<             \
+    message << std::endl
 
 ///
 /// Method style interface for info level severity log entries.
 ///
 #define clog_info(message)                                                     \
-  clog(info) << message << std::endl
+  cinch::info_log_message_t(__FILE__, __LINE__, true).stream() <<              \
+    message << std::endl
 
 ///
 /// Method style interface for warn level severity log entries.
 ///
 #define clog_warn(message)                                                     \
-  clog(warn) << message << std::endl
+  cinch::warn_log_message_t(__FILE__, __LINE__, true).stream() <<              \
+    message << std::endl
 
 ///
 /// Method style interface for error level severity log entries.
 ///
 #define clog_error(message)                                                    \
-  clog(error) << message << std::endl
+  cinch::error_log_message_t(__FILE__, __LINE__, true).stream() <<             \
+    message << std::endl
 
+#else
+
+///
+/// These are empty defintions for the case where ENABLE_CLOG is not defined.
+///
+
+#define clog(severity) if(true) {} else std::cerr
+
+#define clog_trace(message)
+#define clog_info(message)
+#define clog_warn(message)
+#define clog_error(message)
+
+#endif // ENABLE_CLOG
+
+///
 /// Indirection to expand counter name.
+///
+
 #define clog_counter_varname(str, line)                                        \
   _clog_concat(str, line)
 
+///
 /// Indirection to expand counter name.
+///
+
 #define clog_counter(str)                                                      \
   clog_counter_varname(str, __LINE__)
 
+///
 /// Define a counter name.
+///
+
 #define counter_name clog_counter(counter)
 
 ///
 /// Method style interface to output every nth iteration.
 ///
+
 #define clog_every_n(severity, n, message)                                     \
   static size_t counter_name = 0;                                              \
   if(counter_name++%n == 0) { clog_ ## severity(message); }
@@ -1217,12 +1276,15 @@ severity_message_t(fatal, decltype(cinch::true_state),
 ///
 /// Method style interface for fatal level severity log entries.
 ///
+
 #define clog_fatal(message)                                                    \
-  clog(fatal) << message << std::endl
+  true && cinch::fatal_log_message_t(__FILE__, __LINE__, true).stream() <<     \
+    message << std::endl
 
 ///
 /// Assertion with error message.
 ///
+
 #define clog_assert(test, message)                                             \
   !(test) && clog_fatal(message)
 
@@ -1230,6 +1292,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 /// Expose interface to add buffers. Added buffers are enabled
 /// by default.
 ///
+
 #define clog_add_buffer(name, ostream, colorized)                              \
   cinch::clog_t::instance().config_stream().add_buffer(name, ostream,          \
     colorized)
@@ -1237,12 +1300,14 @@ severity_message_t(fatal, decltype(cinch::true_state),
 ///
 /// Expose interface to enable buffers.
 ///
+
 #define clog_enable_buffer(name)                                               \
   cinch::clog_t::instance().config_stream().enable_buffer(name)
 
 ///
 /// Expose interface to disable buffers.
 ///
+
 #define clog_disable_buffer(name)                                              \
   cinch::clog_t::instance().config_stream().disable_buffer(name)
 
@@ -1251,6 +1316,7 @@ namespace clog {
   ///
   // Enum type to specify output delimiters for containers.
   ///
+
   enum clog_delimiters_t : size_t {
     newline,
     space,
@@ -1265,7 +1331,8 @@ namespace clog {
 /// Output contents of a container.
 ///
 
-/// \TODO actual fix warning
+/// \TODO actual fix warning
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wtautological-compare"
 #define clog_container(severity, banner, container, delimiter)                 \
@@ -1448,7 +1515,7 @@ is_active_rank()
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
   std::cout
 
-/// \TODO actual fix warning
+/// \TODO actual fix warning
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
 #define clog_container_one(severity, banner, container, delimiter)             \
