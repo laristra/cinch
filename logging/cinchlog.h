@@ -1433,34 +1433,63 @@ severity_message_t(fatal, decltype(cinch::true_state),
                                                                                \
   !(test) && clog_fatal(message)
 
-///
-/// Expose interface to add buffers. Added buffers are enabled
-/// by default.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_add_buffer(name, ostream, colorized)
+//!
+//! Add a named stream buffer to the clog runtime. Added buffers are enabled
+//! by default, and can be disabled by calling \ref clog_disable_buffer.
+//!
+//! @param name      The name of the output buffer.
+//! @param ostream   The output stream of type std::ostream.
+//! @param colorized A boolean indicating whether or not the output to
+//!                  this stream should be colorized.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_add_buffer(name, ostream, colorized)                              \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::clog_t::instance().config_stream().add_buffer(name, ostream,          \
     colorized)
 
-///
-/// Expose interface to enable buffers.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_enable_buffer(name)
+//!
+//! Enable an output buffer.
+//!
+//! @param name The name of the output stream that was used to add the buffer.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_enable_buffer(name)                                               \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::clog_t::instance().config_stream().enable_buffer(name)
 
-///
-/// Expose interface to disable buffers.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_disable_buffer(name)
+//!
+//! Disable an output buffer.
+//!
+//! @param name The name of the output stream that was used to add the buffer.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_disable_buffer(name)                                              \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::clog_t::instance().config_stream().disable_buffer(name)
 
 namespace clog {
 
-  ///
-  // Enum type to specify output delimiters for containers.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Enum type to specify output delimiters for containers.
+  //!
+  //! @ingroup clog
+  //--------------------------------------------------------------------------//
 
   enum clog_delimiters_t : size_t {
     newline,
@@ -1468,19 +1497,33 @@ namespace clog {
     colon,
     semicolon,
     comma
-  };
+  }; // enum clog_delimiters_t
 
 } // namespace
 
-///
-/// Output contents of a container.
-///
-
-/// \TODO actual fix warning
-
+// \TODO actually fix warning
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wtautological-compare"
+
+//----------------------------------------------------------------------------//
+//! @def clog_container(severity, banner, container, delimiter)
+//!
+//! Output the contents of a standard container type. Valid container types
+//! must implement a forward iterator.
+//!
+//! @param severity  The severity level at which to output the message.
+//! @param banner    A top-level label for the container output.
+//! @param container The container to output.
+//! @param delimiter The output character to use to delimit container
+//!                  entries, e.g., newline, comma, space, etc. Valid
+//!                  delimiters are defined in clog_delimiters_t.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_container(severity, banner, container, delimiter)                 \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
@@ -1510,7 +1553,20 @@ namespace clog {
 
 namespace cinch {
 
+//----------------------------------------------------------------------------//
+//! The mpi_config_t type provides an interface to MPI runtime state
+//! information.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 struct mpi_config_t {
+
+  //--------------------------------------------------------------------------//
+  //! Meyer's singleton instance.
+  //!
+  //! @return The single instance of this type.
+  //--------------------------------------------------------------------------//
 
   static
   mpi_config_t &
@@ -1520,12 +1576,20 @@ struct mpi_config_t {
     return m;
   } // instance
 
+  //--------------------------------------------------------------------------//
+  //! Return the active rank as a constant reference.
+  //--------------------------------------------------------------------------//
+
   const
   size_t &
   active_rank() const
   {
     return active_rank_;
   } // active_rank
+
+  //--------------------------------------------------------------------------//
+  //! Return the active rank as a mutable reference.
+  //--------------------------------------------------------------------------//
 
   size_t &
   active_rank()
@@ -1544,6 +1608,13 @@ private:
 
 }; // struct mpi_config_t
 
+//----------------------------------------------------------------------------//
+//! Return a boolean indicating whether the current runtime rank matches a
+//! statically defined value.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 template<
   size_t R
 >
@@ -1556,7 +1627,13 @@ is_static_rank()
   return part == R;
 } // is_static_rank
 
-// FIXME: Not sure if I like this approach...
+//----------------------------------------------------------------------------//
+//! Return a boolean that indicates whether the current runtime rank is
+//! active.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 inline
 bool
 is_active_rank()
@@ -1568,26 +1645,49 @@ is_active_rank()
 
 } // namespace
 
-///
-/// This handles all of the different logging modes for the insertion
-/// style logging interface for MPI runtime logging.
-///
-/// \param severity The severity level of the log entry.
-///
-/// \note The form "true && ..." is necessary for tertiary argument
-///       evaluation so that the std::ostream & returned by the stream()
-///       function can be implicitly converted to an int.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_rank(severity, rank)
+//!
+//! This handles all of the different logging modes for the insertion
+//! style logging interface.
+//!
+//! @param severity The severity level of the log entry.
+//! @param rank     The rank for which to output the message stream.
+//!
+//! @note The form "true && ..." is necessary for tertiary argument
+//!       evaluation so that the std::ostream & returned by the stream()
+//!       function can be implicitly converted to an int.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value at info severity level on rank 0
+//! clog_rank(info, 0) << "Value: " << value << std::endl;
+//!
+//! // Print the value at warn severity level on rank 1
+//! clog_rank(warn, 1) << "Value: " << value << std::endl;
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_rank(severity, rank)                                              \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true,          \
     cinch::is_static_rank<rank>).stream()
 
 // Set the output rank for clog_one calls.
 #define clog_set_output_rank(rank)                                             \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::mpi_config_t::instance().active_rank() = rank
 
 // Output to the rank set by clog_set_output_rank()
 #define clog_one(severity)                                                     \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__, false,         \
     cinch::is_active_rank).stream()
 
@@ -1595,6 +1695,8 @@ is_active_rank()
 /// Output contents of a container only on the specified rank.
 ///
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
@@ -1623,6 +1725,8 @@ is_active_rank()
 /// Output contents of a container only on the specified rank.
 ///
 #define clog_container_one(severity, banner, container, delimiter)             \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   {                                                                            \
   std::stringstream ss;                                                        \
   char delim =                                                                 \
