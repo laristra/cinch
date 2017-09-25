@@ -16,17 +16,26 @@ Cinch has support for trace, info, warn, error, and fatal log reporting
 information using clog: Insertion style, e.g.,
 
 ```cpp
-clog(info) << "This is some information" << std::endl;
+    clog(info) << "This is some information" << std::endl;
 ```
 
 and a method interface, e.g.,
 
 ```cpp
-clog_info("This is some information");
+    clog_info("This is some information");
 ```
+A newline character is automatically appended to the method style
+output.
 
 Both interface styles are available for all severity levels (discussed
-below).
+below). Additionally, both interfaces support streams as messages. For
+example, the following is legal:
+```cpp
+    int value{20};
+
+    clog(info) << "This is a value: " << value << std::endl; // insertion style
+    clog_info("This is a value: " << value); // method style
+```
 
 **NOTE:** clog is automatically available for Cinch unit tests.
 
@@ -108,7 +117,10 @@ strip level are automatically disabled.
 
 ### Clog Interface Macros
 
-The clog interface is documented in [modules](modules.html).
+**clog(severity)**
+
+The clog interface is also documented in [modules](modules.html) if this
+file is being referenced as part of the FleCSI Doxygen documentation.
 
 --------------------------------------------------------------------------------
 

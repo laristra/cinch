@@ -37,32 +37,23 @@
 #include <vector>
 
 //----------------------------------------------------------------------------//
-// Runtime configuration parameters.
+//! Default value for tag bits.
 //----------------------------------------------------------------------------//
-
-// Set CLOG_ENABLE_STDLOG to enable output to std::clog
-
-// Set CLOG_ENABLE_TAGS to enable tag groups
-
-// Set CLOG_TAG_BITS to enable TAG_BITS number of groups
 
 #ifndef CLOG_TAG_BITS
 #define CLOG_TAG_BITS 64
 #endif
 
 //----------------------------------------------------------------------------//
-// Compile-time configuration parameters.
+//! Set the default strip level. All severity levels that are strictly
+//! less than the strip level will be stripped.
+//!
+//! TRACE 0
+//! INFO  1
+//! WARN  2
+//! ERROR 3
+//! FATAL 4
 //----------------------------------------------------------------------------//
-
-// Set the default strip level. All severity levels that are strictly
-// less than the strip level will be stripped...
-//
-// TRACE 0
-// INFO  1
-// WARN  2
-// ERROR 3
-// FATAL 4
-//
 
 #ifndef CLOG_STRIP_LEVEL
 #define CLOG_STRIP_LEVEL 0
@@ -1153,26 +1144,66 @@ severity_message_t(fatal, decltype(cinch::true_state),
 } // namespace cinch
 
 //----------------------------------------------------------------------------//
+// Private macro interface
+//----------------------------------------------------------------------------//
+
+//
+// Indirection to expand counter name.
+//
+
+#define clog_counter_varname(str, line)                                        \
+  _clog_concat(str, line)
+
+//
+// Indirection to expand counter name.
+//
+
+#define clog_counter(str)                                                      \
+  clog_counter_varname(str, __LINE__)
+
+//
+// Define a counter name.
+//
+
+#define counter_name clog_counter(counter)
+
+//----------------------------------------------------------------------------//
 // Macro Interface
 //----------------------------------------------------------------------------//
 
-///
-/// CLOG runtime intialization
-///
+#if defined(ENABLE_CLOG)
+
+//----------------------------------------------------------------------------//
+//! @def clog_init(active)
+//!
+//! This call initializes the clog runtime with the list of tags specified
+//! in \em active.
+//!
+//! @param active A const char * or std::string containing the list of
+//!               active tags. Tags should be comma delimited.
+//!
+//! \b Usage
+//! \code
+//! int main(int argc, char ** argv) {
+//!
+//!    // Fill a string object with the active tags.
+//!    std::string tags{"init,advance,analysis"};
+//!
+//!    // Initialize the clog runtime with active tags, 'init', 'advance',
+//!    // and 'analysis'.
+//!    clog_init(tags);
+//!
+//!    return 0;
+//! } // main
+//! \endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_init(active)                                                      \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::clog_t::instance().init(active)
-
-///
-/// The BYPASS_OUTPUT definition is used to completely turn off the
-/// insertion-style output interface.
-///
-
-#if defined(ENABLE_CLOG)
-  #define BYPASS_OUTPUT false
-#else
-  #define BYPASS_OUTPUT true
-#endif
 
 //----------------------------------------------------------------------------//
 //! @def clog(severity)
@@ -1180,112 +1211,226 @@ severity_message_t(fatal, decltype(cinch::true_state),
 //! This handles all of the different logging modes for the insertion
 //! style logging interface.
 //!
-//! \param severity The severity level of the log entry.
+//! @param severity The severity level of the log entry.
 //!
-//! \note The form "true && ..." is necessary for tertiary argument
+//! @note The form "true && ..." is necessary for tertiary argument
 //!       evaluation so that the std::ostream & returned by the stream()
 //!       function can be implicitly converted to an int.
 //!
-//! BYPASS_OUTPUT should allow users to completely turn off logging output
-//! for increased performance.
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value at info severity level
+//! clog(info) << "Value: " << value << std::endl;
+//!
+//! // Print the value at warn severity level
+//! clog(warn) << "Value: " << value << std::endl;
+//! @endcode
 //!
 //! @ingroup clog
 //----------------------------------------------------------------------------//
 
-//#define clog(severity)                                                         \
-//  if(BYPASS_OUTPUT) {}                                                         \
-//  else true && cinch::severity ## _log_message_t(                              \
-//    __FILE__, __LINE__, true).stream()
-
-#if defined(ENABLE_CLOG)
-
 #define clog(severity)                                                         \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true).stream()
 
-///
-/// Method style interface for trace level severity log entries.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_trace(message)
+//!
+//! Method style interface for trace level severity log entries.
+//!
+//! @param message The stream message to be printed.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value at trace severity level
+//! clog_trace("Value: " << value);
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_trace(message)                                                    \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::trace_log_message_t(__FILE__, __LINE__, true).stream() <<             \
     message << std::endl
 
-///
-/// Method style interface for info level severity log entries.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_info(message)
+//!
+//! Method style interface for info level severity log entries.
+//!
+//! @param message The stream message to be printed.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value at info severity level
+//! clog_info("Value: " << value);
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_info(message)                                                     \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::info_log_message_t(__FILE__, __LINE__, true).stream() <<              \
     message << std::endl
 
-///
-/// Method style interface for warn level severity log entries.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_warn(message)
+//!
+//! Method style interface for warn level severity log entries.
+//!
+//! @param message The stream message to be printed.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value at warn severity level
+//! clog_warn("Value: " << value);
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_warn(message)                                                     \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::warn_log_message_t(__FILE__, __LINE__, true).stream() <<              \
     message << std::endl
 
-///
-/// Method style interface for error level severity log entries.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_error(message)
+//!
+//! Method style interface for error level severity log entries.
+//!
+//! @param message The stream message to be printed.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value at error severity level
+//! clog_error("Value: " << value);
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_error(message)                                                    \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   cinch::error_log_message_t(__FILE__, __LINE__, true).stream() <<             \
     message << std::endl
 
 #else
 
-///
-/// These are empty defintions for the case where ENABLE_CLOG is not defined.
-///
+//
+// These are empty defintions for the case where ENABLE_CLOG is not defined.
+//
 
+#define clog_init(active)
 #define clog(severity) if(true) {} else std::cerr
-
 #define clog_trace(message)
 #define clog_info(message)
 #define clog_warn(message)
 #define clog_error(message)
 
-#endif // ENABLE_CLOG
-
-///
-/// Indirection to expand counter name.
-///
-
-#define clog_counter_varname(str, line)                                        \
-  _clog_concat(str, line)
-
-///
-/// Indirection to expand counter name.
-///
-
-#define clog_counter(str)                                                      \
-  clog_counter_varname(str, __LINE__)
-
-///
-/// Define a counter name.
-///
-
-#define counter_name clog_counter(counter)
-
-///
-/// Method style interface to output every nth iteration.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_every_n(severity, n, message)
+//!
+//! Method style interface to output every nth iteration. An iteration is
+//! defined as an instance that the clog runtime sees the output line.
+//!
+//! @param severity The severity level at which to output the message.
+//! @param n        The iteration frequency at which to output the message.
+//! @param message  The stream message to be printed.
+//!
+//! @b Usage
+//! @code
+//! for(size_t i{0}; i<10; ++i) {
+//!    // This will output every other time
+//!    clog_every_n(info, 2, "Iterate: " << i);
+//! } // for
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_every_n(severity, n, message)                                     \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   static size_t counter_name = 0;                                              \
   if(counter_name++%n == 0) { clog_ ## severity(message); }
 
-///
-/// Method style interface for fatal level severity log entries.
-///
+#endif // ENABLE_CLOG
+
+//----------------------------------------------------------------------------//
+//! @def clog_fatal(message)
+//!
+//! Method style interface for fatal level severity log entries. Fatal
+//! log entries exit by calling std::exit(1).
+//!
+//! @param message The stream message to be printed.
+//!
+//! @note Fatal level severity log entires are not disabled by tags or
+//!       by the ENABLE_CLOG or CLOG_STRIP_LEVEL build options, i.e.,
+//!       they are always active.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value and exit
+//! clog_fatal("Value: " << value);
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_fatal(message)                                                    \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   true && cinch::fatal_log_message_t(__FILE__, __LINE__, true).stream() <<     \
     message << std::endl
 
-///
-/// Assertion with error message.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_assert(test, message)
+//!
+//! Clog assertion interface. Assertions allow the developer to catch
+//! invalid program state. This call will invoke clog_fatal if the test
+//! condition is false.
+//!
+//! @param test    The test condition.
+//! @param message The stream message to be printed.
+//!
+//! @note Failed assertions are not disabled by tags or
+//!       by the ENABLE_CLOG or CLOG_STRIP_LEVEL build options, i.e.,
+//!       they are always active.
+//!
+//! @b Usage
+//! @code
+//! int value{20};
+//!
+//! // Print the value and exit
+//! clog_assert(value == 20, "invalid value");
+//! @endcode
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
 
 #define clog_assert(test, message)                                             \
+/* MACRO IMPLEMENTATION */                                                     \
+                                                                               \
   !(test) && clog_fatal(message)
 
 ///
