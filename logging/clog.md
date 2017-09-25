@@ -7,13 +7,13 @@
 
 <!-- CINCHDOC DOCUMENT(User Guide) SECTION(CLOG) -->
 
-## Cinch Logging Utilities (CLOG)
+## Cinch Logging Utilities (clog)
 
 ### Basic Description
 
 Cinch has support for trace, info, warn, error, and fatal log reporting
 (similar to Google Log). There are two interface styles for logging
-information using CLOG: Insertion style, e.g.,
+information using clog: Insertion style, e.g.,
 
 ```cpp
 clog(info) << "This is some information" << std::endl;
@@ -28,39 +28,99 @@ clog_info("This is some information");
 Both interface styles are available for all severity levels (discussed
 below).
 
-**NOTE:** CLOG is automatically available for Cinch unit tests.
+**NOTE:** clog is automatically available for Cinch unit tests.
+
+--------------------------------------------------------------------------------
+
+### Runtime Options
+
+**Environment Option: CLOG_ENABLE_STDLOG (default UNSET)**  
+
+This options must be set in the user's environment to enable standard
+terminal output. Users can set this option like:
+```
+    % export CLOG_ENABLE_STDLOG=1 (bash)
+
+    % setenv CLOG_ENABLE_STDLOG 1 (tcsh)
+```
+If this option is unset, no output will be directed to the terminal.
+This does not affect other output streams.
+
+**NOTE:** In C++, std::clog is the standard output stream for logging.
+This is not an extension of clog. The naming is simply an artifact of
+the shared purpose, as std::clog is consistent with std::cout, and
+std::cerr.
+
+--------------------------------------------------------------------------------
 
 ### Build Options
 
-***CMake Option:*** **ENABLE_CLOG (default OFF)**
+**CMake Option: ENABLE_CLOG (default OFF)**  
 
-***CMake Option:*** **CLOG_COLOR_OUTPUT (default ON)**
+This options allows the user to completely disable clog calls such that
+no overhead is added to the runtime.
 
-***CMake Option:*** **CLOG_DEBUG (default OFF)**
+**CMake Option: CLOG_COLOR_OUTPUT (default ON)**  
 
-***CMake Option:*** **CLOG_ENABLE_EXTERNAL (default OFF)**
+This option controls whether or not colorization control characters are
+embedded in the output stream. If this option is enabled, it is still
+possible to disable color output for specific output streams as
+documented below.
 
-***CMake Option:*** **CLOG_ENABLE_MPI (default OFF)**
+**CMake Option: CLOG_DEBUG (default OFF)**  
 
-***CMake Option:*** **CLOG_ENABLE_TAGS (default OFF)**
+If this option is enabled, additional debugging inforamtion is output to
+help in diagnosing clog issues. Normal users will not want to enable
+this option as it produces extremely verbose output.
 
-***CMake Option:*** **CLOG_STRIP_LEVEL (default "0")**
+**CMake Option: CLOG_ENABLE_EXTERNAL (default OFF)**  
 
-***CMake Option:*** **CLOG_TAG_BITS (default "64")**
+This option enables output of clog calls that are defined at external or
+file scope in a translation unit. Clog calls made at this scope cannot
+be controlled by the runtime as they are executed before the runtime can
+be initialized. Best practice is to not make externally scoped calls to
+the clog interface unless you understand what you are doing.
 
-### CLOG Interface Macros
+**CMake Option: CLOG_ENABLE_MPI (default OFF)**  
 
-The CLOG interface is documented in [modules](modules.html).
+This option enables the clog basic MPI interface.
 
-### Controlling CLOG Output: Output Streams
+**CMake Option: CLOG_ENABLE_TAGS (default OFF)**  
 
-CLOG can write output to multiple output streams at once.  Users can
-control which CLOG log files and output are created by adding and
-enabling/disabling various output streams. By default, CLOG directs
+This optino enables the clog tagging feature. Tags allow the user to
+selectively turn on and off output for specific code sections at
+runtime. Tags are described in more detail below.
+
+**CMake Option: CLOG_TAG_BITS (default "64")**  
+
+This option determines the number of tags that can be uniquely defined
+in the code. There is very little performance overhead in setting this
+to a large number.
+
+**CMake Option: CLOG_STRIP_LEVEL (default "0")**  
+
+The strip level determines which classes of logging are output depending
+on the severtiy of the message. Each severity level is assigned an
+integer value. Severity levels with an integer value lower than the
+strip level are automatically disabled.
+
+--------------------------------------------------------------------------------
+
+### Clog Interface Macros
+
+The clog interface is documented in [modules](modules.html).
+
+--------------------------------------------------------------------------------
+
+### Controlling Clog Output: Output Streams
+
+Clog can write output to multiple output streams at once.  Users can
+control which clog log files and output are created by adding and
+enabling/disabling various output streams. By default, clog directs
 output to std::clog (this is the default C++ log iostream and is not
-part of CLOG) when the **CLOG_ENABLE_STDLOG** environment variable is
+part of clog) when the **CLOG_ENABLE_STDLOG** environment variable is
 defined. Other output streams must be added by the user application. As
-an example, if the user application wanted CLOG output to go to a file
+an example, if the user application wanted clog output to go to a file
 named *output.log*, one could do the following:
 
 ```cpp
@@ -70,15 +130,15 @@ named *output.log*, one could do the following:
 
 int main(int argc, char ** argv) {
 
-  // Initialize CLOG with output for all tag groups (discussed below)
+  // Initialize clog with output for all tag groups (discussed below)
   clog_init("all");
 
   // Open an output stream for "output.log"
   std::ofstream output("output.log");
 
-  // Add the stream to CLOG:
+  // Add the stream to clog:
   // param 1 ("output") The string name of the buffer.
-  // param 2 (output)   The stream (CLOG will call stream.rdbuf() on this).
+  // param 2 (output)   The stream (clog will call stream.rdbuf() on this).
   // param 3 (false)    A boolean denoting whether or not the buffer
   //                    supports colorization.
   //
@@ -94,12 +154,14 @@ int main(int argc, char ** argv) {
 } // main
 ```
 
-### Controlling CLOG Output: Severity Levels
+--------------------------------------------------------------------------------
 
-CLOG output can be controlled at compile time by specifying a particular
+### Controlling Clog Output: Severity Levels
+
+Clog output can be controlled at compile time by specifying a particular
 severity level. Any logging messages with a lower severity level than
 the one specified by **CLOG_STRIP_LEVEL** will be disabled. Note that
-this implies that CLOG will produce no output for
+this implies that clog will produce no output for
 **CLOG_STRIP_LEVEL >= 5**.
 
 The different severity levels have the following behavior:
@@ -130,12 +192,14 @@ print a message, dump the current stack trace, and call std::exit(1).
 When **CLOG_COLOR_OUTPUT** is enabled, fatal messages will be displayed
 in red.
 
-### Controlling CLOG Output: Tag Groups
+--------------------------------------------------------------------------------
 
-Runtime control of CLOG output is possible by adding scoping sections in
+### Controlling Clog Output: Tag Groups
+
+Runtime control of clog output is possible by adding scoping sections in
 the source code. These are referred to as *tag groups* because the
 scoped section is labeled with a tag. The number of possible tag groups
-is controlled by **CLOG_TAG_BITS** (default 16).  Tag groups can be
+is controlled by **CLOG_TAG_BITS** (default 64).  Tag groups can be
 enabled or disabled at runtime by specifying the list of tag groups to
 the *clog_init* function. Generally, these are controlled by a
 command-line flag that is interpreted by the user's application. Here is
@@ -205,12 +269,14 @@ Example code runs:
 % [I1225 11:59:59 example.cc:37] This output is not scoped
 ```
 
+--------------------------------------------------------------------------------
+
 ### Advanced Topics: Predicated Output
 
-The normal CLOG interface is implemented through a set of macros.
-Advanced users, who need greater control over CLOG, can create their own
-interfaces (macro or otherwise) to directly access the low-level CLOG
-interface. Log messages in CLOG derive from the *cinch::log_message_t*
+The normal clog interface is implemented through a set of macros.
+Advanced users, who need greater control over clog, can create their own
+interfaces (macro or otherwise) to directly access the low-level clog
+interface. Log messages in clog derive from the *cinch::log_message_t*
 type, which provides a constructor, virtual destructor, and a virtual
 stream method:
 
@@ -251,9 +317,9 @@ struct log_message_t
 }; // struct log_message_t
 ```
 
-Users wishing to customize CLOG can change the default behavior by
+Users wishing to customize clog can change the default behavior by
 overriding the virtual methods of this type, and by providing custom
-predicates. Much of the basic CLOG functionality is implemented in this
+predicates. Much of the basic clog functionality is implemented in this
 manner, e.g., the following code implements the trace level severity
 output:
 

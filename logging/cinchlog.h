@@ -47,7 +47,7 @@
 // Set CLOG_TAG_BITS to enable TAG_BITS number of groups
 
 #ifndef CLOG_TAG_BITS
-#define CLOG_TAG_BITS 32
+#define CLOG_TAG_BITS 64
 #endif
 
 //----------------------------------------------------------------------------//
