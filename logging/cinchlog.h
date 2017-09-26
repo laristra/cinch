@@ -889,6 +889,8 @@ private:
 
 }; // clog_tag_scope_t
 
+#if defined(ENABLE_CLOG)
+
 // Note that none of the tag interface is thread safe. This will have
 // to be fixed in the future. One way to do this would be to use TLS
 // for the active tag information.
@@ -910,6 +912,14 @@ private:
 // Create a new tag scope.
 #define clog_tag_guard(name)                                                   \
   cinch::clog_tag_scope_t name ## _clog_tag_scope__(clog_tag_lookup(name))
+
+#else
+
+#define clog_register_tag(name)
+#define clog_tag_lookup(name)
+#define clog_tag_guard(name)
+
+#endif // ENABLE_CLOG
 
 #define clog_tag_map()                                                         \
   cinch::clog_t::instance().tag_map()

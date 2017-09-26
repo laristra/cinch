@@ -117,17 +117,49 @@ strip level are automatically disabled.
 
 ### Clog Interface Macros
 
-**clog(severity)**
+clog_init(active)
 
-The clog interface is also documented in [modules](modules.html) if this
-file is being referenced as part of the FleCSI Doxygen documentation.
+clog(severity)
+
+clog_trace(message)
+
+clog_info(message)
+
+clog_warn(message)
+
+clog_error(message)
+
+clog_fatal(message)
+
+clog_assert(test, message)
+
+clog_add_buffer(name, ostream, colorized)
+
+clog_enable_buffer(name)
+
+clog_disable_buffer(name)
+
+clog_container(severity, banner, container, delimiter)
+
+clog_rank(severity, rank)
+
+clog_set_output_rank(rank)
+
+clog_one(severity)
+
+clog_container_rank(severity, banner, container, delimiter, rank)
+
+clog_container_one(severity, banner, container, delimiter)
+
+The clog interface is documented in [modules](modules.html) if this
+file is being referenced as part of a project that uses Cinch.
 
 --------------------------------------------------------------------------------
 
 ### Controlling Clog Output: Output Streams
 
 Clog can write output to multiple output streams at once.  Users can
-control which clog log files and output are created by adding and
+control which clog log files and outputs are created by adding and
 enabling/disabling various output streams. By default, clog directs
 output to std::clog (this is the default C++ log iostream and is not
 part of clog) when the **CLOG_ENABLE_STDLOG** environment variable is
@@ -174,7 +206,9 @@ Clog output can be controlled at compile time by specifying a particular
 severity level. Any logging messages with a lower severity level than
 the one specified by **CLOG_STRIP_LEVEL** will be disabled. Note that
 this implies that clog will produce no output for
-**CLOG_STRIP_LEVEL >= 5**.
+**CLOG_STRIP_LEVEL >= 5**. However, a strip level of >= 5 does not
+completely remove overhead created by clog. Fatal errors and assertions
+will still be executed, although no output will be generated.
 
 The different severity levels have the following behavior:
 
@@ -383,6 +417,91 @@ severity_message_t(trace, decltype(cinch::true_state),
   });
 ```
 
-Interested users should look at the source code for more examples.
+Interested users should look at the Doxygen [documentation](modules.html) and source code for more examples.
+
+--------------------------------------------------------------------------------
+
+### Full Example
+
+Full example using Boost program options:
+
+```cpp
+#include <boost/program_options.hpp>
+
+// Uncomment these to enable color output and tags
+// #define CLOG_COLOR_OUTPUT 
+// #define CLOG_ENABLE_TAGS
+
+#include <cinchlog.h>
+
+using namespace boost::program_options;
+
+clog_register_tag(tag1);
+clog_register_tag(tag2);
+
+int main(int argc, char ** argv) {
+
+  // Initialize tags to output all tag groups from clog
+  std::string tags("all");
+
+  // Create program options object
+  options_description desc("Cinch test options");
+
+  // Add command-line options
+  desc.add_options()
+    ("help,h", "Print this message and exit.")
+    ("tags,t", value(&tags)->implicit_value("0"),
+      "Enable the specified output tags, e.g., --tags=tag1,tag2."
+      " Passing --tags by itself will print the available tags.")
+    ;
+  variables_map vm;
+  parsed_options parsed =
+    command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+  store(parsed, vm);
+
+  notify(vm);
+
+  // Output help message
+  if(vm.count("help")) {
+    std::cout << desc << std::endl;
+    return 1;
+  }
+
+  // Test tags
+  if(tags == "0") {
+    std::cout << "Available tags (clog):" << std::endl;
+
+    for(auto t: clog_tag_map()) {
+      std::cout << " " << t.first << std::endl;
+    } // for
+  }
+  else {
+    // Initialize clog runtime
+    clog_init(tags);
+  } // if
+
+  {
+    clog_tag_guard(tag1);
+
+    clog(info) << "In tag guard for tag1" << std::endl;
+
+    for(auto i{0}; i<10; ++i) {
+      clog(info) << "i: " << i << std::endl;
+    } // for
+  } // scope
+
+  {
+    clog_tag_guard(tag2);
+
+    clog(trace) << "In tag guard for tag2" << std::endl;
+
+    for(auto i{0}; i<10; ++i) {
+      clog(trace) << "i: " << i << std::endl;
+    } // for
+  } // scope
+
+  return 0;
+} // main
+```
 
 <!-- vim: set tabstop=2 shiftwidth=2 expandtab fo=cqt tw=72 : -->
