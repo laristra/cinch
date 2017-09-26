@@ -1,14 +1,13 @@
 #------------------------------------------------------------------------------#
-# Copyright (c) 2016 Los Alamos National Security, LLC
+# Copyright (c) 2016-2017 Los Alamos National Security, LLC
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-# - Find flecsi
 # Find the native EOSPAC headers and libraries.
 #
-#  EOSPAC_INCLUDE_DIRS - where to find flecsi.h, etc.
-#  EOSPAC_LIBRARIES    - List of libraries when using flecsi.
-#  EOSPAC_FOUND        - True if flecsi found.
+#  EOSPAC_INCLUDE_DIRS - where to find eos_Interface.h, etc.
+#  EOSPAC_LIBRARIES    - List of libraries when using eospac6.
+#  EOSPAC_FOUND        - True if eospac found.
 
 # Look for the header file.
 FIND_PATH(EOSPAC_INCLUDE_DIR NAMES eos_Interface.h)
