@@ -37,7 +37,7 @@
 #include <vector>
 
 //----------------------------------------------------------------------------//
-//! Default value for tag bits.
+// Default value for tag bits.
 //----------------------------------------------------------------------------//
 
 #ifndef CLOG_TAG_BITS
@@ -45,14 +45,14 @@
 #endif
 
 //----------------------------------------------------------------------------//
-//! Set the default strip level. All severity levels that are strictly
-//! less than the strip level will be stripped.
-//!
-//! TRACE 0
-//! INFO  1
-//! WARN  2
-//! ERROR 3
-//! FATAL 4
+// Set the default strip level. All severity levels that are strictly
+// less than the strip level will be stripped.
+//
+// TRACE 0
+// INFO  1
+// WARN  2
+// ERROR 3
+// FATAL 4
 //----------------------------------------------------------------------------//
 
 #ifndef CLOG_STRIP_LEVEL
@@ -197,25 +197,35 @@ std::string rstrip(const char *file) {
 /// Stream buffer type to allow output to multiple targets
 /// a la the tee function.
 ///
+
+//----------------------------------------------------------------------------//
+//! The tee_buffer_t type provides a stream buffer that allows output to
+//! multiple targets.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 class tee_buffer_t
   : public std::streambuf
 {
 public:
 
-  ///
-  /// Buffer data type to hold state and actual low-level
-  /// stream buffer pointer.
-  ///
+  //--------------------------------------------------------------------------//
+  //! The buffer_data_t type is used to hold state and the actual low-level
+  //! stream buffer pointer.
+  //--------------------------------------------------------------------------//
+
   struct buffer_data_t {
     bool enabled;
     bool colorized;
     std::streambuf * buffer;
   }; // struct buffer_data_t
 
-  ///
-  /// Add a buffer to which output should be written. This also enables
-  /// the buffer, i.e., output will be written to it.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Add a buffer to which output should be written. This also enables
+  //! the buffer,i.e., output will be written to it.
+  //--------------------------------------------------------------------------//
+
   void
   add_buffer(
     std::string key,
@@ -228,10 +238,11 @@ public:
     buffers_[key].colorized = colorized;
   } // add_buffer
 
-  ///
-  /// Enable a buffer so that output is written to it. This is mainly
-  /// for buffers that have been disabled and need to be re-enabled.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Enable a buffer so that output is written to it. This is mainly
+  //! for buffers that have been disabled and need to be re-enabled.
+  //--------------------------------------------------------------------------//
+
   bool
   enable_buffer(
     std::string key
@@ -241,9 +252,10 @@ public:
     return buffers_[key].enabled;
   } // enable_buffer
 
-  ///
-  /// Disable a buffer so that output is not written to it.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Disable a buffer so that output is not written to it.
+  //--------------------------------------------------------------------------//
+
   bool
   disable_buffer(
     std::string key
@@ -255,16 +267,17 @@ public:
 
 protected:
 
-  ///
-  /// Override the overflow method. This streambuf has no buffer, so overflow
-  /// happens for every character that is written to the string, allowing
-  /// us to write to multiple output streams. This method also detects
-  /// colorization strings embedded in the character stream and removes
-  /// them from output that is going to non-colorized buffers.
-  ///
-  /// \param c The character to write. This is passed in as an int so that
-  ///          non-characters like EOF can be written to the stream.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Override the overflow method. This streambuf has no buffer, so overflow
+  //! happens for every character that is written to the string, allowing
+  //! us to write to multiple output streams. This method also detects
+  //! colorization strings embedded in the character stream and removes
+  //! them from output that is going to non-colorized buffers.
+  //!
+  //! \param c The character to write. This is passed in as an int so that
+  //!          non-characters like EOF can be written to the stream.
+  //--------------------------------------------------------------------------//
+
   virtual
   int
   overflow(
@@ -369,9 +382,10 @@ protected:
     } // if
   } // overflow
 
-  ///
-  /// Override the sync method so that we sync all of the output buffers.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Override the sync method so that we sync all of the output buffers.
+  //--------------------------------------------------------------------------//
+
   virtual
   int
   sync()
@@ -438,9 +452,11 @@ private:
 
 }; // class tee_buffer_t
 
-///
-/// A stream class that writes to multiple output buffers.
-///
+//----------------------------------------------------------------------------//
+//! The tee_stream_t type provides a stream class that writes to multiple
+//! output buffers.
+//----------------------------------------------------------------------------//
+
 struct tee_stream_t
   : public std::ostream
 {
@@ -462,9 +478,10 @@ struct tee_stream_t
     return *this;
   } // operator *
 
-  ///
-  /// Add a new buffer to the output.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Add a new buffer to the output.
+  //--------------------------------------------------------------------------//
+
   void
   add_buffer(
     std::string key,
@@ -475,11 +492,12 @@ struct tee_stream_t
     tee_.add_buffer(key, s.rdbuf(), colorized);
   } // add_buffer
 
-  ///
-  /// Enable an existing buffer.
-  ///
-  /// \param[in] key The string identifier of the streambuf.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Enable an existing buffer.
+  //!
+  //! \param key The string identifier of the streambuf.
+  //--------------------------------------------------------------------------//
+
   bool
   enable_buffer(
     std::string key
@@ -489,11 +507,12 @@ struct tee_stream_t
     return true;
   } // enable_buffer
 
-  ///
-  /// Disable an existing buffer.
-  ///
-  /// \param[in] key The string identifier of the streambuf.
-  ///
+  //--------------------------------------------------------------------------//
+  //! Disable an existing buffer.
+  //!
+  //! \param key The string identifier of the streambuf.
+  //--------------------------------------------------------------------------//
+
   bool
   disable_buffer(
     std::string key
@@ -513,18 +532,20 @@ private:
 // Management type.
 //----------------------------------------------------------------------------//
 
-///
-/// \class clog_t cinchlog.h
-/// \brief clog_t provides access to logging parameters and configuration.
-///
-/// This type provides access to the underlying logging parameters for
-/// configuration and information. The cinch logging functions provide
-/// basic logging with an interface that is similar to Google's GLOG
-/// and the Boost logging utilities.
-///
-/// \note We may want to consider adopting one of these packages
-/// in the future.
-///
+//----------------------------------------------------------------------------//
+//! The clog_t type provides access to logging parameters and configuration.
+//!
+//! This type provides access to the underlying logging parameters for
+//! configuration and information. The cinch logging functions provide
+//! basic logging with an interface that is similar to Google's GLOG
+//! and the Boost logging utilities.
+//!
+//! @note We may want to consider adopting one of these packages
+//! in the future.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 class clog_t
 {
 public:
@@ -1612,11 +1633,13 @@ private:
 //! Return a boolean indicating whether the current runtime rank matches a
 //! statically defined value.
 //!
+//! @tparam RANK The static rank to use in the comparison.
+//!
 //! @ingroup clog
 //----------------------------------------------------------------------------//
 
 template<
-  size_t R
+  size_t RANK
 >
 inline
 bool
@@ -1624,7 +1647,7 @@ is_static_rank()
 {
   int part;
   MPI_Comm_rank(MPI_COMM_WORLD, &part);
-  return part == R;
+  return part == RANK;
 } // is_static_rank
 
 //----------------------------------------------------------------------------//
@@ -1678,22 +1701,56 @@ is_active_rank()
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true,          \
     cinch::is_static_rank<rank>).stream()
 
-// Set the output rank for clog_one calls.
+//----------------------------------------------------------------------------//
+//! @def clog_set_output_rank(rank)
+//!
+//! Set the output rank for calls to clog_one.
+//!
+//! @param rank The rank for which output will be generated.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_set_output_rank(rank)                                             \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   cinch::mpi_config_t::instance().active_rank() = rank
 
-// Output to the rank set by clog_set_output_rank()
+//----------------------------------------------------------------------------//
+//! @def clog_one(severity)
+//!
+//! This handles all of the different logging modes for the insertion
+//! style logging interface. This will only output on the rank specified
+//! by clog_set_output_rank.
+//!
+//! @param severity The severity level of the log entry.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_one(severity)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__, false,         \
     cinch::is_active_rank).stream()
 
-///
-/// Output contents of a container only on the specified rank.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_container_rank(severity, banner, container, delimiter, rank)
+//!
+//! Output the contents of a standard container type on the specified
+//! rank. Valid container types must implement a forward iterator.
+//!
+//! @param severity  The severity level at which to output the message.
+//! @param banner    A top-level label for the container output.
+//! @param container The container to output.
+//! @param delimiter The output character to use to delimit container
+//!                  entries, e.g., newline, comma, space, etc. Valid
+//!                  delimiters are defined in clog_delimiters_t.
+//! @param rank      The rank for which to output the message stream.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
@@ -1721,9 +1778,23 @@ is_active_rank()
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
   }
 
-///
-/// Output contents of a container only on the specified rank.
-///
+//----------------------------------------------------------------------------//
+//! @def clog_container_one(severity, banner, container, delimiter)
+//!
+//! Output the contents of a standard container type on the rank
+//! specified by clog_set_output_rank. Valid container types must
+//! implement a forward iterator.
+//!
+//! @param severity  The severity level at which to output the message.
+//! @param banner    A top-level label for the container output.
+//! @param container The container to output.
+//! @param delimiter The output character to use to delimit container
+//!                  entries, e.g., newline, comma, space, etc. Valid
+//!                  delimiters are defined in clog_delimiters_t.
+//!
+//! @ingroup clog
+//----------------------------------------------------------------------------//
+
 #define clog_container_one(severity, banner, container, delimiter)             \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
@@ -1753,22 +1824,16 @@ is_active_rank()
 
 #else
 
-#define clog_rank(severity, rank)                                              \
-  std::cout
-
+#define clog_rank(severity, rank) if(true) {} else std::cerr
 #define clog_set_output_rank(rank)
+#define clog_one(severity) if(true) {} else std::cerr
+#define clog_container_rank(severity, banner, container, delimiter, rank) if(true) {} else std::cerr
 
-#define clog_one(severity)                                                     \
-  std::cout
-
-#define clog_container_rank(severity, banner, container, delimiter, rank)      \
-  std::cout
-
-/// \TODO actual fix warning
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-#define clog_container_one(severity, banner, container, delimiter)             \
-  std::cout
+
+#define clog_container_one(severity, banner, container, delimiter) if(true) {} else std::cerr
+
 #pragma clang diagnostic pop
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
