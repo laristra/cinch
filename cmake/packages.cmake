@@ -7,6 +7,7 @@ macro(cinch_load_extras)
 
   include(boost)
   include(coverage)
+  include(style)
   include(doxygen)
   include(legion)
   include(mpi)
