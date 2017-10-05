@@ -25,7 +25,11 @@ find_package(Legion REQUIRED)
   set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH}
      ${LEGION_INSTALL_DIRS})
   include_directories(${LEGION_INCLUDE_DIRS})
+  # old flags: remove once support for older Legion versions is not required
   add_definitions( -DLEGION_CMAKE )
+  # new flags: required by newer Legion versions
+  add_definitions( -DLEGION_USE_CMAKE )
+  add_definitions( -DREALM_USE_CMAKE )
   message(STATUS "Legion found: ${Legion_FOUND}")
 
 
