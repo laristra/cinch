@@ -12,6 +12,15 @@ include(subdirlist)
 function(cinch_add_library_target target directory)
 
     #--------------------------------------------------------------------------#
+    # Is this a nested library? Default is true, presence of third arg
+    # indicates flat.
+    #--------------------------------------------------------------------------#
+    set(NESTED TRUE)
+    if(${ARGC} EQUAL "3")
+        set(NESTED FALSE)
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Add target to list
     #--------------------------------------------------------------------------#
 
@@ -53,9 +62,7 @@ function(cinch_add_library_target target directory)
 
     cinch_subdirlist(_SUBDIRECTORIES ${_SOURCE_DIR} False)
 
-    set(flatSubdirSet "test")
-
-    if((_SUBDIRECTORIES) AND NOT "${_SUBDIRECTORIES}" STREQUAL ${flatSubdirSet})
+    if(${NESTED})
 
         message(STATUS "Processing nested library project")
 
