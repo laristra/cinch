@@ -357,6 +357,7 @@ function(cinch_add_unit name)
     endif()
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
+        find_package(Boost COMPONENTS program_options REQUIRED QUIET)
         target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
 
