@@ -284,6 +284,20 @@ function(cinch_add_unit name)
         add_dependencies(${name} ${_FORTRAN_SPECIALS})
 
     else()
+        foreach(source ${unit_SOURCES})
+
+            # Identify flecsi language soruce files and add the appropriate
+            # language and compiler flags to properties.
+
+            get_filename_component(_EXT ${source} EXT)
+
+            if("${_EXT}" STREQUAL ".fcc")
+                set_source_files_properties(${source}
+                    PROPERTIES LANGUAGE CXX
+                )
+            endif()
+        endforeach()
+
         add_executable(${name} ${unit_SOURCES} ${_OUTPUT_DIR}/${_TARGET_MAIN})
         target_link_libraries(${name} ${GTEST_LIBRARIES})
         target_include_directories(${name} PRIVATE ${GTEST_INCLUDE_DIRS})
