@@ -55,6 +55,7 @@ endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 #------------------------------------------------------------------------------#
 # Add support for Doxygen documentation
 #------------------------------------------------------------------------------#
+include (doxygen)
 
 cinch_add_doxygen()
 
