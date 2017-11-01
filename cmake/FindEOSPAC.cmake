@@ -5,23 +5,26 @@
 
 # Find the native EOSPAC headers and libraries.
 #
-#  EOSPAC_INCLUDE_DIRS - where to find eos_Interface.h, etc.
-#  EOSPAC_LIBRARIES    - List of libraries when using eospac6.
-#  EOSPAC_FOUND        - True if eospac found.
+#  EOSPAC_ROOT         - Search path for EOSPAC installation
+#  EOSPAC_INCLUDE_DIRS - where to find eos_Interface.h, etc
+#  EOSPAC_LIBRARIES    - List of libraries when using EOSPAC.
+#  EOSPAC_FOUND        - True if eospac is found.
+#
 
-# Look for the header file.
-FIND_PATH(EOSPAC_INCLUDE_DIR NAMES eos_Interface.h)
+if(NOT ${EOSPAC_ROOT})
+	set(EOSPAC_ROOT "/usr" CACHE PATH "Root directory of EOSPAC installation")
+endif()
 
-# Look for the library.
-FIND_LIBRARY(EOSPAC_LIBRARY NAMES eospac6 libeospac6)
+find_path(EOSPAC_INCLUDE_DIR eos_Interface.h
+	HINTS ${EOSPAC_ROOT}/include
+   PATHS ${EOSPAC_ROOT}/include)
+find_library(EOSPAC_LIBRARY NAMES eospac6
+	PATHS ${EOSPAC_ROOT}/lib ${EOSPAC_ROOT}/lib64)
 
-# handle the QUIETLY and REQUIRED arguments and set EOSPAC_FOUND to TRUE if
-# all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(EOSPAC DEFAULT_MSG EOSPAC_LIBRARY EOSPAC_INCLUDE_DIR)
+set(EOSPAC_LIBRARIES "${EOSPAC_LIBRARY}")
+set(EOSPAC_INCLUDE_DIRS "${EOSPAC_INCLUDE_DIR}")
 
-# Copy the results to the output variables.
-SET(EOSPAC_LIBRARIES ${EOSPAC_LIBRARY})
-SET(EOSPAC_INCLUDE_DIRS ${EOSPAC_INCLUDE_DIR})
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(EOSPAC DEFAULT_MSG EOSPAC_LIBRARY EOSPAC_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(EOSPAC_INCLUDE_DIR EOSPAC_LIBRARY)
+mark_as_advanced(EOSPAC_INCLUDE_DIR EOSPAC_LIBRARY)
