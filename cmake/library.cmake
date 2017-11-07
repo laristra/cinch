@@ -12,6 +12,15 @@ include(subdirlist)
 function(cinch_add_library_target target directory)
 
     #--------------------------------------------------------------------------#
+    # Is this a nested library? Default is true, presence of third arg
+    # indicates flat.
+    #--------------------------------------------------------------------------#
+    set(NESTED TRUE)
+    if(${ARGC} EQUAL "3")
+        set(NESTED FALSE)
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Add target to list
     #--------------------------------------------------------------------------#
 
@@ -53,23 +62,22 @@ function(cinch_add_library_target target directory)
 
     cinch_subdirlist(_SUBDIRECTORIES ${_SOURCE_DIR} False)
 
-    set(flatSubdirSet "test")
-
-    if((_SUBDIRECTORIES) AND NOT "${_SUBDIRECTORIES}" STREQUAL ${flatSubdirSet})
+    if(${NESTED})
 
         message(STATUS "Processing nested library project")
 
-        #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
         # Add subdirectories
         #
-        # This uses a glob, i.e., all sub-directories will be added at this level.
-        # This is not true for levels below this one.  This allows some flexibility
-        # while keeping the generic case as simple as possible.
-        #--------------------------------------------------------------------------#
+        # This uses a glob, i.e., all sub-directories will be added at
+        # this level. This is not true for levels below this one. This
+        # allows some flexibility while keeping the generic case as simple
+        # as possible.
+        #----------------------------------------------------------------------#
 
-        #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
         # Add subdirectory files
-        #--------------------------------------------------------------------------#
+        #----------------------------------------------------------------------#
 
         # This loop adds header and source files for each listed sub-directory
         # to the main header and source file lists.  Additionally, it adds the
@@ -126,10 +134,23 @@ function(cinch_add_library_target target directory)
 
         # add sources
         foreach(_SOURCE ${${directory}_SOURCES})
+
             if(NOT EXISTS ${_SOURCE_DIR}/${_SOURCE})
                 message(FATAL_ERROR
                     "Source '${_SOURCE}' from ${directory}_SOURCES does not exist.")
             endif()
+
+            # Identify flecsi language soruce files and add the appropriate
+            # language and compiler flags to properties.
+
+            get_filename_component(_EXT ${_SOURCE} EXT)
+
+            if("${_EXT}" STREQUAL ".fcc")
+                set_source_files_properties(${_SOURCE}
+                    PROPERTIES LANGUAGE CXX
+                )
+            endif()
+
             list(APPEND SOURCES ${directory}/${_SOURCE})
         endforeach()
 
