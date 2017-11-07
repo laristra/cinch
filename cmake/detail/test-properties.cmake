@@ -48,7 +48,7 @@
     #--------------------------------------------------------------------------#
 
     if(ENABLE_BOOST_PROGRAM_OPTIONS)
-        find_package(Boost COMPONENTS program_options REQUIRED)
+        find_package(Boost COMPONENTS program_options REQUIRED QUIET)
         target_include_directories(${name} PRIVATE ${Boost_INCLUDE_DIRS})
         target_compile_definitions(${name} PRIVATE
             ENABLE_BOOST_PROGRAM_OPTIONS)

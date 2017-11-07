@@ -41,77 +41,69 @@ example, the following is legal:
 
 --------------------------------------------------------------------------------
 
-### Runtime Options
+### Runtime Environment Options
 
-**Environment Option: CLOG_ENABLE_STDLOG (default UNSET)**  
+* **CLOG_ENABLE_STDLOG [default UNSET]**<br>  
+  This options must be set in the user's environment to enable standard
+  terminal output. Users can set this option like:
+  ```
+      % export CLOG_ENABLE_STDLOG=1 (bash)
 
-This options must be set in the user's environment to enable standard
-terminal output. Users can set this option like:
-```
-    % export CLOG_ENABLE_STDLOG=1 (bash)
+      % setenv CLOG_ENABLE_STDLOG 1 (tcsh)
+  ```
+  If this option is unset, no output will be directed to the terminal.
+  This does not affect other output streams.
 
-    % setenv CLOG_ENABLE_STDLOG 1 (tcsh)
-```
-If this option is unset, no output will be directed to the terminal.
-This does not affect other output streams.
-
-**NOTE:** In C++, std::clog is the standard output stream for logging.
-This is not an extension of clog. The naming is simply an artifact of
-the shared purpose, as std::clog is consistent with std::cout, and
-std::cerr.
+  **NOTE:** In C++, std::clog is the standard output stream for logging.
+  This is not an extension of clog. The naming is simply an artifact of
+  the shared purpose, as std::clog is consistent with std::cout, and
+  std::cerr.
 
 --------------------------------------------------------------------------------
 
-### Build Options
+### CMake Configuration Options
 
-**CMake Option: ENABLE_CLOG (default OFF)**  
+* **ENABLE_CLOG [default OFF]**<br>  
+  This options allows the user to completely disable clog calls such
+  that no overhead is added to the runtime.
 
-This options allows the user to completely disable clog calls such that
-no overhead is added to the runtime.
+* **CLOG_COLOR_OUTPUT [default ON]**<br>  
+  This option controls whether or not colorization control characters
+  are embedded in the output stream. If this option is enabled, it is
+  still possible to disable color output for specific output streams as
+  documented below.
 
-**CMake Option: CLOG_COLOR_OUTPUT (default ON)**  
+* **CLOG_DEBUG [default OFF]**<br>  
+  If this option is enabled, additional debugging inforamtion is output
+  to help in diagnosing clog issues. Normal users will not want to
+  enable this option as it produces extremely verbose output.
 
-This option controls whether or not colorization control characters are
-embedded in the output stream. If this option is enabled, it is still
-possible to disable color output for specific output streams as
-documented below.
+* **CLOG_ENABLE_EXTERNAL [default OFF]**<br>  
+  This option enables output of clog calls that are defined at external
+  or file scope in a translation unit. Clog calls made at this scope
+  cannot be controlled by the runtime as they are executed before the
+  runtime can be initialized. Best practice is to not make externally
+  scoped calls to the clog interface unless you understand what you are
+  doing.
 
-**CMake Option: CLOG_DEBUG (default OFF)**  
+* **CLOG_ENABLE_MPI [default OFF]**<br>  
+  This option enables the clog basic MPI interface.
 
-If this option is enabled, additional debugging inforamtion is output to
-help in diagnosing clog issues. Normal users will not want to enable
-this option as it produces extremely verbose output.
+* **CLOG_ENABLE_TAGS [default OFF]**<br>  
+  This optino enables the clog tagging feature. Tags allow the user to
+  selectively turn on and off output for specific code sections at
+  runtime. Tags are described in more detail below.
 
-**CMake Option: CLOG_ENABLE_EXTERNAL (default OFF)**  
+* **CLOG_TAG_BITS [default "64"]**<br>  
+  This option determines the number of tags that can be uniquely defined
+  in the code. There is very little performance overhead in setting this
+  to a large number.
 
-This option enables output of clog calls that are defined at external or
-file scope in a translation unit. Clog calls made at this scope cannot
-be controlled by the runtime as they are executed before the runtime can
-be initialized. Best practice is to not make externally scoped calls to
-the clog interface unless you understand what you are doing.
-
-**CMake Option: CLOG_ENABLE_MPI (default OFF)**  
-
-This option enables the clog basic MPI interface.
-
-**CMake Option: CLOG_ENABLE_TAGS (default OFF)**  
-
-This optino enables the clog tagging feature. Tags allow the user to
-selectively turn on and off output for specific code sections at
-runtime. Tags are described in more detail below.
-
-**CMake Option: CLOG_TAG_BITS (default "64")**  
-
-This option determines the number of tags that can be uniquely defined
-in the code. There is very little performance overhead in setting this
-to a large number.
-
-**CMake Option: CLOG_STRIP_LEVEL (default "0")**  
-
-The strip level determines which classes of logging are output depending
-on the severtiy of the message. Each severity level is assigned an
-integer value. Severity levels with an integer value lower than the
-strip level are automatically disabled.
+* **CLOG_STRIP_LEVEL [default "0"]**<br>  
+  The strip level determines which classes of logging are output
+  depending on the severtiy of the message. Each severity level is
+  assigned an integer value. Severity levels with an integer value lower
+  than the strip level are automatically disabled.
 
 --------------------------------------------------------------------------------
 
@@ -212,26 +204,26 @@ will still be executed, although no output will be generated.
 
 The different severity levels have the following behavior:
 
-* **trace**  
+* **trace**<br>  
 Enabled only for severity level 0 (less than 1)  
 Trace output is suitable for fine-grained logging information.
 
-* **info**  
+* **info**<br>  
 Enabled for severity levels less than 2  
 Info output is suitable for normal logging information.
 
-* **warn**  
+* **warn**<br>  
 Enabled for severity levels less than 3  
 Warn output is useful for issuing warnings. When **CLOG_COLOR_OUTPUT**
 is enabled, warn messages will be displayed in yellow.
 
-* **error**  
+* **error**<br>  
 Enabled for severity levels less than 4  
 Error output is useful for issuing non-fatal errors. When
 **CLOG_COLOR_OUTPUT** is enabled, error messages will be displayed in
 red.
 
-* **fatal**  
+* **fatal**<br>  
 Enabled for severity levels less than 5  
 Fatal error output is useful for issuing fatal errors. Fatal errors
 print a message, dump the current stack trace, and call std::exit(1).
