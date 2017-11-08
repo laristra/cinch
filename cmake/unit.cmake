@@ -62,14 +62,13 @@ if(ENABLE_UNIT_TESTS)
 
 endif(ENABLE_UNIT_TESTS)
 
-
 #[=============================================================================[
-.. command:: mcinch_add_unit
+.. command:: cinch_add_unit
 
-  The ``mcinch_add_unit`` function creates a custom unit test with
+  The ``cinch_add_unit`` function creates a custom unit test with
   various different runtime policies::
 
-   mcinch_add_unit(<name> [<option>...])
+   cinch_add_unit(<name> [<option>...])
 
   General options are:
 
@@ -121,7 +120,8 @@ function(cinch_add_unit name)
     if ( PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME ) 
       set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${_SOURCE_DIR_NAME}")
     else()
-      set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${PROJECT_NAME}/${_SOURCE_DIR_NAME}")
+      set(_OUTPUT_DIR
+        "${CMAKE_BINARY_DIR}/test/${PROJECT_NAME}/${_SOURCE_DIR_NAME}")
     endif()
 
     #--------------------------------------------------------------------------#
