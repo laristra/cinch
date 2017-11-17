@@ -188,6 +188,8 @@ function(cinch_add_unit name)
       set(unit_policy_libraries ${MPI_${MPI_LANGUAGE}_LIBRARIES})
       set(unit_policy_exec ${MPIEXEC})
       set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
+      set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
+      set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
 
     elseif(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND 
         unit_policy_main STREQUAL "LEGION")
@@ -201,6 +203,8 @@ function(cinch_add_unit name)
         ${MPI_${MPI_LANGUAGE}_LIBRARIES})
       set(unit_policy_exec ${MPIEXEC})
       set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG}) 
+      set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
+      set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
       set(unit_policy_defines -DENABLE_MPI)
 
     elseif(Legion_FOUND AND unit_policy_main STREQUAL "LEGION")
@@ -429,8 +433,10 @@ function(cinch_add_unit name)
                     "${_TEST_PREFIX}${name}_${instance}"
                 COMMAND
                     ${unit_policy_exec}
+                    ${unit_policy_exec_preflags}
                     ${unit_policy_exec_threads} ${instance}
                     $<TARGET_FILE:${name}>
+                    ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS} 
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endforeach(instance)
@@ -452,7 +458,9 @@ function(cinch_add_unit name)
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
                     ${unit_THREADS}
+                    ${unit_policy_exec_preflags}
                     $<TARGET_FILE:${name}>
+                    ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         else()
