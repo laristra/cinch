@@ -92,7 +92,8 @@ function(cinch_add_library_target target directory)
 
     foreach(file ${HEADERS})
         get_filename_component(DIR ${file} DIRECTORY)
-        install(FILES ${directory}/${file} DESTINATION include/${target}/${DIR})
+        install(FILES ${directory}/${file}
+            DESTINATION include/${directory}/${DIR})
     endforeach()
 
     install(TARGETS ${target} EXPORT ${target}Targets DESTINATION ${LIBDIR})
