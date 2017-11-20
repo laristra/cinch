@@ -163,7 +163,7 @@ function(cinch_add_library_target target directory)
         install(FILES ${directory}/${file} DESTINATION include/${target}/${DIR})
     endforeach()
 
-    install( TARGETS ${target} DESTINATION ${LIBDIR} )
+    install(TARGETS ${target} EXPORT ${target}Targets DESTINATION ${LIBDIR})
 
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include/${target})
