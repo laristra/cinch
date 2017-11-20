@@ -33,8 +33,8 @@ env: #maybe add mpich later
     - MPI=OFF TEST=laristra/cinch-example
     - MPI=ON  TEST=laristra/cinch-nested-example
     - MPI=OFF TEST=laristra/cinch-nested-example
-    - MPI=ON  TEST=losalamos/vpic
-    - MPI=OFF TEST=losalamos/vpic
+#    - MPI=ON  TEST=losalamos/vpic
+#    - MPI=OFF TEST=losalamos/vpic
 # flecsi has no mimimal build currently
 #    - MPI=ON  TEST=laristra/flecsi GVER=5
 #    - MPI=OFF TEST=laristra/flecsi GVER=5
