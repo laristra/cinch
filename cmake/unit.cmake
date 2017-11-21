@@ -205,7 +205,7 @@ function(cinch_add_unit name)
       set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG}) 
       set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
       set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
-      set(unit_policy_defines -DENABLE_MPI)
+      set(unit_policy_defines -DCINCH_ENABLE_MPI)
 
     elseif(Legion_FOUND AND unit_policy_main STREQUAL "LEGION")
 
