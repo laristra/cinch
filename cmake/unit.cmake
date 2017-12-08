@@ -184,6 +184,7 @@ function(cinch_add_unit name)
 
       set(unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-mpi.cc)
       set(unit_policy_flags ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS})
+      message(STATUS "MPI COMPILE FLAGS ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS}")
       set(unit_policy_includes ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
       set(unit_policy_libraries ${MPI_${MPI_LANGUAGE}_LIBRARIES})
       set(unit_policy_exec ${MPIEXEC})
