@@ -62,14 +62,13 @@ if(ENABLE_UNIT_TESTS)
 
 endif(ENABLE_UNIT_TESTS)
 
-
 #[=============================================================================[
-.. command:: mcinch_add_unit
+.. command:: cinch_add_unit
 
-  The ``mcinch_add_unit`` function creates a custom unit test with
+  The ``cinch_add_unit`` function creates a custom unit test with
   various different runtime policies::
 
-   mcinch_add_unit(<name> [<option>...])
+   cinch_add_unit(<name> [<option>...])
 
   General options are:
 
@@ -121,7 +120,8 @@ function(cinch_add_unit name)
     if ( PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME ) 
       set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${_SOURCE_DIR_NAME}")
     else()
-      set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${PROJECT_NAME}/${_SOURCE_DIR_NAME}")
+      set(_OUTPUT_DIR
+        "${CMAKE_BINARY_DIR}/test/${PROJECT_NAME}/${_SOURCE_DIR_NAME}")
     endif()
 
     #--------------------------------------------------------------------------#
@@ -188,6 +188,8 @@ function(cinch_add_unit name)
       set(unit_policy_libraries ${MPI_${MPI_LANGUAGE}_LIBRARIES})
       set(unit_policy_exec ${MPIEXEC})
       set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
+      set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
+      set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
 
     elseif(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND 
         unit_policy_main STREQUAL "LEGION")
@@ -201,7 +203,9 @@ function(cinch_add_unit name)
         ${MPI_${MPI_LANGUAGE}_LIBRARIES})
       set(unit_policy_exec ${MPIEXEC})
       set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG}) 
-      set(unit_policy_defines -DENABLE_MPI)
+      set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
+      set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
+      set(unit_policy_defines -DCINCH_ENABLE_MPI)
 
     elseif(Legion_FOUND AND unit_policy_main STREQUAL "LEGION")
 
@@ -429,8 +433,10 @@ function(cinch_add_unit name)
                     "${_TEST_PREFIX}${name}_${instance}"
                 COMMAND
                     ${unit_policy_exec}
+                    ${unit_policy_exec_preflags}
                     ${unit_policy_exec_threads} ${instance}
                     $<TARGET_FILE:${name}>
+                    ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS} 
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endforeach(instance)
@@ -452,7 +458,9 @@ function(cinch_add_unit name)
                     ${unit_policy_exec}
                     ${unit_policy_exec_threads}
                     ${unit_THREADS}
+                    ${unit_policy_exec_preflags}
                     $<TARGET_FILE:${name}>
+                    ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         else()

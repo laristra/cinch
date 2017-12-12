@@ -31,14 +31,13 @@ endif(ENABLE_MPI_CXX_BINDINGS)
 if(MPI_${MPI_LANGUAGE}_FOUND)
 
     include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
-    add_definitions(-DENABLE_MPI)
 
     # using mpich, there are extra spaces that cause some issues
-    separate_arguments( MPI_${MPI_LANGUAGE}_COMPILE_FLAGS )
+    separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
     
     if(NOT ENABLE_MPI_CXX_BINDINGS)
         list(APPEND MPI_${MPI_LANGUAGE}_COMPILE_FLAGS 
-            -DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX )
+            OMPI_SKIP_MPICXX MPICH_SKIP_MPICXX)
     endif()
 
 endif(MPI_${MPI_LANGUAGE}_FOUND)

@@ -33,7 +33,7 @@
             ${MPI_${MPI_LANGUAGE}_LIBRARIES})
         set(test_policy_exec ${MPIEXEC})
         set(test_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
-        set(test_policy_defines -DENABLE_MPI)
+        set(test_policy_defines -DCINCH_ENABLE_MPI)
 
     else()
 

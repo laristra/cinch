@@ -3,9 +3,10 @@
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-#ifdef ENABLE_MPI
-#include <mpi.h>
+#if defined(CINCH_ENABLE_MPI)
+  #include <mpi.h>
 #endif
+
 #include <legion.h>
 #include <vector>
 
@@ -44,12 +45,12 @@ void print_devel_code_label(std::string name) {
   clog_rank(info, 0) <<
     OUTPUT_LTGREEN("Executing development target " << name) << std::endl;
 
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
   // This is safe even if the user creates other comms, because we
   // execute this function before handing control over to the user
   // code logic.
   MPI_Barrier(MPI_COMM_WORLD);
-#endif // ENABLE_MPI
+#endif // CINCH_ENABLE_MPI
 } // print_devel_code_label
 #endif
 
@@ -61,7 +62,7 @@ int main(int argc, char ** argv) {
 
   int rank(0);
 
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
   // Get the MPI version
   int version, subversion;
   MPI_Get_version(&version, &subversion);
@@ -102,7 +103,7 @@ int main(int argc, char ** argv) {
   argc = args.size();
   argv = args.data();
 
-#endif // ENABLE_MPI
+#endif // CINCH_ENABLE_MPI
 
 #if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
@@ -143,7 +144,7 @@ int main(int argc, char ** argv) {
       std::cout << std::endl << std::endl << desc << std::endl;
     } // if
 
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
     MPI_Finalize();
 #endif
     return 1;
@@ -153,7 +154,7 @@ int main(int argc, char ** argv) {
     if(rank == 0) {
       std::cout << desc << std::endl;
     } // if
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
     MPI_Finalize();
 #endif
     return 1;
@@ -163,7 +164,7 @@ int main(int argc, char ** argv) {
   int result(0);
 
   if(tags == "0") {
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
     // Output the available tags
     if(rank == 0) {
 #endif
@@ -172,7 +173,7 @@ int main(int argc, char ** argv) {
       for(auto t: clog_tag_map()) {
         std::cout << "  " << t.first << std::endl;
       } // for
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
     } // if
 #endif
   }
@@ -200,13 +201,13 @@ int main(int argc, char ** argv) {
 #endif
   } // if
 
-#if defined(ENABLE_MPI)
+#if defined(CINCH_ENABLE_MPI)
   // FIXME: This is some kind of GASNet bug (or maybe Legion).
   // Shutdown the MPI runtime
 #ifndef GASNET_CONDUIT_MPI
   MPI_Finalize();
 #endif
-#endif // ENABLE_MPI
+#endif // CINCH_ENABLE_MPI
 
   return result;
 } // main
