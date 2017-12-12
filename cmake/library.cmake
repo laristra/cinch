@@ -118,9 +118,6 @@ function(cinch_target_link_libraries target)
         )
     endif()
 
-    message(STATUS
-      "Linking target ${target} with libraries ${ARGN}")
-
     target_link_libraries( ${target} ${ARGN} )
 
 endfunction()
