@@ -35,11 +35,6 @@ if(MPI_${MPI_LANGUAGE}_FOUND)
     # using mpich, there are extra spaces that cause some issues
     separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
     
-    if(NOT ENABLE_MPI_CXX_BINDINGS)
-        list(APPEND MPI_${MPI_LANGUAGE}_COMPILE_FLAGS 
-            OMPI_SKIP_MPICXX MPICH_SKIP_MPICXX)
-    endif()
-
 endif(MPI_${MPI_LANGUAGE}_FOUND)
 
 endif(ENABLE_MPI)
