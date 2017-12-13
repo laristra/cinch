@@ -79,6 +79,7 @@ function(cinch_add_library_target target directory)
             endif()
             list(APPEND HEADERS
                 ${_SUBDIR}/${_HEADER})
+            list(APPEND GLOBAL_HEADERS ${_SOURCE_DIR}/${_SUBDIR}/${_HEADER})
         endforeach()
     
         foreach(_SOURCE ${${_SUBDIR}_SOURCES})
@@ -102,6 +103,17 @@ function(cinch_add_library_target target directory)
         install(FILES ${directory}/${file} DESTINATION include)
     endforeach()
 
+    if(EXISTS ${PROJECT_SOURCE_DIR}/.clang-format)
+      find_program(CLANG_FORMAT "clang-format")
+      find_package_handle_standard_args(CLANG_FORMAT REQUIRED_VARS CLANG_FORMAT)
+      if (CLANG_FORMAT_FOUND)
+        add_custom_target(format-${target} COMMAND ${CLANG_FORMAT} -style=file -i ${GLOBAL_HEADERS} ${SOURCES})
+      else()
+        add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND} -E echo "No clang-format found")
+      endif()
+    else()
+      add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND} -E echo "No ${PROJECT_SOURCE_DIR}/.clang-format found")
+    endif()
 endfunction(cinch_add_library_target)
 
 #
