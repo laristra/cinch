@@ -26,6 +26,9 @@ if(ENABLE_MPI_CXX_BINDINGS)
     set(MPI_LANGUAGE CXX)
 else()
     set(MPI_LANGUAGE C)
+    # Globally add these compile definitions for linking C++ applications
+    # with the C-version of MPI.  Might be a better way to do this.
+    add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
 endif(ENABLE_MPI_CXX_BINDINGS)
 
 if(MPI_${MPI_LANGUAGE}_FOUND)
