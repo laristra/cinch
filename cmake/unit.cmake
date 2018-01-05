@@ -107,7 +107,7 @@ function(cinch_add_unit name)
     set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
     set(multi_value_args 
-        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER
+        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS
     )
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
@@ -436,6 +436,7 @@ function(cinch_add_unit name)
                     ${unit_policy_exec_preflags}
                     ${unit_policy_exec_threads} ${instance}
                     $<TARGET_FILE:${name}>
+                    ${unit_ARGUMENTS}
                     ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS} 
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
@@ -460,6 +461,7 @@ function(cinch_add_unit name)
                     ${unit_THREADS}
                     ${unit_policy_exec_preflags}
                     $<TARGET_FILE:${name}>
+                    ${unit_ARGUMENTS}
                     ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
