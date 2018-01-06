@@ -1533,8 +1533,10 @@ namespace clog {
 } // namespace
 
 // \TODO actually fix warning
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wtautological-compare"
+#endif
 
 //----------------------------------------------------------------------------//
 //! @def clog_container(severity, banner, container, delimiter)
@@ -1577,7 +1579,10 @@ namespace clog {
   }                                                                            \
   clog(severity) << ss.str() << std::endl;                                     \
   }
+
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 
 // Enable MPI
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
@@ -1839,12 +1844,16 @@ is_active_rank()
 #define clog_one(severity) if(true) {} else std::cerr
 #define clog_container_rank(severity, banner, container, delimiter, rank) if(true) {} else std::cerr
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
+#endif
 
 #define clog_container_one(severity, banner, container, delimiter) if(true) {} else std::cerr
 
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
 

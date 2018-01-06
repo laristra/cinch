@@ -40,7 +40,7 @@ public:
   void to_file(const char * filename) {
     std::ofstream f(filename);
 
-    if(not f.good()) {
+    if(! f.good()) {
       std::cerr << "Failed to open " << filename << std::endl;
       std::exit(1);
     } // if
@@ -63,8 +63,8 @@ public:
     to_file(save_output);
 
     std::ifstream f(testdir_filename);
-    
-    if(not f.good()) {
+
+    if(! f.good()) {
       std::cerr << "Failed to open " << filename << std::endl;
       std::exit(1);
     } // if
