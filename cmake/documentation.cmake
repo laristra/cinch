@@ -98,8 +98,6 @@ function(cinch_add_doc target config directories output)
             list(APPEND _directories ${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
         endforeach()
 
-        # FIXME: remove this when you are done...
-        message(STATUS "DIRECTORIES: ${_directories}")
         set(_directory ${CMAKE_CURRENT_SOURCE_DIR}/${directories})
 
         set(_config ${CMAKE_CURRENT_SOURCE_DIR}/doc/${config})
