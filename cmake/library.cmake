@@ -122,15 +122,9 @@ endfunction(cinch_add_library_target)
 
 function(cinch_target_link_libraries target)
 
-    if (NOT ARGN)
-        message(
-            FATAL_ERROR
-            "The list of libaries provided to link to target '${target}' is "
-            "empty"
-        )
+    if (ARGN)
+        target_link_libraries( ${target} ${ARGN} )
     endif()
-
-    target_link_libraries( ${target} ${ARGN} )
 
 endfunction()
 
