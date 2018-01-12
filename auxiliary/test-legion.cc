@@ -9,6 +9,7 @@
 
 #include <legion.h>
 #include <vector>
+#include <cstring>
 
 // Boost command-line options
 #if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
