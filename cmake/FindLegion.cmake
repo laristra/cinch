@@ -13,7 +13,7 @@ set(Legion_ROOT "" CACHE PATH "Root directory of Legion installation")
 # Find the header file
 #------------------------------------------------------------------------------#
 
-find_path(Legion_INCLUDE_DIR legion/legion.h
+find_path(Legion_INCLUDE_DIR legion.h
     HINTS ENV Legion_ROOT
     PATHS ${Legion_ROOT}
     PATH_SUFFIXES include)
