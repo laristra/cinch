@@ -7,6 +7,7 @@
 #define cinchtest_h
 
 #include "../logging/cinchlog.h"
+#include "check_collections.h"
 #include "listener.h"
 #include "output.h"
 
@@ -33,6 +34,16 @@
 // Dump captured output on failure
 #define CINCH_EXPECT(EXPECTATION, ...) \
   EXPECT_ ## EXPECTATION(__VA_ARGS__) << CINCH_DUMP()
+
+// compare collections with varying levels of assertions
+#define CINCH_CHECK_EQUAL_COLLECTIONS(...) \
+  cinch::CheckEqualCollections(__VA_ARGS__)
+
+#define CINCH_ASSERT_EQUAL_COLLECTIONS(...) \
+  ASSERT_TRUE( cinch::CheckEqualCollections(__VA_ARGS__) << CINCH_DUMP()
+
+#define CINCH_EXPECT_EQUAL_COLLECTIONS(...) \
+  EXPECT_TRUE( cinch::CheckEqualCollections(__VA_ARGS__) ) << CINCH_DUMP()
 
 #endif // cinchtest_h
 
