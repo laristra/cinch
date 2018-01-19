@@ -35,17 +35,19 @@ template<typename LeftIter, typename RightIter>
     if (right_begin == right_end) {
       equal = false;
       message << "\n\tRight file ends early after " << index << " lines";
+      break;
     }
     // mismatch in files
     if (*left_begin++ != *right_begin++) {
       equal = false;
       message << "\n\tMismatch at index " << index;
+      break;
     }
     ++index;
   }
 
   // left ends early 
-  if (left_begin == left_end && right_begin != right_end) {
+  if (left_begin == left_end && right_begin != right_end && equal) {
     equal = false;
     message << "\n\tLeft file ends early after " << index << " lines";
   }
