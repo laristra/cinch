@@ -24,19 +24,24 @@ if(ENABLE_UNIT_TESTS)
 
     if(GTEST_FOUND)
         include_directories(${GTEST_INCLUDE_DIRS})
-    elseif(NOT TARGET gtest)
+    endif()
+        
+    if (NOT GTEST_INCLUDE_DIRS)
+        set(GTEST_INCLUDE_DIRS 
+          ${CINCH_SOURCE_DIR}/gtest/googlemock/include
+          ${CINCH_SOURCE_DIR}/gtest/googletest
+          ${CINCH_SOURCE_DIR}/gtest/googletest/include)
+        set(GTEST_LIBRARIES gtest)
+    endif()
+
+    if(NOT TARGET gtest)
         find_package(Threads)
         add_library(gtest
             ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
         target_include_directories(gtest PRIVATE
             ${CINCH_SOURCE_DIR}/gtest/googletest)
         target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
-        set(GTEST_INCLUDE_DIRS 
-          ${CINCH_SOURCE_DIR}/gtest/googlemock/include
-          ${CINCH_SOURCE_DIR}/gtest/googletest
-          ${CINCH_SOURCE_DIR}/gtest/googletest/include)
         target_include_directories(gtest PRIVATE ${GTEST_INCLUDE_DIRS})
-        set(GTEST_LIBRARIES gtest)
     endif()
 
     #--------------------------------------------------------------------------#
