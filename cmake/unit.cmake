@@ -82,7 +82,7 @@ endif(ENABLE_UNIT_TESTS)
   ``INPUTS <inputs>...``
     The input files used to run the test
   ``POLICY <policy>``
-    The runtime policy to use when executing the test 
+    The runtime policy to use when executing the test
   ``THREADS <threads>...``
     The number of threads to run the test with
   ``LIBRARIES <libraries>...``
@@ -92,10 +92,10 @@ endif(ENABLE_UNIT_TESTS)
   ``DRIVER <driver_sources>...``
     Source files to build custom runtime driver.
   ``NOCI``
-    Test does NOT get run (but still build) if 
+    Test does NOT get run (but still build) if
     ENV{'CI'} is "true".
   ``NOOPENMPI``
-    Test does NOT get run (but still build) if 
+    Test does NOT get run (but still build) if
     ENV{'OPENMPI'} is "true".
 #]=============================================================================]
 
@@ -111,7 +111,7 @@ function(cinch_add_unit name)
 
     set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
-    set(multi_value_args 
+    set(multi_value_args
         SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS
     )
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
@@ -122,7 +122,7 @@ function(cinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     get_filename_component(_SOURCE_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-    if ( PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME ) 
+    if ( PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME )
       set(_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/${_SOURCE_DIR_NAME}")
     else()
       set(_OUTPUT_DIR
@@ -142,14 +142,14 @@ function(cinch_add_unit name)
     endif(FORTRAN_ENABLED EQUAL -1)
 
     #--------------------------------------------------------------------------#
-    # Make sure that MPI_LANGUAGE is set.  
+    # Make sure that MPI_LANGUAGE is set.
     # This is not a standard variable set by FindMPI.  But cinch
     # might set it.
     #
     # Right now, the MPI policy only works with C/C++.
     #--------------------------------------------------------------------------#
 
-    if(NOT MPI_LANGUAGE) 
+    if(NOT MPI_LANGUAGE)
       set(MPI_LANGUAGE C)
     endif()
 
@@ -162,12 +162,14 @@ function(cinch_add_unit name)
     else()
         set(_TEST_PREFIX "${PROJECT_NAME}:")
     endif()
-    
+
     #--------------------------------------------------------------------------#
     # Check to see if the user has specified a runtime and
     # process it
     #--------------------------------------------------------------------------#
-   
+
+    message(cinch_add_unit ${name} ${ARGN} ", unit_POLICY: " ${unit_POLICY})
+
     if(unit_POLICY)
       string(REPLACE "_" ";" unit_policies ${unit_POLICY})
       list(GET unit_policies 0 unit_policy_main)
@@ -196,18 +198,18 @@ function(cinch_add_unit name)
       set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
       set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
 
-    elseif(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND 
+    elseif(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND
         unit_policy_main STREQUAL "LEGION")
 
       set(unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-legion.cc)
-      set(unit_policy_flags ${Legion_CXX_FLAGS} 
+      set(unit_policy_flags ${Legion_CXX_FLAGS}
         ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS})
-      set(unit_policy_includes ${Legion_INCLUDE_DIRS} 
+      set(unit_policy_includes ${Legion_INCLUDE_DIRS}
         ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
       set(unit_policy_libraries ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
         ${MPI_${MPI_LANGUAGE}_LIBRARIES})
       set(unit_policy_exec ${MPIEXEC})
-      set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG}) 
+      set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
       set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
       set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
       set(unit_policy_defines -DCINCH_ENABLE_MPI)
@@ -218,7 +220,20 @@ function(cinch_add_unit name)
       set(unit_policy_flags ${Legion_CXX_FLAGS})
       set(unit_policy_includes ${Legion_INCLUDE_DIRS})
       set(unit_policy_libraries ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
-  
+
+    elseif(MPI_${MPI_LANGUAGE}_FOUND AND HPX_FOUND AND
+        unit_policy_main STREQUAL "HPX")
+
+      set(unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-hpx.cc)
+      set(unit_policy_flags ${HPX_CXX_FLAGS})
+      set(unit_policy_includes ${HPX_INCLUDE_DIRS})
+      set(unit_policy_libraries ${HPX_LIBRARIES} ${HPX_LIB_FLAGS})
+
+      set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
+      set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
+      set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
+      set(unit_policy_defines -DCINCH_ENABLE_MPI)
+
     else()
 
       return()
@@ -227,11 +242,11 @@ function(cinch_add_unit name)
 
     # add the devel flag if requested
     if(_IS_DEVEL)
-      list(APPEND unit_policy_defines -DCINCH_DEVEL_TEST) 
+      list(APPEND unit_policy_defines -DCINCH_DEVEL_TEST)
     endif()
 
     # if a custom runtime driver was provided, override it
-    if (unit_DRIVER) 
+    if (unit_DRIVER)
         set( unit_policy_runtime ${unit_DRIVER} )
     endif()
 
@@ -336,16 +351,16 @@ function(cinch_add_unit name)
     endif()
 
     #--------------------------------------------------------------------------#
-    # Check for input files. 
+    # Check for input files.
     #--------------------------------------------------------------------------#
-    
+
     if(unit_INPUTS)
         set(_OUTPUT_FILES)
         foreach(input ${unit_INPUTS})
             get_filename_component(_OUTPUT_NAME ${input} NAME)
             get_filename_component(_PATH ${input} ABSOLUTE)
             add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                COMMAND ${CMAKE_COMMAND} -E copy 
+                COMMAND ${CMAKE_COMMAND} -E copy
                 ${_PATH}
                 ${_OUTPUT_DIR}/${_OUTPUT_NAME}
                 DEPENDS ${input}
@@ -443,7 +458,7 @@ function(cinch_add_unit name)
                     $<TARGET_FILE:${name}>
                     ${unit_ARGUMENTS}
                     ${unit_policy_exec_postflags}
-                    ${UNIT_FLAGS} 
+                    ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endforeach(instance)
 
