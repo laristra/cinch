@@ -24,10 +24,14 @@ if(ENABLE_UNIT_TESTS)
 
     if(GTEST_FOUND)
         include_directories(${GTEST_INCLUDE_DIRS})
+        if(MSVC)
+          # suppress stupid TR1 warnings issued by MSVC while compiling GTest
+          add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+        endif()
     endif()
-        
+
     if (NOT GTEST_INCLUDE_DIRS)
-        set(GTEST_INCLUDE_DIRS 
+        set(GTEST_INCLUDE_DIRS
           ${CINCH_SOURCE_DIR}/gtest/googlemock/include
           ${CINCH_SOURCE_DIR}/gtest/googletest
           ${CINCH_SOURCE_DIR}/gtest/googletest/include)
@@ -167,8 +171,6 @@ function(cinch_add_unit name)
     # Check to see if the user has specified a runtime and
     # process it
     #--------------------------------------------------------------------------#
-
-    message(cinch_add_unit ${name} ${ARGN} ", unit_POLICY: " ${unit_POLICY})
 
     if(unit_POLICY)
       string(REPLACE "_" ";" unit_policies ${unit_POLICY})
