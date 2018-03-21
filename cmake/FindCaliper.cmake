@@ -5,9 +5,10 @@
 
 # Find the native Caliper headers and libraries.
 #
-#  Caliper_INCLUDE_DIRS - where to find flecsi.h, etc.
-#  Caliper_LIBRARIES    - List of libraries when using flecsi.
-#  Caliper_FOUND        - True if flecsi found.
+#  Caliper_INCLUDE_DIRS  - where to find flecsi.h, etc.
+#  Caliper_MPI_LIBRARIES - List of mpi libraries when using flecsi.
+#  Caliper_LIBRARIES     - List of libraries when using flecsi.
+#  Caliper_FOUND         - True if flecsi found.
 
 find_package(PkgConfig)
 
@@ -26,14 +27,23 @@ FIND_LIBRARY(Caliper_LIBRARIES
 	HINTS ${PC_Caliper_LIBRARIES}
 )
 
+# Look for the mpi library.
+FIND_LIBRARY(Caliper_MPI_LIBRARIES
+        NAMES caliper-mpi libcaliper-mpi
+        HINTS ${PC_Caliper_MPI_LIBRARIES}
+)
+
 # handle the QUIETLY and REQUIRED arguments and set Caliper_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Caliper DEFAULT_MSG Caliper_LIBRARIES
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Caliper DEFAULT_MSG 
+	Caliper_MPI_LIBRARIES
+	Caliper_LIBRARIES
 	Caliper_INCLUDE_DIRS)
 
 # Copy the results to the output variables.
+SET(Caliper_MPI_LIBRARIES ${Caliper_MPI_LIBRARIES})
 SET(Caliper_LIBRARIES ${Caliper_LIBRARIES})
 SET(Caliper_INCLUDE_DIRS ${Caliper_INCLUDE_DIRS})
 
-MARK_AS_ADVANCED(Caliper_INCLUDE_DIRS Caliper_LIBRARIES)
+MARK_AS_ADVANCED(Caliper_INCLUDE_DIRS Caliper_LIBRARIES Caliper_MPI_LIBRARIES)
