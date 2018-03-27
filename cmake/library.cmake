@@ -9,7 +9,7 @@ include(subdirlist)
 # cinch_add_library
 #
 
-function(cinch_add_library_target target directory)
+function(cinch_add_library_target target export_target directory)
 
     #--------------------------------------------------------------------------#
     # Add target to list
@@ -97,7 +97,7 @@ function(cinch_add_library_target target directory)
             DESTINATION include/${directory}/${DIR})
     endforeach()
 
-    install(TARGETS ${target} EXPORT ${target}Targets DESTINATION ${LIBDIR})
+    install(TARGETS ${target} EXPORT ${export_target} DESTINATION ${LIBDIR})
 
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include)
