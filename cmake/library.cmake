@@ -9,7 +9,18 @@ include(subdirlist)
 # cinch_add_library
 #
 
-function(cinch_add_library_target target export_target directory)
+function(cinch_add_library_target target directory)
+
+    #--------------------------------------------------------------------------#
+    # Setup argument options
+    #--------------------------------------------------------------------------#
+
+    set(options)
+    set(one_value_args EXPORT_TARGET)
+    set(multi_value_args)
+
+    cmake_parse_arguments(lib "${options}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
 
     #--------------------------------------------------------------------------#
     # Add target to list
@@ -97,8 +108,9 @@ function(cinch_add_library_target target export_target directory)
             DESTINATION include/${directory}/${DIR})
     endforeach()
 
-    if(NOT "${export_target}" STREQUAL "None")
-        install(TARGETS ${target} EXPORT ${export_target} DESTINATION ${LIBDIR})
+    if(lib_EXPORT_TARGET)
+        install(TARGETS ${target} EXPORT ${lib_EXPORT_TARGET}
+            DESTINATION ${LIBDIR})
     else()
         install(TARGETS ${target} DESTINATION ${LIBDIR})
     endif()
