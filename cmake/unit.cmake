@@ -46,6 +46,7 @@ if(ENABLE_UNIT_TESTS)
             ${CINCH_SOURCE_DIR}/gtest/googletest)
         target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
         target_include_directories(gtest PRIVATE ${GTEST_INCLUDE_DIRS})
+        set_target_properties(gtest PROPERTIES FOLDER "Dependencies")
     endif()
 
     #--------------------------------------------------------------------------#
@@ -101,6 +102,8 @@ endif(ENABLE_UNIT_TESTS)
   ``NOOPENMPI``
     Test does NOT get run (but still build) if
     ENV{'OPENMPI'} is "true".
+  ``FOLDER``
+    Specify a project 'folder' to associate th eunit test with.
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -114,7 +117,7 @@ function(cinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     set(options NOCI NOOPENMPI)
-    set(one_value_args POLICY)
+    set(one_value_args POLICY FOLDER)
     set(multi_value_args
         SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS
     )
@@ -340,6 +343,10 @@ function(cinch_add_unit name)
             PRIVATE ${unit_policy_flags})
     endif()
 
+    if(unit_FOLDER)
+        set_target_properties(${name} PROPERTIES FOLDER "${unit_FOLDER}")
+    endif()
+
     #--------------------------------------------------------------------------#
     # Check for defines.
     #--------------------------------------------------------------------------#
@@ -371,6 +378,9 @@ function(cinch_add_unit name)
         endforeach()
         add_custom_target(${name}_inputs
             DEPENDS ${_OUTPUT_FILES})
+        if(unit_FOLDER)
+            set_target_properties(${name}_inputs PROPERTIES FOLDER "${unit_FOLDER}/Inputs")
+        endif()
         add_dependencies(${name} ${name}_inputs)
     endif()
 
