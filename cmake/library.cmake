@@ -97,7 +97,11 @@ function(cinch_add_library_target target export_target directory)
             DESTINATION include/${directory}/${DIR})
     endforeach()
 
-    install(TARGETS ${target} EXPORT ${export_target} DESTINATION ${LIBDIR})
+    if(NOT "${export_target}" STREQUAL "None")
+        install(TARGETS ${target} EXPORT ${export_target} DESTINATION ${LIBDIR})
+    else()
+        install(TARGETS ${target} DESTINATION ${LIBDIR})
+    endif()
 
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include)
