@@ -35,8 +35,10 @@ macro(cinch_load_extras)
   # load unit after legion and mpi
   include(unit)
 
+  # load caliper
+  include(caliper)
+
   include(devel)
-  include(logging)
 
 endmacro()
 
