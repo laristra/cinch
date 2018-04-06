@@ -16,9 +16,8 @@ pkg_check_modules(PC_Caliper caliper)
 
 # Look for the header file.
 FIND_PATH(Caliper_INCLUDE_DIRS
-	NAMES Annotation.h
+	NAMES "caliper/Caliper.h"
 	HINTS ${PC_Caliper_INCLUDE_DIRS}
-	PATH_SUFFIXES caliper
 )
 
 # Look for the library.
