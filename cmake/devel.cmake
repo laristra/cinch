@@ -49,6 +49,10 @@ function(cinch_add_devel_target name)
 
     include(detail/test-inputs)
 
+    if(test_FOLDER)
+        set_target_properties(${name} PROPERTIES FOLDER "${test_FOLDER}")
+    endif()
+
 endfunction(cinch_add_devel_target)
 
 #------------------------------------------------------------------------------#
