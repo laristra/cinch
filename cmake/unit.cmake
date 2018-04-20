@@ -47,6 +47,10 @@ if(ENABLE_UNIT_TESTS)
         target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
         target_include_directories(gtest PRIVATE ${GTEST_INCLUDE_DIRS})
         set_target_properties(gtest PROPERTIES FOLDER "Dependencies")
+        if(BUILD_SHARED_LIBS)
+            set_target_properties(gtest PROPERTIES
+                COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
+        endif()
     endif()
 
     #--------------------------------------------------------------------------#
