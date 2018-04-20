@@ -19,6 +19,7 @@ macro(check_for_cxx17_compiler _VAR)
             NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 17.7) OR
         (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
             NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.6)
+    )
 
         set(${_VAR} 1)
         message(STATUS "Checking for C++17 compiler - available")
