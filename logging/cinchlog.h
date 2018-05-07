@@ -378,6 +378,7 @@ protected:
             return flush_buffer(all_buffers);
           } // if
       } // switch
+
       return c;
     } // if
   } // overflow

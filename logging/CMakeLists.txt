@@ -40,9 +40,12 @@ if(ENABLE_CLOG)
     endif()
 
     # MPI
-    if(MPI_${MPI_LANGUAGE}_FOUND)
+    find_package(MPI)
+
+    if(MPI_C_FOUND)
         option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
         if(CLOG_ENABLE_MPI)
+            include_directories(${MPI_C_INCLUDE_PATH})
             add_definitions(-DCLOG_ENABLE_MPI)
         endif()
 
@@ -70,6 +73,10 @@ add_executable(clog_test clog_test.cc)
 add_definitions(-DENABLE_CLOG)
 
 target_link_libraries(clog_test ${Boost_LIBRARIES})
+
+if(CLOG_ENABLE_MPI)
+    target_link_libraries(clog_test ${MPI_LIBRARIES})
+endif()
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
