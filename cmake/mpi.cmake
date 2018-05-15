@@ -24,17 +24,20 @@ find_package(MPI REQUIRED)
 
 if(ENABLE_MPI_CXX_BINDINGS)
     set(MPI_LANGUAGE CXX)
-    set(MPI_CPPFLAGS)
 else()
     set(MPI_LANGUAGE C)
-    add_definitions(-DOMPI_SKIP_MPICXX)
-    add_definitions(-DMPICH_SKIP_MPICXX)
-    set(MPI_CPPFLAGS -DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
+    # Globally add these compile definitions for linking C++ applications
+    # with the C-version of MPI.  Might be a better way to do this.
+    add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
 endif(ENABLE_MPI_CXX_BINDINGS)
 
 if(MPI_${MPI_LANGUAGE}_FOUND)
+
     include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
-    add_definitions(-DENABLE_MPI)
+
+    # using mpich, there are extra spaces that cause some issues
+    separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
+    
 endif(MPI_${MPI_LANGUAGE}_FOUND)
 
 endif(ENABLE_MPI)

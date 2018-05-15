@@ -3,10 +3,7 @@
 	url = ../../google/googletest.git
 [submodule "pfunit"]
 	path = pfunit
-	url = ../pfunit.git
+	url = ../../laristra/pfunit.git
 [submodule "boost/preprocessor"]
 	path = boost/preprocessor
 	url = ../../boostorg/preprocessor.git
-[submodule "gflags"]
-	path = gflags
-	url = ../gflags.git

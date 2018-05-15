@@ -24,6 +24,8 @@ execute_process(COMMAND ${CLANG_EXEC} --version
 
 # strip the extra lines from the output
 string(REGEX REPLACE "\n.*" "" CLANG_VERSION ${CLANG_VERSION})
+string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+\\.[0-9]+).*" "\\1"
+    CLANG_VERSION ${CLANG_VERSION})
 
 mark_as_advanced(CLANG_VERSION)
 

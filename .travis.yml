@@ -12,7 +12,6 @@ addons:
       - cmake
       - cmake-data
       - libopenmpi-dev
-#      - libcereal-dev
       - openmpi-bin
       - gcc-4.9
       - g++-4.9
@@ -20,6 +19,7 @@ addons:
       - gcc-5
       - g++-5
       - gfortran-5
+      - libboost-all-dev
 
 before_install:
  - git fetch --unshallow && git fetch --tags #for versioning
@@ -33,15 +33,16 @@ env: #maybe add mpich later
     - MPI=OFF TEST=laristra/cinch-example
     - MPI=ON  TEST=laristra/cinch-nested-example
     - MPI=OFF TEST=laristra/cinch-nested-example
-    - MPI=ON  TEST=losalamos/vpic
-    - MPI=OFF TEST=losalamos/vpic
+#    - MPI=ON  TEST=losalamos/vpic
+#    - MPI=OFF TEST=losalamos/vpic
+# flecsi has no mimimal build currently
 #    - MPI=ON  TEST=laristra/flecsi GVER=5
 #    - MPI=OFF TEST=laristra/flecsi GVER=5
 
 script:
   - git checkout -b cinch_current_commit
   - cd $HOME && git clone --recursive https://github.com/${TEST} ${TEST} && cd ${TEST} &&
-    for i in $(find . -type d -name cinch); do [ -e ${i}/.git ] || continue; git -C ${i} fetch ${HOME}/build/${TRAVIS_REPO_SLUG} cinch_current_commit && git -C ${i} checkout -f FETCH_HEAD; done &&
+    for i in $(find . -type d -name cinch); do [ -e ${i}/.git ] || continue; git -C ${i} fetch ${HOME}/build/${TRAVIS_REPO_SLUG} cinch_current_commit && git -C ${i} checkout -f FETCH_HEAD && git -C ${i} submodule update --init --recursive; done &&
     mkdir build && cd build && 
     FC=gfortran-${GVER} CC=gcc-${GVER} CXX=g++-${GVER} cmake -DENABLE_MPI=$MPI -DENABLE_UNIT_TESTS=ON .. && 
     make -j4 && make test ARGS="-V" && make install DESTDIR="${HOME}"

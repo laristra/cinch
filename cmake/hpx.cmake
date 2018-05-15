@@ -4,36 +4,36 @@
 #------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------#
-# Add option to enable Legion
+# Add option to enable HPX
 #------------------------------------------------------------------------------#
 
-option(ENABLE_LEGION "Enable Legion" OFF)
+option(ENABLE_HPX "Enable HPX" OFF)
 
-if(ENABLE_LEGION)
+if(ENABLE_HPX)
 
 #------------------------------------------------------------------------------#
-# Find Legion
+# Find HPX
 #------------------------------------------------------------------------------#
 
-find_package(Legion REQUIRED)
+  find_package(HPX REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
 
-  if(NOT Legion_FOUND)
-      message(FATAL_ERROR "Legion is required
-                     for this build configuration")
-  endif(NOT Legion_FOUND)
+  include_directories(${HPX_INCLUDE_DIRS})
+  link_directories(${HPX_LIBRARY_DIR})
 
-  set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH}
-     ${LEGION_INSTALL_DIRS})
-  include_directories(${LEGION_INCLUDE_DIRS})
-  # old flags: remove once support for older Legion versions is not required
-  add_definitions( -DLEGION_CMAKE )
-  # new flags: required by newer Legion versions
-  add_definitions( -DLEGION_USE_CMAKE )
-  add_definitions( -DREALM_USE_CMAKE )
-  message(STATUS "Legion found: ${Legion_FOUND}")
+  add_definitions(-DENABLE_HPX)
+  if(MSVC)
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_NONSTDC_NO_WARNINGS)
+    add_definitions(-D_HAS_AUTO_PTR_ETC=1)
+    add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+  endif()
 
+  message(STATUS "HPX found: ${HPX_FOUND}")
 
-endif(ENABLE_LEGION)
+endif(ENABLE_HPX)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

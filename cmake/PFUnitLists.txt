@@ -5,7 +5,7 @@
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated)
 
-set(_PFUNIT ${CMAKE_SOURCE_DIR}/cinch/pfunit)
+set(_PFUNIT ${CINCH_SOURCE_DIR}/pfunit)
 set(_PFUNIT_GENERATED_DIR ${CMAKE_BINARY_DIR}/pfunit/generated)
 
 execute_process(
@@ -34,63 +34,59 @@ endforeach()
 
 add_library(pfunit
     ${_GENERATED_SOURCES}
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/AbstractTestParameter.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/AbstractTestResult.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/AssertBasic.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/Assert.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/BaseTestRunner.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/DebugListener.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/DynamicTestCase.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/Exception.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/Expectation.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/MockCall.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/Mock.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/MockRepository.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/ParallelContext.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/ParallelException.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/ParameterizedTestCase.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/Params.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/pFUnit.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/pFUnitPackage.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/RemoteProxyTestCase.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/ResultPrinter.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/RobustRunner.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/SerialContext.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/SourceLocation.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/StringConversionUtilities.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/SubsetRunner.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/SurrogateTestCase.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestCase.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/Test.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestFailure.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestListener.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestMethod.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestResult.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestRunner.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/TestSuite.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/ThrowFundamentalTypes.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/UnixPipeInterfaces.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/UnixProcess.F90
-    ${CMAKE_SOURCE_DIR}/cinch/pfunit/source/XmlPrinter.F90
+    ${_PFUNIT}/source/AbstractTestParameter.F90
+    ${_PFUNIT}/source/AbstractTestResult.F90
+    ${_PFUNIT}/source/AssertBasic.F90
+    ${_PFUNIT}/source/Assert.F90
+    ${_PFUNIT}/source/BaseTestRunner.F90
+    ${_PFUNIT}/source/DebugListener.F90
+    ${_PFUNIT}/source/DynamicTestCase.F90
+    ${_PFUNIT}/source/Exception.F90
+    ${_PFUNIT}/source/Expectation.F90
+    ${_PFUNIT}/source/MockCall.F90
+    ${_PFUNIT}/source/Mock.F90
+    ${_PFUNIT}/source/MockRepository.F90
+    ${_PFUNIT}/source/ParallelContext.F90
+    ${_PFUNIT}/source/ParallelException.F90
+    ${_PFUNIT}/source/ParameterizedTestCase.F90
+    ${_PFUNIT}/source/Params.F90
+    ${_PFUNIT}/source/pFUnit.F90
+    ${_PFUNIT}/source/pFUnitPackage.F90
+    ${_PFUNIT}/source/RemoteProxyTestCase.F90
+    ${_PFUNIT}/source/ResultPrinter.F90
+    ${_PFUNIT}/source/RobustRunner.F90
+    ${_PFUNIT}/source/SerialContext.F90
+    ${_PFUNIT}/source/SourceLocation.F90
+    ${_PFUNIT}/source/StringConversionUtilities.F90
+    ${_PFUNIT}/source/SubsetRunner.F90
+    ${_PFUNIT}/source/SurrogateTestCase.F90
+    ${_PFUNIT}/source/TestCase.F90
+    ${_PFUNIT}/source/Test.F90
+    ${_PFUNIT}/source/TestFailure.F90
+    ${_PFUNIT}/source/TestListener.F90
+    ${_PFUNIT}/source/TestMethod.F90
+    ${_PFUNIT}/source/TestResult.F90
+    ${_PFUNIT}/source/TestRunner.F90
+    ${_PFUNIT}/source/TestSuite.F90
+    ${_PFUNIT}/source/ThrowFundamentalTypes.F90
+    ${_PFUNIT}/source/UnixPipeInterfaces.F90
+    ${_PFUNIT}/source/UnixProcess.F90
+    ${_PFUNIT}/source/XmlPrinter.F90
 )
 
-set(_PFUNIT_DEFINES)
-list(APPEND _PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
-list(APPEND _PFUNIT_DEFINES BUILD_ROBUST)
+set(PFUNIT_DEFINES)
+list(APPEND PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
+list(APPEND PFUNIT_DEFINES BUILD_ROBUST)
 
 set_target_properties(pfunit PROPERTIES COMPILE_DEFINITIONS
-    "${_PFUNIT_DEFINES}")
+    "${PFUNIT_DEFINES}")
 set_target_properties(pfunit PROPERTIES COMPILE_FLAGS -UDEBUG)
 set_target_properties(pfunit
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/lib)
 set_target_properties(pfunit
     PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated)
 
-if(BUILD_SHARED_LIBS)
-    set(PFUNIT_LIBRARY ${CMAKE_BINARY_DIR}/pfunit/lib/libpfunit.so)
-else()
-    set(PFUNIT_LIBRARY ${CMAKE_BINARY_DIR}/pfunit/lib/libpfunit.a)
-endif(BUILD_SHARED_LIBS)
+set(PFUNIT_LIBRARY pfunit)
 
 set(PFUNIT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/pfunit/include)
 set(PFUNIT_DRIVER ${CMAKE_SOURCE_DIR}/cinch/pfunit/include/driver.F90)

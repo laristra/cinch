@@ -29,6 +29,12 @@ function(cinch_add_doxygen)
         # respective project names.
         #----------------------------------------------------------------------#
 
+        if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+           set(CINCH_CONFIG_INFOTAG)
+        else()
+            set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
+        endif()
+
         if(CINCH_CONFIG_INFOTAG)
             if(NOT EXISTS ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
                 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
@@ -52,9 +58,14 @@ function(cinch_add_doxygen)
             #------------------------------------------------------------------#
             # Add dependency for sub doxygen targets
             #------------------------------------------------------------------#
-
-            add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
-            add_dependencies(install-doxygen ${CINCH_CONFIG_INFOTAG}install-doxygen)
+            
+            if ( TARGET doxygen )
+                add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
+            endif()
+            if ( TARGET install-doxygen )
+                add_dependencies(install-doxygen
+                    ${CINCH_CONFIG_INFOTAG}install-doxygen)
+            endif()
 
         else()
 
