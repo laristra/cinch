@@ -15,6 +15,11 @@ endif()
 option(ENABLE_BOOST_PROGRAM_OPTIONS
     "Enable Boost program options for command-line flags" OFF)
 
+if(ENABLE_BOOST_PROGRAM_OPTIONS)
+    find_package(Boost COMPONENTS program_options REQUIRED QUIET)
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 # vim: set tabstop=4 shiftwidth=4 expandtab :
