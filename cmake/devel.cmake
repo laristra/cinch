@@ -36,6 +36,12 @@ function(cinch_add_devel_target name)
     add_executable(${name} ${test_SOURCES} ${_OUTPUT_DIR}/${_TARGET_MAIN})
 
     #--------------------------------------------------------------------------#
+    # CLOG has pthread dependency
+    #--------------------------------------------------------------------------#
+
+    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+
+    #--------------------------------------------------------------------------#
     # Set test properties.
     #--------------------------------------------------------------------------#
 

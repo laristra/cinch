@@ -338,6 +338,8 @@ function(cinch_add_unit name)
             ${CINCH_SOURCE_DIR}/auxiliary)
     endif()
 
+    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+
     target_include_directories(${name} PRIVATE ${_OUTPUT_DIR})
     set_target_properties(${name}
         PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${_OUTPUT_DIR})

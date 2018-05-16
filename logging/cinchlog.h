@@ -1,23 +1,21 @@
-/*~--------------------------------------------------------------------------~*
+/*----------------------------------------------------------------------------*
  * Copyright (c) 2016 Los Alamos National Security, LLC
  * All rights reserved.
- *~--------------------------------------------------------------------------~*/
+ *----------------------------------------------------------------------------*/
 
-#ifndef cinch_cinchlog_h
-#define cinch_cinchlog_h
+#pragma once
 
-//----------------------------------------------------------------------------//
-//! @file
-//! @date Initial file creation: Dec 15, 2016
-//----------------------------------------------------------------------------//
+/*! @file */
 
 #if defined __GNUC__
   #include <cxxabi.h>
   #include <execinfo.h>
 #endif // __GNUC__
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <time.h>
 
 #include <bitset>
@@ -32,6 +30,12 @@
 
 #include <mutex>
 #include <sstream>
+
+// FIXME: guards?
+#include <sys/time.h>
+#include <unistd.h>
+
+#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -192,6 +196,136 @@ std::string rstrip(const char *file) {
 //----------------------------------------------------------------------------//
 // Auxiliary types.
 //----------------------------------------------------------------------------//
+
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+
+// Options to configure buffered message packet behavior
+
+#ifndef CLOG_MAX_MESSAGE_SIZE
+#define CLOG_MAX_MESSAGE_SIZE 1024
+#endif
+
+#ifndef CLOG_MAX_PACKET_BUFFER
+#define CLOG_MAX_PACKET_BUFFER 1024
+#endif
+
+#ifndef CLOG_PACKET_FLUSH_INTERVAL
+#define CLOG_PACKET_FLUSH_INTERVAL 100
+#endif
+
+//----------------------------------------------------------------------------//
+// Packet type.
+//----------------------------------------------------------------------------//
+
+struct packet_t
+{
+  static constexpr size_t sec_bytes = sizeof(time_t);
+  static constexpr size_t usec_bytes = sizeof(suseconds_t);
+
+  packet_t(const char * msg = nullptr) {
+    timeval stamp;
+    if(gettimeofday(&stamp, NULL)) {
+      std::cerr << "CLOG: call to gettimeofday failed!!! " <<
+        __FILE__ << __LINE__ << std::endl;
+      std::exit(1);
+    } // if
+
+    strncpy(data_, reinterpret_cast<const char *>(&stamp.tv_sec), sec_bytes);
+    strncpy(data_+sec_bytes, reinterpret_cast<const char *>(&stamp.tv_usec),
+      usec_bytes);
+
+    std::ostringstream oss;
+    oss << msg;
+
+    strcpy(data_+sec_bytes+usec_bytes, oss.str().c_str());
+  } // packet_t
+
+  time_t const & seconds() const {
+    return *reinterpret_cast<time_t const *>(data_);
+  } // seconds
+
+  suseconds_t const & useconds() const {
+    return *reinterpret_cast<suseconds_t const *>(data_+sec_bytes);
+  } // seconds
+
+  const char * message() {
+    return data_ + sec_bytes + usec_bytes;
+  } // message
+
+  const char * data() const {
+    return data_;
+  } // data
+
+  size_t bytes() const {
+    return sec_bytes + usec_bytes + CLOG_MAX_MESSAGE_SIZE;
+  } // bytes
+
+  bool operator < (packet_t const & b) {
+    return this->seconds() == b.seconds() ?
+      this->useconds() < b.useconds() :
+      this->seconds() < b.seconds();
+  } // operator <
+
+private:
+
+  char data_[sec_bytes + usec_bytes + CLOG_MAX_MESSAGE_SIZE];
+
+}; // packet_t
+
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+
+// Forward
+inline void flush_packets();
+
+struct mpi_state_t
+{
+  static mpi_state_t & instance() {
+    static mpi_state_t s;
+    return s;
+  } // instance
+
+  void init() {
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
+    MPI_Comm_size(MPI_COMM_WORLD, &size_);
+
+    std::thread flusher(flush_packets);
+    instance().flusher_thread().swap(flusher);
+
+    initialized_ = true;
+  } // init
+
+  bool initialized() { return initialized_; }
+
+  int rank() { return rank_; }
+  int size() { return size_; }
+
+  std::thread & flusher_thread() { return flusher_thread_; }
+  std::mutex & packets_mutex() { return packets_mutex_; }
+  std::vector<packet_t> & packets() { return packets_; }
+
+  bool run_flusher() { return run_flusher_; }
+  void end_flusher() { run_flusher_ = false; }
+
+private:
+
+  ~mpi_state_t()
+  {
+    end_flusher();
+    flusher_thread_.join();
+  }
+
+  int rank_;
+  int size_;
+  std::thread flusher_thread_;
+  std::mutex packets_mutex_;
+  std::vector<packet_t> packets_;
+  bool run_flusher_ = true;
+  bool initialized_ = false;
+
+}; // mpi_state_t
+
+#endif // !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
 
 ///
 /// Stream buffer type to allow output to multiple targets
@@ -624,8 +758,13 @@ public:
     } // if
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
-    MPI_Comm_size(MPI_COMM_WORLD, &size_);
+
+    #if defined(CLOG_DEBUG)
+      std::cerr << COLOR_LTGRAY << "CLOG: initializing mpi state" <<
+        COLOR_PLAIN << std::endl;
+    #endif
+
+    mpi_state_t::instance().init();
 #endif
 
     initialized_ = true;
@@ -639,6 +778,15 @@ public:
   {
     return tag_map_;
   } // tag_map
+
+  ///
+  /// Return the buffered log stream.
+  ///
+  std::stringstream &
+  buffer_stream()
+  {
+    return buffer_stream_;
+  } // stream
 
   ///
   /// Return the log stream.
@@ -657,7 +805,8 @@ public:
   std::ostream &
   severity_stream(bool active = true)
   {
-    return active ? *stream_ : null_stream_;
+    //return active ? *stream_ : null_stream_;
+    return active ? buffer_stream_ : null_stream_;
   } // stream
 
   ///
@@ -758,12 +907,6 @@ public:
     return tag_map_[tag];
   } // lookup_tag
 
-  std::mutex &
-  mutex()
-  {
-    return mutex_;
-  } // mutex
-
   bool
   initialized()
   {
@@ -774,13 +917,13 @@ public:
   int
   rank()
   {
-    return rank_;
+    return mpi_state_t::instance().rank();
   } // rank
 
   int
   size()
   {
-    return size_;
+    return mpi_state_t::instance().size();
   } // rank
 #endif
 
@@ -795,53 +938,39 @@ private:
   {
   } // clog_t
 
-  ~clog_t() {}
-
   bool initialized_ = false;
 
   tee_stream_t stream_;
+  std::stringstream buffer_stream_;
   std::ostream null_stream_;
 
   size_t tag_id_;
   size_t active_tag_;
   std::bitset<CLOG_TAG_BITS> tag_bitset_;
   std::unordered_map<std::string, size_t> tag_map_;
-  std::mutex mutex_;
-
-#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
-  int rank_;
-  int size_;
-#endif
 
 }; // class clog_t
 
-// Add turnstile capability to cleanup output during MPI execution
-// Attribution: This was adapted from Kevin Bower's implementation
-// in VPIC.
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+void flush_packets() {
+  while(mpi_state_t::instance().run_flusher()) {
+    usleep(CLOG_PACKET_FLUSH_INTERVAL);
 
-#define begin_turnstile(nway, enabled) do {                                    \
-  int _nway = (nway), _baton;                                                  \
-  if(enabled && clog_t::instance().initialized() &&                            \
-    clog_t::instance().rank() >= _nway) {                                      \
-    MPI_Recv(&_baton, 1, MPI_INT, clog_t::instance().rank()-_nway,             \
-      42, MPI_COMM_WORLD, MPI_STATUS_IGNORE);                                  \
-  } /* if */                                                                   \
-  do
+    {
+    std::lock_guard<std::mutex> guard(mpi_state_t::instance().packets_mutex());
 
-#define end_turnstile(enabled) while(0);                                       \
-  if(enabled && clog_t::instance().initialized() &&                            \
-    clog_t::instance().rank() + _nway < clog_t::instance().size()) {           \
-    MPI_Send(&_baton, 1, MPI_INT, clog_t::instance().rank()+_nway,             \
-      42, MPI_COMM_WORLD);                                                     \
-  } /* if */                                                                   \
-} while(0);
+    std::sort(mpi_state_t::instance().packets().begin(),
+      mpi_state_t::instance().packets().end());
 
-#else
+    for(auto & p: mpi_state_t::instance().packets()) {
+      clog_t::instance().stream() << p.message();
+    } // for
 
-#define begin_turnstile(nway, enabled)
-#define end_turnstile(enabled)
+    mpi_state_t::instance().packets().clear();
+    } // scope
 
+  } // while
+} // flush_packets
 #endif
 
 //----------------------------------------------------------------------------//
@@ -925,6 +1054,32 @@ private:
 #define clog_tag_map()                                                         \
   cinch::clog_t::instance().tag_map()
 
+#define send_to_one(message)                                                   \
+                                                                               \
+  if(mpi_state_t::instance().initialized()) { \
+    packet_t pkt(message);                                                     \
+                                                                               \
+    packet_t * pkts = mpi_state_t::instance().rank() == 0 ?                    \
+      new packet_t[mpi_state_t::instance().size()] :                           \
+      nullptr;                                                                 \
+                                                                               \
+    MPI_Gather(pkt.data(), pkt.bytes(), MPI_BYTE,                              \
+      pkts, pkt.bytes(), MPI_BYTE, 0, MPI_COMM_WORLD);                         \
+                                                                               \
+    if(mpi_state_t::instance().rank()==0) {                                    \
+                                                                               \
+      std::lock_guard<std::mutex>                                              \
+        guard(mpi_state_t::instance().packets_mutex());                        \
+                                                                               \
+      for(size_t i{0}; i<mpi_state_t::instance().size(); ++i) {                \
+        mpi_state_t::instance().packets().push_back(pkts[i]);                  \
+      } /* for */                                                              \
+                                                                               \
+      delete[] pkts;                                                           \
+                                                                               \
+    } /* if */                                                                 \
+  } /* if */
+
 //----------------------------------------------------------------------------//
 // Base type for log messages.
 //----------------------------------------------------------------------------//
@@ -968,12 +1123,11 @@ struct log_message_t
   log_message_t(
     const char * file,
     int line,
-    bool can_turnstile,
     P && predicate
   )
   :
-    file_(file), line_(line), can_turnstile_(can_turnstile),
-      predicate_(predicate), clean_color_(false), fatal_(false)
+    file_(file), line_(line), predicate_(predicate), clean_color_(false),
+    fatal_(false)
   {
 #if defined(CLOG_DEBUG)
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
@@ -984,6 +1138,19 @@ struct log_message_t
   virtual
   ~log_message_t()
   {
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: log_message_t destructor " <<
+      COLOR_PLAIN << std::endl;
+#endif
+
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+    send_to_one(clog_t::instance().buffer_stream().str().c_str());
+#else
+    clog_t::instance().stream() << clog_t::instance().buffer_stream().str();
+#endif
+
+    clog_t::instance().buffer_stream().str(std::string{});
+
     if(fatal_ && predicate_()) {
 
       // Create a backtrace.
@@ -993,7 +1160,7 @@ struct log_message_t
       size_t size;
 
       size = size_t(backtrace(array, 100));  // backtrace returns int
-      char ** symbols = backtrace_symbols(array, int(size));  // func. takes int
+      char ** symbols = backtrace_symbols(array, int(size)); // func. takes int
 
       std::ostream & stream = std::cerr;
       if ( clean_color_ ) stream << COLOR_PLAIN;
@@ -1034,15 +1201,13 @@ struct log_message_t
   std::ostream &
   stream()
   {
-    return predicate_() ? clog_t::instance().stream() :
-      clog_t::instance().null_stream();
+    return clog_t::instance().severity_stream(predicate_());
   } // stream
 
 protected:
 
   const char * file_;
   int line_;
-  bool can_turnstile_;
   P & predicate_;
   bool clean_color_;
   bool fatal_;
@@ -1063,15 +1228,14 @@ struct severity ## _log_message_t                                              \
   severity ## _log_message_t(                                                  \
     const char * file,                                                         \
     int line,                                                                  \
-    bool can_turnstile,                                                        \
     P && predicate = true_state)                                               \
-    : log_message_t<P>(file, line, can_turnstile, predicate) {}                \
+    : log_message_t<P>(file, line, predicate) {}                               \
                                                                                \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
     /* Clean colors from the stream */                                         \
     if(clean_color_) {                                                         \
-      clog_t::instance().stream() << COLOR_PLAIN;                              \
+      clog_t::instance().buffer_stream() << COLOR_PLAIN;                       \
     }                                                                          \
   }                                                                            \
                                                                                \
@@ -1088,8 +1252,11 @@ struct severity ## _log_message_t                                              \
 #define message_stamp \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
-#if !defined(CLOG_TURNSTILE_NWAY)
-#define CLOG_TURNSTILE_NWAY 1
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+#define mpi_stamp \
+  " r" << mpi_state_t::instance().rank()
+#else
+#define mpi_stamp ""
 #endif
 
 // Trace
@@ -1099,11 +1266,11 @@ severity_message_t(trace, decltype(cinch::true_state),
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 1 &&
         predicate_() && clog_t::instance().tag_enabled());
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-      stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_CYAN("] ");
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_CYAN("] ");
+    } // scope
 
     return stream;
   });
@@ -1115,11 +1282,11 @@ severity_message_t(info, decltype(cinch::true_state),
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 2 &&
         predicate_() && clog_t::instance().tag_enabled());
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-      stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_GREEN("] ");
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_GREEN("] ");
+    } // scope
 
     return stream;
   });
@@ -1127,15 +1294,15 @@ severity_message_t(info, decltype(cinch::true_state),
 // Warn
 severity_message_t(warn, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 3 &&
         predicate_() && clog_t::instance().tag_enabled());
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+    } // scope
 
     clean_color_ = true;
     return stream;
@@ -1144,13 +1311,13 @@ severity_message_t(warn, decltype(cinch::true_state),
 // Error
 severity_message_t(error, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream = std::cerr;
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_RED("] ") << COLOR_LTRED;
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_RED("] ") << COLOR_LTRED;
+    } // scope
 
     clean_color_ = true;
     return stream;
@@ -1161,12 +1328,11 @@ severity_message_t(error, decltype(cinch::true_state),
 // Fatal
 severity_message_t(fatal, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream = std::cerr;
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+    } // scope
 
     clean_color_ = true;
     fatal_ = true;
@@ -1266,7 +1432,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog(severity)                                                         \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true).stream()
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__).stream()
 
 //----------------------------------------------------------------------------//
 //! @def clog_trace(message)
@@ -1289,8 +1455,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_trace(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::trace_log_message_t(__FILE__, __LINE__, true).stream() <<             \
-    message << std::endl
+  cinch::trace_log_message_t(__FILE__, __LINE__).stream() << message
 
 //----------------------------------------------------------------------------//
 //! @def clog_info(message)
@@ -1313,8 +1478,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_info(message)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::info_log_message_t(__FILE__, __LINE__, true).stream() <<              \
-    message << std::endl
+  cinch::info_log_message_t(__FILE__, __LINE__).stream() << message
 
 //----------------------------------------------------------------------------//
 //! @def clog_warn(message)
@@ -1337,8 +1501,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_warn(message)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::warn_log_message_t(__FILE__, __LINE__, true).stream() <<              \
-    message << std::endl
+  cinch::warn_log_message_t(__FILE__, __LINE__).stream() << message
 
 //----------------------------------------------------------------------------//
 //! @def clog_error(message)
@@ -1361,8 +1524,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_error(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::error_log_message_t(__FILE__, __LINE__, true).stream() <<             \
-    message << std::endl
+  cinch::error_log_message_t(__FILE__, __LINE__).stream() << message
 
 #else
 
@@ -1432,8 +1594,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_fatal(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::fatal_log_message_t(__FILE__, __LINE__, true).stream() <<     \
-    message << std::endl
+  true && cinch::fatal_log_message_t(__FILE__, __LINE__).stream() << message
 
 //----------------------------------------------------------------------------//
 //! @def clog_assert(test, message)
@@ -1714,7 +1875,7 @@ is_active_rank()
 #define clog_rank(severity, rank)                                              \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true,          \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
     cinch::is_static_rank<rank>).stream()
 
 //----------------------------------------------------------------------------//
@@ -1747,7 +1908,7 @@ is_active_rank()
 #define clog_one(severity)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, false,         \
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
     cinch::is_active_rank).stream()
 
 //----------------------------------------------------------------------------//
@@ -1857,10 +2018,3 @@ is_active_rank()
 #endif
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
-
-#endif // cinch_cinchlog_h
-
-/*~-------------------------------------------------------------------------~-*
- * Formatting options for vim.
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/

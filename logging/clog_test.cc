@@ -64,24 +64,25 @@ int main(int argc, char ** argv) {
   {
     clog_tag_guard(tag1);
 
-    //clog(info) << "In tag guard for tag1" << std::endl;
-    clog_info("In tag guard for tag1" << std::endl);
+    clog(info) << "In tag guard for tag1" << std::endl;
+    //clog_info("In tag guard for tag1" << std::endl);
 
     for(auto i{0}; i<10; ++i) {
-      //clog(info) << "i: " << i << std::endl;
-      clog_info("i: " << i << std::endl);
+      clog(info) << "i: " << i << std::endl;
+      usleep(10000);
+      //clog_info("i: " << i << std::endl);
     } // for
   } // scope
 
   {
     clog_tag_guard(tag2);
 
-    //clog(trace) << "In tag guard for tag2" << std::endl;
-    clog_trace("In tag guard for tag2" << std::endl);
+    clog(trace) << "In tag guard for tag2" << std::endl;
+    //clog_trace("In tag guard for tag2" << std::endl);
 
     for(auto i{0}; i<10; ++i) {
-      //clog(trace) << "i: " << i << std::endl;
-      clog_trace("i: " << i << std::endl);
+      clog(trace) << "i: " << i << std::endl;
+      //clog_trace("i: " << i << std::endl);
     } // for
   } // scope
 
