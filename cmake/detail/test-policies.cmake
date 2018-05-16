@@ -7,7 +7,7 @@
 # Check the test policy. The default is SERIAL.
 #--------------------------------------------------------------------------#
 
-    if(NOT test_POLICY OR test_POLICY STREQUAL "SERIAL") 
+    if(NOT test_POLICY OR test_POLICY STREQUAL "SERIAL")
 
         set(test_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-standard.cc)
         set(test_policy_defines -DSERIAL)
@@ -19,7 +19,7 @@
         set(test_policy_includes ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
         set(test_policy_libraries ${MPI_${MPI_LANGUAGE}_LIBRARIES})
         set(test_policy_exec ${MPIEXEC})
-        set(test_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})        
+        set(test_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
 
     elseif(MPI_${MPI_LANGUAGE}_FOUND AND Legion_FOUND AND
         test_POLICY STREQUAL "LEGION")
@@ -31,6 +31,16 @@
             ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
         set(test_policy_libraries ${Legion_LIBRARIES} ${Legion_LIB_FLAGS}
             ${MPI_${MPI_LANGUAGE}_LIBRARIES})
+        set(test_policy_exec ${MPIEXEC})
+        set(test_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
+        set(test_policy_defines -DCINCH_ENABLE_MPI)
+
+    elseif(MPI_${MPI_LANGUAGE}_FOUND AND HPX_FOUND AND test_POLICY STREQUAL "HPX")
+
+        set(test_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-hpx.cc)
+        set(test_policy_flags ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS})
+        set(test_policy_includes ${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
+        set(test_policy_libraries ${MPI_${MPI_LANGUAGE}_LIBRARIES})
         set(test_policy_exec ${MPIEXEC})
         set(test_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
         set(test_policy_defines -DCINCH_ENABLE_MPI)
