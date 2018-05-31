@@ -3,7 +3,7 @@
 	url = ../../google/googletest.git
 [submodule "pfunit"]
 	path = pfunit
-	url = ../../laristra/pfunit.git
+	url = ../../Goddard-Fortran-Ecosystem/pFUnit.git
 [submodule "boost/preprocessor"]
 	path = boost/preprocessor
 	url = ../../boostorg/preprocessor.git
