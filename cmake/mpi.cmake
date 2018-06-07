@@ -37,8 +37,19 @@ if(MPI_${MPI_LANGUAGE}_FOUND)
 
     # using mpich, there are extra spaces that cause some issues
     separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
-    
+
 endif(MPI_${MPI_LANGUAGE}_FOUND)
+
+if(MSVC)
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_NONSTDC_NO_WARNINGS)
+    add_definitions(-D_HAS_AUTO_PTR_ETC=1)
+    add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+    add_definitions(-DGTEST_LANG_CXX11=1)
+endif()
 
 endif(ENABLE_MPI)
 
