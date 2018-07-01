@@ -32,8 +32,10 @@
 #include <sstream>
 
 // FIXME: guards?
+#if !defined(_MSC_VER)
 #include <sys/time.h>
 #include <unistd.h>
+#endif
 
 #include <thread>
 #include <unordered_map>
