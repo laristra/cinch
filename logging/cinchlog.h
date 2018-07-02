@@ -770,7 +770,7 @@ public:
 #endif
 
     initialized_ = true;
-  } // clog_t
+  } // init
 
   ///
   /// Return the tag map.
@@ -940,6 +940,13 @@ private:
   {
   } // clog_t
 
+  ~clog_t()
+  {
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: clog_t destructor" << std::endl;
+#endif
+  }
+
   bool initialized_ = false;
 
   tee_stream_t stream_;
@@ -1096,40 +1103,40 @@ true_state()
   return true;
 } // output_bool
 
-///
-/// \struct log_message_t cinchlog.h
-/// \brief log_message_t provides a base class for implementing
-///        formatted logging utilities.
-///
+/*!
+  The log_message_t type provides a base class for implementing
+  formatted logging utilities.
+ */
 template<typename P>
 struct log_message_t
 {
-  ///
-  /// Constructor.
-  ///
-  /// This method initializes the \e fatal_ data member to false. Derived
-  /// classes wishing to force exit should set this to true in their
-  /// override of the stream method.
-  ///
-  /// \tparam P Predicate function type.
-  ///
-  /// \param file The current file (where the log message was created).
-  ///             In general, this will always use the __FILE__ parameter
-  ///             from the calling macro.
-  /// \param line The current line (where the log message was called).
-  ///             In general, this will always use the __LINE__ parameter
-  ///             from the calling macro.
-  /// \param predicate The predicate function to determine whether or not
-  ///                  the calling runtime should produce output.
-  ///
+  /*!
+    Constructor.
+
+    This method initializes the \e fatal_ data member to false. Derived
+    classes wishing to force exit should set this to true in their
+    override of the stream method.
+
+    @tparam P Predicate function type.
+
+    @param file      The current file (where the log message was created).
+                     In general, this will always use the __FILE__ parameter
+                     from the calling macro.
+    @param line      The current line (where the log message was called).
+                     In general, this will always use the __LINE__ parameter
+                     from the calling macro.
+    @param predicate The predicate function to determine whether or not
+                     the calling runtime should produce output.
+   */
   log_message_t(
     const char * file,
     int line,
-    P && predicate
+    P && predicate,
+    bool can_send_to_one = true
   )
   :
-    file_(file), line_(line), predicate_(predicate), clean_color_(false),
-    fatal_(false)
+    file_(file), line_(line), predicate_(predicate),
+    can_send_to_one_(can_send_to_one), clean_color_(false), fatal_(false)
   {
 #if defined(CLOG_DEBUG)
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
@@ -1146,7 +1153,12 @@ struct log_message_t
 #endif
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
-    send_to_one(clog_t::instance().buffer_stream().str().c_str());
+    if(can_send_to_one_) {
+      send_to_one(clog_t::instance().buffer_stream().str().c_str());
+    }
+    else {
+      clog_t::instance().stream() << clog_t::instance().buffer_stream().str();
+    } // if
 #else
     clog_t::instance().stream() << clog_t::instance().buffer_stream().str();
 #endif
@@ -1211,6 +1223,7 @@ protected:
   const char * file_;
   int line_;
   P & predicate_;
+  bool can_send_to_one_;
   bool clean_color_;
   bool fatal_;
 
@@ -1230,8 +1243,10 @@ struct severity ## _log_message_t                                              \
   severity ## _log_message_t(                                                  \
     const char * file,                                                         \
     int line,                                                                  \
-    P && predicate = true_state)                                               \
-    : log_message_t<P>(file, line, predicate) {}                               \
+    P && predicate = true_state,                                               \
+    bool can_send_to_one = true                                                \
+  )                                                                            \
+    : log_message_t<P>(file, line, predicate, can_send_to_one) {}              \
                                                                                \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
@@ -1251,7 +1266,7 @@ struct severity ## _log_message_t                                              \
 // Define the insertion style severity levels.
 //----------------------------------------------------------------------------//
 
-#define message_stamp \
+#define message_stamp                                                          \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
@@ -1877,7 +1892,7 @@ is_active_rank()
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
-    cinch::is_static_rank<rank>).stream()
+    cinch::is_static_rank<rank>, false).stream()
 
 /*!
   @def clog_set_output_rank(rank)
@@ -1910,7 +1925,7 @@ is_active_rank()
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
-    cinch::is_active_rank).stream()
+    cinch::is_active_rank, false).stream()
 
 /*!
   @def clog_container_rank(severity, banner, container, delimiter, rank)
@@ -1954,7 +1969,7 @@ is_active_rank()
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
-  }
+  } /* scope */
 
 /*!
   @def clog_container_one(severity, banner, container, delimiter)
@@ -1998,7 +2013,7 @@ is_active_rank()
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_one(severity) << ss.str() << std::endl;                                 \
-  }
+  } /* scope */
 
 #else
 
