@@ -63,6 +63,9 @@
         target_link_libraries(${name} ${test_LIBRARIES})
     endif()
 
+    if (HPX_FOUND AND test_POLICY STREQUAL "HPX")
+        hpx_setup_target(${name} NOPREFIX)
+    endif()
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
 # vim: set tabstop=4 shiftwidth=4 expandtab :
