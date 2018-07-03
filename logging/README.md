@@ -9,6 +9,20 @@
 
 ## Cinch Logging Utilities (clog)
 
+### Quick Start
+
+Configure cmake to enable clog:
+```
+$ cmake -DENABLE_CLOG=ON -DCLOG_ENABLE_MPI=ON -DCLOG_ENABLE_TAGS=ON path...
+```
+**The options for MPI and tags are useful, but not necessary.**  Rebuild
+the project, and then set the std::clog environment variable:
+```
+$ export CLOG_ENABLE_STDLOG=1
+```
+If your executable uses clog calls, they should now produce output when
+you run.
+
 ### Basic Description
 
 Cinch has support for trace, info, warn, error, and fatal log reporting
