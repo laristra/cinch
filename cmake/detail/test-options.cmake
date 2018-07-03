@@ -8,7 +8,7 @@
     #--------------------------------------------------------------------------#
 
     set(options)
-    set(one_value_args POLICY)
+    set(one_value_args POLICY FOLDER)
     set(multi_value_args SOURCES INPUTS THREADS LIBRARIES DEFINES)
 
     cmake_parse_arguments(test "${options}" "${one_value_args}"

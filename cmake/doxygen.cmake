@@ -62,6 +62,7 @@ function(cinch_add_doxygen)
             if ( TARGET doxygen )
                 add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
             endif()
+
             if ( TARGET install-doxygen )
                 add_dependencies(install-doxygen
                     ${CINCH_CONFIG_INFOTAG}install-doxygen)
@@ -123,8 +124,8 @@ function(cinch_add_doxygen)
         #----------------------------------------------------------------------#
 
         add_custom_target(${CINCH_CONFIG_INFOTAG}install-doxygen
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${_directory}/doxygen $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${_directory}/doxygen
+                $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
 
     endif(ENABLE_DOXYGEN)
 

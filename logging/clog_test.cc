@@ -18,6 +18,14 @@ clog_register_tag(tag2);
 
 int main(int argc, char ** argv) {
 
+  int rank(0);
+
+#if defined(CLOG_ENABLE_MPI)
+  MPI_Init(&argc, &argv);
+
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+
   // Initialize tags to output all tag groups from clog
   std::string tags("all");
 
@@ -38,11 +46,38 @@ int main(int argc, char ** argv) {
 
   notify(vm);
 
-  // Output help message
-  if(vm.count("help")) {
-    std::cout << desc << std::endl;
+  // Gather the unregistered options, if there are any, print a help message
+  // and die nicely.
+  std::vector<std::string> unrecog_options =
+    collect_unrecognized(parsed.options, include_positional);
+
+  if(unrecog_options.size()) {
+    if(rank == 0) {
+      std::cout << std::endl << "Unrecognized options: ";
+      for ( int i=0; i<unrecog_options.size(); ++i ) {
+        std::cout << unrecog_options[i] << " ";
+      }
+      std::cout << std::endl << std::endl << desc << std::endl;
+    } // if
+
+#if defined(CLOG_ENABLE_MPI)
+    MPI_Finalize();
+#endif
+
     return 1;
-  }
+  } // if
+
+  if(vm.count("help")) {
+    if(rank == 0) {
+      std::cout << desc << std::endl;
+    } // if
+
+#if defined(CLOG_ENABLE_MPI)
+    MPI_Finalize();
+#endif
+
+    return 1;
+  } // if
 
   // Test tags
   if(tags == "0") {
@@ -51,6 +86,8 @@ int main(int argc, char ** argv) {
     for(auto t: clog_tag_map()) {
       std::cout << " " << t.first << std::endl;
     } // for
+
+    return 1;
   }
   else {
     // Initialize clog runtime
@@ -61,9 +98,12 @@ int main(int argc, char ** argv) {
     clog_tag_guard(tag1);
 
     clog(info) << "In tag guard for tag1" << std::endl;
+    //clog_info("In tag guard for tag1" << std::endl);
 
     for(auto i{0}; i<10; ++i) {
       clog(info) << "i: " << i << std::endl;
+      usleep(10000);
+      //clog_info("i: " << i << std::endl);
     } // for
   } // scope
 
@@ -71,11 +111,17 @@ int main(int argc, char ** argv) {
     clog_tag_guard(tag2);
 
     clog(trace) << "In tag guard for tag2" << std::endl;
+    //clog_trace("In tag guard for tag2" << std::endl);
 
     for(auto i{0}; i<10; ++i) {
       clog(trace) << "i: " << i << std::endl;
+      //clog_trace("i: " << i << std::endl);
     } // for
   } // scope
+
+#if defined(CLOG_ENABLE_MPI)
+  MPI_Finalize();
+#endif
 
   return 0;
 } // main

@@ -12,6 +12,17 @@ include(subdirlist)
 function(cinch_add_library_target target directory)
 
     #--------------------------------------------------------------------------#
+    # Setup argument options
+    #--------------------------------------------------------------------------#
+
+    set(options)
+    set(one_value_args EXPORT_TARGET)
+    set(multi_value_args)
+
+    cmake_parse_arguments(lib "${options}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
     # Add target to list
     #--------------------------------------------------------------------------#
 
@@ -97,7 +108,12 @@ function(cinch_add_library_target target directory)
             DESTINATION include/${directory}/${DIR})
     endforeach()
 
-    install(TARGETS ${target} EXPORT ${target}Targets DESTINATION ${LIBDIR})
+    if(lib_EXPORT_TARGET)
+        install(TARGETS ${target} EXPORT ${lib_EXPORT_TARGET}
+            DESTINATION ${LIBDIR})
+    else()
+        install(TARGETS ${target} DESTINATION ${LIBDIR})
+    endif()
 
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include)

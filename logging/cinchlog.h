@@ -1,23 +1,21 @@
-/*~--------------------------------------------------------------------------~*
+/*----------------------------------------------------------------------------*
  * Copyright (c) 2016 Los Alamos National Security, LLC
  * All rights reserved.
- *~--------------------------------------------------------------------------~*/
+ *----------------------------------------------------------------------------*/
 
-#ifndef cinch_cinchlog_h
-#define cinch_cinchlog_h
+#pragma once
 
-//----------------------------------------------------------------------------//
-//! @file
-//! @date Initial file creation: Dec 15, 2016
-//----------------------------------------------------------------------------//
+/*! @file */
 
 #if defined __GNUC__
   #include <cxxabi.h>
   #include <execinfo.h>
 #endif // __GNUC__
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <time.h>
 
 #include <bitset>
@@ -32,6 +30,14 @@
 
 #include <mutex>
 #include <sstream>
+
+// FIXME: guards?
+#if !defined(_MSC_VER)
+#include <sys/time.h>
+#include <unistd.h>
+#endif
+
+#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -192,6 +198,136 @@ std::string rstrip(const char *file) {
 //----------------------------------------------------------------------------//
 // Auxiliary types.
 //----------------------------------------------------------------------------//
+
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+
+// Options to configure buffered message packet behavior
+
+#ifndef CLOG_MAX_MESSAGE_SIZE
+#define CLOG_MAX_MESSAGE_SIZE 1024
+#endif
+
+#ifndef CLOG_MAX_PACKET_BUFFER
+#define CLOG_MAX_PACKET_BUFFER 1024
+#endif
+
+#ifndef CLOG_PACKET_FLUSH_INTERVAL
+#define CLOG_PACKET_FLUSH_INTERVAL 100
+#endif
+
+//----------------------------------------------------------------------------//
+// Packet type.
+//----------------------------------------------------------------------------//
+
+struct packet_t
+{
+  static constexpr size_t sec_bytes = sizeof(time_t);
+  static constexpr size_t usec_bytes = sizeof(suseconds_t);
+
+  packet_t(const char * msg = nullptr) {
+    timeval stamp;
+    if(gettimeofday(&stamp, NULL)) {
+      std::cerr << "CLOG: call to gettimeofday failed!!! " <<
+        __FILE__ << __LINE__ << std::endl;
+      std::exit(1);
+    } // if
+
+    strncpy(data_, reinterpret_cast<const char *>(&stamp.tv_sec), sec_bytes);
+    strncpy(data_+sec_bytes, reinterpret_cast<const char *>(&stamp.tv_usec),
+      usec_bytes);
+
+    std::ostringstream oss;
+    oss << msg;
+
+    strcpy(data_+sec_bytes+usec_bytes, oss.str().c_str());
+  } // packet_t
+
+  time_t const & seconds() const {
+    return *reinterpret_cast<time_t const *>(data_);
+  } // seconds
+
+  suseconds_t const & useconds() const {
+    return *reinterpret_cast<suseconds_t const *>(data_+sec_bytes);
+  } // seconds
+
+  const char * message() {
+    return data_ + sec_bytes + usec_bytes;
+  } // message
+
+  const char * data() const {
+    return data_;
+  } // data
+
+  size_t bytes() const {
+    return sec_bytes + usec_bytes + CLOG_MAX_MESSAGE_SIZE;
+  } // bytes
+
+  bool operator < (packet_t const & b) {
+    return this->seconds() == b.seconds() ?
+      this->useconds() < b.useconds() :
+      this->seconds() < b.seconds();
+  } // operator <
+
+private:
+
+  char data_[sec_bytes + usec_bytes + CLOG_MAX_MESSAGE_SIZE];
+
+}; // packet_t
+
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+
+// Forward
+inline void flush_packets();
+
+struct mpi_state_t
+{
+  static mpi_state_t & instance() {
+    static mpi_state_t s;
+    return s;
+  } // instance
+
+  void init() {
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
+    MPI_Comm_size(MPI_COMM_WORLD, &size_);
+
+    std::thread flusher(flush_packets);
+    instance().flusher_thread().swap(flusher);
+
+    initialized_ = true;
+  } // init
+
+  bool initialized() { return initialized_; }
+
+  int rank() { return rank_; }
+  int size() { return size_; }
+
+  std::thread & flusher_thread() { return flusher_thread_; }
+  std::mutex & packets_mutex() { return packets_mutex_; }
+  std::vector<packet_t> & packets() { return packets_; }
+
+  bool run_flusher() { return run_flusher_; }
+  void end_flusher() { run_flusher_ = false; }
+
+private:
+
+  ~mpi_state_t()
+  {
+    end_flusher();
+    flusher_thread_.join();
+  }
+
+  int rank_;
+  int size_;
+  std::thread flusher_thread_;
+  std::mutex packets_mutex_;
+  std::vector<packet_t> packets_;
+  bool run_flusher_ = true;
+  bool initialized_ = false;
+
+}; // mpi_state_t
+
+#endif // !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
 
 ///
 /// Stream buffer type to allow output to multiple targets
@@ -378,6 +514,7 @@ protected:
             return flush_buffer(all_buffers);
           } // if
       } // switch
+
       return c;
     } // if
   } // overflow
@@ -623,12 +760,17 @@ public:
     } // if
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
-    MPI_Comm_size(MPI_COMM_WORLD, &size_);
+
+    #if defined(CLOG_DEBUG)
+      std::cerr << COLOR_LTGRAY << "CLOG: initializing mpi state" <<
+        COLOR_PLAIN << std::endl;
+    #endif
+
+    mpi_state_t::instance().init();
 #endif
 
     initialized_ = true;
-  } // clog_t
+  } // init
 
   ///
   /// Return the tag map.
@@ -638,6 +780,15 @@ public:
   {
     return tag_map_;
   } // tag_map
+
+  ///
+  /// Return the buffered log stream.
+  ///
+  std::stringstream &
+  buffer_stream()
+  {
+    return buffer_stream_;
+  } // stream
 
   ///
   /// Return the log stream.
@@ -656,7 +807,8 @@ public:
   std::ostream &
   severity_stream(bool active = true)
   {
-    return active ? *stream_ : null_stream_;
+    //return active ? *stream_ : null_stream_;
+    return active ? buffer_stream_ : null_stream_;
   } // stream
 
   ///
@@ -757,12 +909,6 @@ public:
     return tag_map_[tag];
   } // lookup_tag
 
-  std::mutex &
-  mutex()
-  {
-    return mutex_;
-  } // mutex
-
   bool
   initialized()
   {
@@ -773,13 +919,13 @@ public:
   int
   rank()
   {
-    return rank_;
+    return mpi_state_t::instance().rank();
   } // rank
 
   int
   size()
   {
-    return size_;
+    return mpi_state_t::instance().size();
   } // rank
 #endif
 
@@ -794,53 +940,46 @@ private:
   {
   } // clog_t
 
-  ~clog_t() {}
+  ~clog_t()
+  {
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: clog_t destructor" << std::endl;
+#endif
+  }
 
   bool initialized_ = false;
 
   tee_stream_t stream_;
+  std::stringstream buffer_stream_;
   std::ostream null_stream_;
 
   size_t tag_id_;
   size_t active_tag_;
   std::bitset<CLOG_TAG_BITS> tag_bitset_;
   std::unordered_map<std::string, size_t> tag_map_;
-  std::mutex mutex_;
-
-#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
-  int rank_;
-  int size_;
-#endif
 
 }; // class clog_t
 
-// Add turnstile capability to cleanup output during MPI execution
-// Attribution: This was adapted from Kevin Bower's implementation
-// in VPIC.
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+void flush_packets() {
+  while(mpi_state_t::instance().run_flusher()) {
+    usleep(CLOG_PACKET_FLUSH_INTERVAL);
 
-#define begin_turnstile(nway, enabled) do {                                    \
-  int _nway = (nway), _baton;                                                  \
-  if(enabled && clog_t::instance().initialized() &&                            \
-    clog_t::instance().rank() >= _nway) {                                      \
-    MPI_Recv(&_baton, 1, MPI_INT, clog_t::instance().rank()-_nway,             \
-      42, MPI_COMM_WORLD, MPI_STATUS_IGNORE);                                  \
-  } /* if */                                                                   \
-  do
+    {
+    std::lock_guard<std::mutex> guard(mpi_state_t::instance().packets_mutex());
 
-#define end_turnstile(enabled) while(0);                                       \
-  if(enabled && clog_t::instance().initialized() &&                            \
-    clog_t::instance().rank() + _nway < clog_t::instance().size()) {           \
-    MPI_Send(&_baton, 1, MPI_INT, clog_t::instance().rank()+_nway,             \
-      42, MPI_COMM_WORLD);                                                     \
-  } /* if */                                                                   \
-} while(0);
+    std::sort(mpi_state_t::instance().packets().begin(),
+      mpi_state_t::instance().packets().end());
 
-#else
+    for(auto & p: mpi_state_t::instance().packets()) {
+      clog_t::instance().stream() << p.message();
+    } // for
 
-#define begin_turnstile(nway, enabled)
-#define end_turnstile(enabled)
+    mpi_state_t::instance().packets().clear();
+    } // scope
 
+  } // while
+} // flush_packets
 #endif
 
 //----------------------------------------------------------------------------//
@@ -924,6 +1063,32 @@ private:
 #define clog_tag_map()                                                         \
   cinch::clog_t::instance().tag_map()
 
+#define send_to_one(message)                                                   \
+                                                                               \
+  if(mpi_state_t::instance().initialized()) { \
+    packet_t pkt(message);                                                     \
+                                                                               \
+    packet_t * pkts = mpi_state_t::instance().rank() == 0 ?                    \
+      new packet_t[mpi_state_t::instance().size()] :                           \
+      nullptr;                                                                 \
+                                                                               \
+    MPI_Gather(pkt.data(), pkt.bytes(), MPI_BYTE,                              \
+      pkts, pkt.bytes(), MPI_BYTE, 0, MPI_COMM_WORLD);                         \
+                                                                               \
+    if(mpi_state_t::instance().rank()==0) {                                    \
+                                                                               \
+      std::lock_guard<std::mutex>                                              \
+        guard(mpi_state_t::instance().packets_mutex());                        \
+                                                                               \
+      for(size_t i{0}; i<mpi_state_t::instance().size(); ++i) {                \
+        mpi_state_t::instance().packets().push_back(pkts[i]);                  \
+      } /* for */                                                              \
+                                                                               \
+      delete[] pkts;                                                           \
+                                                                               \
+    } /* if */                                                                 \
+  } /* if */
+
 //----------------------------------------------------------------------------//
 // Base type for log messages.
 //----------------------------------------------------------------------------//
@@ -938,41 +1103,40 @@ true_state()
   return true;
 } // output_bool
 
-///
-/// \struct log_message_t cinchlog.h
-/// \brief log_message_t provides a base class for implementing
-///        formatted logging utilities.
-///
+/*!
+  The log_message_t type provides a base class for implementing
+  formatted logging utilities.
+ */
 template<typename P>
 struct log_message_t
 {
-  ///
-  /// Constructor.
-  ///
-  /// This method initializes the \e fatal_ data member to false. Derived
-  /// classes wishing to force exit should set this to true in their
-  /// override of the stream method.
-  ///
-  /// \tparam P Predicate function type.
-  ///
-  /// \param file The current file (where the log message was created).
-  ///             In general, this will always use the __FILE__ parameter
-  ///             from the calling macro.
-  /// \param line The current line (where the log message was called).
-  ///             In general, this will always use the __LINE__ parameter
-  ///             from the calling macro.
-  /// \param predicate The predicate function to determine whether or not
-  ///                  the calling runtime should produce output.
-  ///
+  /*!
+    Constructor.
+
+    This method initializes the \e fatal_ data member to false. Derived
+    classes wishing to force exit should set this to true in their
+    override of the stream method.
+
+    @tparam P Predicate function type.
+
+    @param file      The current file (where the log message was created).
+                     In general, this will always use the __FILE__ parameter
+                     from the calling macro.
+    @param line      The current line (where the log message was called).
+                     In general, this will always use the __LINE__ parameter
+                     from the calling macro.
+    @param predicate The predicate function to determine whether or not
+                     the calling runtime should produce output.
+   */
   log_message_t(
     const char * file,
     int line,
-    bool can_turnstile,
-    P && predicate
+    P && predicate,
+    bool can_send_to_one = true
   )
   :
-    file_(file), line_(line), can_turnstile_(can_turnstile),
-      predicate_(predicate), clean_color_(false), fatal_(false)
+    file_(file), line_(line), predicate_(predicate),
+    can_send_to_one_(can_send_to_one), clean_color_(false), fatal_(false)
   {
 #if defined(CLOG_DEBUG)
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
@@ -983,6 +1147,24 @@ struct log_message_t
   virtual
   ~log_message_t()
   {
+#if defined(CLOG_DEBUG)
+    std::cerr << COLOR_LTGRAY << "CLOG: log_message_t destructor " <<
+      COLOR_PLAIN << std::endl;
+#endif
+
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+    if(can_send_to_one_) {
+      send_to_one(clog_t::instance().buffer_stream().str().c_str());
+    }
+    else {
+      clog_t::instance().stream() << clog_t::instance().buffer_stream().str();
+    } // if
+#else
+    clog_t::instance().stream() << clog_t::instance().buffer_stream().str();
+#endif
+
+    clog_t::instance().buffer_stream().str(std::string{});
+
     if(fatal_ && predicate_()) {
 
       // Create a backtrace.
@@ -992,7 +1174,7 @@ struct log_message_t
       size_t size;
 
       size = size_t(backtrace(array, 100));  // backtrace returns int
-      char ** symbols = backtrace_symbols(array, int(size));  // func. takes int
+      char ** symbols = backtrace_symbols(array, int(size)); // func. takes int
 
       std::ostream & stream = std::cerr;
       if ( clean_color_ ) stream << COLOR_PLAIN;
@@ -1033,16 +1215,15 @@ struct log_message_t
   std::ostream &
   stream()
   {
-    return predicate_() ? clog_t::instance().stream() :
-      clog_t::instance().null_stream();
+    return clog_t::instance().severity_stream(predicate_());
   } // stream
 
 protected:
 
   const char * file_;
   int line_;
-  bool can_turnstile_;
   P & predicate_;
+  bool can_send_to_one_;
   bool clean_color_;
   bool fatal_;
 
@@ -1062,15 +1243,16 @@ struct severity ## _log_message_t                                              \
   severity ## _log_message_t(                                                  \
     const char * file,                                                         \
     int line,                                                                  \
-    bool can_turnstile,                                                        \
-    P && predicate = true_state)                                               \
-    : log_message_t<P>(file, line, can_turnstile, predicate) {}                \
+    P && predicate = true_state,                                               \
+    bool can_send_to_one = true                                                \
+  )                                                                            \
+    : log_message_t<P>(file, line, predicate, can_send_to_one) {}              \
                                                                                \
   ~severity ## _log_message_t()                                                \
   {                                                                            \
     /* Clean colors from the stream */                                         \
     if(clean_color_) {                                                         \
-      clog_t::instance().stream() << COLOR_PLAIN;                              \
+      clog_t::instance().buffer_stream() << COLOR_PLAIN;                       \
     }                                                                          \
   }                                                                            \
                                                                                \
@@ -1084,11 +1266,14 @@ struct severity ## _log_message_t                                              \
 // Define the insertion style severity levels.
 //----------------------------------------------------------------------------//
 
-#define message_stamp \
+#define message_stamp                                                          \
   timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
 
-#if !defined(CLOG_TURNSTILE_NWAY)
-#define CLOG_TURNSTILE_NWAY 1
+#if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
+#define mpi_stamp \
+  " r" << mpi_state_t::instance().rank()
+#else
+#define mpi_stamp ""
 #endif
 
 // Trace
@@ -1098,11 +1283,11 @@ severity_message_t(trace, decltype(cinch::true_state),
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 1 &&
         predicate_() && clog_t::instance().tag_enabled());
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-      stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_CYAN("] ");
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_CYAN("[T") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_CYAN("] ");
+    } // scope
 
     return stream;
   });
@@ -1114,11 +1299,11 @@ severity_message_t(info, decltype(cinch::true_state),
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 2 &&
         predicate_() && clog_t::instance().tag_enabled());
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
-      stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_GREEN("] ");
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_GREEN("[I") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_GREEN("] ");
+    } // scope
 
     return stream;
   });
@@ -1126,15 +1311,15 @@ severity_message_t(info, decltype(cinch::true_state),
 // Warn
 severity_message_t(warn, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream =
       clog_t::instance().severity_stream(CLOG_STRIP_LEVEL < 3 &&
         predicate_() && clog_t::instance().tag_enabled());
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_BROWN("[W") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_BROWN("] ") << COLOR_YELLOW;
+    } // scope
 
     clean_color_ = true;
     return stream;
@@ -1143,13 +1328,13 @@ severity_message_t(warn, decltype(cinch::true_state),
 // Error
 severity_message_t(error, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream = std::cerr;
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
-      stream << OUTPUT_RED("] ") << COLOR_LTRED;
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_RED("[E") << OUTPUT_LTGRAY(message_stamp);
+    stream << OUTPUT_DKGRAY(mpi_stamp);
+    stream << OUTPUT_RED("] ") << COLOR_LTRED;
+    } // scope
 
     clean_color_ = true;
     return stream;
@@ -1160,12 +1345,11 @@ severity_message_t(error, decltype(cinch::true_state),
 // Fatal
 severity_message_t(fatal, decltype(cinch::true_state),
   {
-    std::lock_guard<std::mutex> guard(clog_t::instance().mutex());
     std::ostream & stream = std::cerr;
 
-    begin_turnstile(CLOG_TURNSTILE_NWAY, can_turnstile_) {
-      stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
-    } end_turnstile(can_turnstile_)
+    {
+    stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
+    } // scope
 
     clean_color_ = true;
     fatal_ = true;
@@ -1204,164 +1388,160 @@ severity_message_t(fatal, decltype(cinch::true_state),
 
 #if defined(ENABLE_CLOG)
 
-//----------------------------------------------------------------------------//
-//! @def clog_init(active)
-//!
-//! This call initializes the clog runtime with the list of tags specified
-//! in \em active.
-//!
-//! @param active A const char * or std::string containing the list of
-//!               active tags. Tags should be comma delimited.
-//!
-//! \b Usage
-//! \code
-//! int main(int argc, char ** argv) {
-//!
-//!    // Fill a string object with the active tags.
-//!    std::string tags{"init,advance,analysis"};
-//!
-//!    // Initialize the clog runtime with active tags, 'init', 'advance',
-//!    // and 'analysis'.
-//!    clog_init(tags);
-//!
-//!    return 0;
-//! } // main
-//! \endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_init(active)
+
+  This call initializes the clog runtime with the list of tags specified
+  in \em active.
+
+  @param active A const char * or std::string containing the list of
+                active tags. Tags should be comma delimited.
+
+  \b Usage
+  \code
+  int main(int argc, char ** argv) {
+
+     // Fill a string object with the active tags.
+     std::string tags{"init,advance,analysis"};
+
+     // Initialize the clog runtime with active tags, 'init', 'advance',
+     // and 'analysis'.
+     clog_init(tags);
+
+     return 0;
+  } // main
+  \endcode
+
+  @ingroup clog
+ */
 
 #define clog_init(active)                                                      \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   cinch::clog_t::instance().init(active)
 
-//----------------------------------------------------------------------------//
-//! @def clog(severity)
-//!
-//! This handles all of the different logging modes for the insertion
-//! style logging interface.
-//!
-//! @param severity The severity level of the log entry.
-//!
-//! @note The form "true && ..." is necessary for tertiary argument
-//!       evaluation so that the std::ostream & returned by the stream()
-//!       function can be implicitly converted to an int.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value at info severity level
-//! clog(info) << "Value: " << value << std::endl;
-//!
-//! // Print the value at warn severity level
-//! clog(warn) << "Value: " << value << std::endl;
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog(severity)
+
+  This handles all of the different logging modes for the insertion
+  style logging interface.
+
+  @param severity The severity level of the log entry.
+
+  @note The form "true && ..." is necessary for tertiary argument
+        evaluation so that the std::ostream & returned by the stream()
+        function can be implicitly converted to an int.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value at info severity level
+  clog(info) << "Value: " << value << std::endl;
+
+  // Print the value at warn severity level
+  clog(warn) << "Value: " << value << std::endl;
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog(severity)                                                         \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true).stream()
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__).stream()
 
-//----------------------------------------------------------------------------//
-//! @def clog_trace(message)
-//!
-//! Method style interface for trace level severity log entries.
-//!
-//! @param message The stream message to be printed.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value at trace severity level
-//! clog_trace("Value: " << value);
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_trace(message)
+
+  Method style interface for trace level severity log entries.
+
+  @param message The stream message to be printed.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value at trace severity level
+  clog_trace("Value: " << value);
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_trace(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::trace_log_message_t(__FILE__, __LINE__, true).stream() <<             \
-    message << std::endl
+  cinch::trace_log_message_t(__FILE__, __LINE__).stream() << message
 
-//----------------------------------------------------------------------------//
-//! @def clog_info(message)
-//!
-//! Method style interface for info level severity log entries.
-//!
-//! @param message The stream message to be printed.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value at info severity level
-//! clog_info("Value: " << value);
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_info(message)
+
+  Method style interface for info level severity log entries.
+
+  @param message The stream message to be printed.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value at info severity level
+  clog_info("Value: " << value);
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_info(message)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::info_log_message_t(__FILE__, __LINE__, true).stream() <<              \
-    message << std::endl
+  cinch::info_log_message_t(__FILE__, __LINE__).stream() << message
 
-//----------------------------------------------------------------------------//
-//! @def clog_warn(message)
-//!
-//! Method style interface for warn level severity log entries.
-//!
-//! @param message The stream message to be printed.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value at warn severity level
-//! clog_warn("Value: " << value);
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_warn(message)
+
+  Method style interface for warn level severity log entries.
+
+  @param message The stream message to be printed.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value at warn severity level
+  clog_warn("Value: " << value);
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_warn(message)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::warn_log_message_t(__FILE__, __LINE__, true).stream() <<              \
-    message << std::endl
+  cinch::warn_log_message_t(__FILE__, __LINE__).stream() << message
 
-//----------------------------------------------------------------------------//
-//! @def clog_error(message)
-//!
-//! Method style interface for error level severity log entries.
-//!
-//! @param message The stream message to be printed.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value at error severity level
-//! clog_error("Value: " << value);
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_error(message)
+
+  Method style interface for error level severity log entries.
+
+  @param message The stream message to be printed.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value at error severity level
+  clog_error("Value: " << value);
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_error(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  cinch::error_log_message_t(__FILE__, __LINE__, true).stream() <<             \
-    message << std::endl
+  cinch::error_log_message_t(__FILE__, __LINE__).stream() << message
 
 #else
 
@@ -1376,26 +1556,26 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_warn(message)
 #define clog_error(message)
 
-//----------------------------------------------------------------------------//
-//! @def clog_every_n(severity, n, message)
-//!
-//! Method style interface to output every nth iteration. An iteration is
-//! defined as an instance that the clog runtime sees the output line.
-//!
-//! @param severity The severity level at which to output the message.
-//! @param n        The iteration frequency at which to output the message.
-//! @param message  The stream message to be printed.
-//!
-//! @b Usage
-//! @code
-//! for(size_t i{0}; i<10; ++i) {
-//!    // This will output every other time
-//!    clog_every_n(info, 2, "Iterate: " << i);
-//! } // for
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_every_n(severity, n, message)
+
+  Method style interface to output every nth iteration. An iteration is
+  defined as an instance that the clog runtime sees the output line.
+
+  @param severity The severity level at which to output the message.
+  @param n        The iteration frequency at which to output the message.
+  @param message  The stream message to be printed.
+
+  @b Usage
+  @code
+  for(size_t i{0}; i<10; ++i) {
+     // This will output every other time
+     clog_every_n(info, 2, "Iterate: " << i);
+  } // for
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_every_n(severity, n, message)                                     \
 /* MACRO IMPLEMENTATION */                                                     \
@@ -1405,78 +1585,77 @@ severity_message_t(fatal, decltype(cinch::true_state),
 
 #endif // ENABLE_CLOG
 
-//----------------------------------------------------------------------------//
-//! @def clog_fatal(message)
-//!
-//! Method style interface for fatal level severity log entries. Fatal
-//! log entries exit by calling std::exit(1).
-//!
-//! @param message The stream message to be printed.
-//!
-//! @note Fatal level severity log entires are not disabled by tags or
-//!       by the ENABLE_CLOG or CLOG_STRIP_LEVEL build options, i.e.,
-//!       they are always active.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value and exit
-//! clog_fatal("Value: " << value);
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_fatal(message)
+
+  Method style interface for fatal level severity log entries. Fatal
+  log entries exit by calling std::exit(1).
+
+  @param message The stream message to be printed.
+
+  @note Fatal level severity log entires are not disabled by tags or
+        by the ENABLE_CLOG or CLOG_STRIP_LEVEL build options, i.e.,
+        they are always active.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value and exit
+  clog_fatal("Value: " << value);
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_fatal(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::fatal_log_message_t(__FILE__, __LINE__, true).stream() <<     \
-    message << std::endl
+  true && cinch::fatal_log_message_t(__FILE__, __LINE__).stream() << message
 
-//----------------------------------------------------------------------------//
-//! @def clog_assert(test, message)
-//!
-//! Clog assertion interface. Assertions allow the developer to catch
-//! invalid program state. This call will invoke clog_fatal if the test
-//! condition is false.
-//!
-//! @param test    The test condition.
-//! @param message The stream message to be printed.
-//!
-//! @note Failed assertions are not disabled by tags or
-//!       by the ENABLE_CLOG or CLOG_STRIP_LEVEL build options, i.e.,
-//!       they are always active.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value and exit
-//! clog_assert(value == 20, "invalid value");
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_assert(test, message)
+
+  Clog assertion interface. Assertions allow the developer to catch
+  invalid program state. This call will invoke clog_fatal if the test
+  condition is false.
+
+  @param test    The test condition.
+  @param message The stream message to be printed.
+
+  @note Failed assertions are not disabled by tags or
+        by the ENABLE_CLOG or CLOG_STRIP_LEVEL build options, i.e.,
+        they are always active.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value and exit
+  clog_assert(value == 20, "invalid value");
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_assert(test, message)                                             \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   !(test) && clog_fatal(message)
 
-//----------------------------------------------------------------------------//
-//! @def clog_add_buffer(name, ostream, colorized)
-//!
-//! Add a named stream buffer to the clog runtime. Added buffers are enabled
-//! by default, and can be disabled by calling \ref clog_disable_buffer.
-//!
-//! @param name      The name of the output buffer.
-//! @param ostream   The output stream of type std::ostream.
-//! @param colorized A boolean indicating whether or not the output to
-//!                  this stream should be colorized.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_add_buffer(name, ostream, colorized)
+
+  Add a named stream buffer to the clog runtime. Added buffers are enabled
+  by default, and can be disabled by calling \ref clog_disable_buffer.
+
+  @param name      The name of the output buffer.
+  @param ostream   The output stream of type std::ostream.
+  @param colorized A boolean indicating whether or not the output to
+                   this stream should be colorized.
+
+  @ingroup clog
+ */
 
 #define clog_add_buffer(name, ostream, colorized)                              \
 /* MACRO IMPLEMENTATION */                                                     \
@@ -1484,30 +1663,30 @@ severity_message_t(fatal, decltype(cinch::true_state),
   cinch::clog_t::instance().config_stream().add_buffer(name, ostream,          \
     colorized)
 
-//----------------------------------------------------------------------------//
-//! @def clog_enable_buffer(name)
-//!
-//! Enable an output buffer.
-//!
-//! @param name The name of the output stream that was used to add the buffer.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_enable_buffer(name)
+
+  Enable an output buffer.
+
+  @param name The name of the output stream that was used to add the buffer.
+
+  @ingroup clog
+ */
 
 #define clog_enable_buffer(name)                                               \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   cinch::clog_t::instance().config_stream().enable_buffer(name)
 
-//----------------------------------------------------------------------------//
-//! @def clog_disable_buffer(name)
-//!
-//! Disable an output buffer.
-//!
-//! @param name The name of the output stream that was used to add the buffer.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_disable_buffer(name)
+
+  Disable an output buffer.
+
+  @param name The name of the output stream that was used to add the buffer.
+
+  @ingroup clog
+ */
 
 #define clog_disable_buffer(name)                                              \
 /* MACRO IMPLEMENTATION */                                                     \
@@ -1516,11 +1695,11 @@ severity_message_t(fatal, decltype(cinch::true_state),
 
 namespace clog {
 
-  //--------------------------------------------------------------------------//
-  //! Enum type to specify output delimiters for containers.
-  //!
-  //! @ingroup clog
-  //--------------------------------------------------------------------------//
+  /*!
+    Enum type to specify output delimiters for containers.
+
+    @ingroup clog
+   */
 
   enum clog_delimiters_t : size_t {
     newline,
@@ -1538,21 +1717,21 @@ namespace clog {
 #pragma clang diagnostic ignored "-Wtautological-compare"
 #endif
 
-//----------------------------------------------------------------------------//
-//! @def clog_container(severity, banner, container, delimiter)
-//!
-//! Output the contents of a standard container type. Valid container types
-//! must implement a forward iterator.
-//!
-//! @param severity  The severity level at which to output the message.
-//! @param banner    A top-level label for the container output.
-//! @param container The container to output.
-//! @param delimiter The output character to use to delimit container
-//!                  entries, e.g., newline, comma, space, etc. Valid
-//!                  delimiters are defined in clog_delimiters_t.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_container(severity, banner, container, delimiter)
+
+  Output the contents of a standard container type. Valid container types
+  must implement a forward iterator.
+
+  @param severity  The severity level at which to output the message.
+  @param banner    A top-level label for the container output.
+  @param container The container to output.
+  @param delimiter The output character to use to delimit container
+                   entries, e.g., newline, comma, space, etc. Valid
+                   delimiters are defined in clog_delimiters_t.
+
+  @ingroup clog
+ */
 
 #define clog_container(severity, banner, container, delimiter)                 \
 /* MACRO IMPLEMENTATION */                                                     \
@@ -1589,20 +1768,20 @@ namespace clog {
 
 namespace cinch {
 
-//----------------------------------------------------------------------------//
-//! The mpi_config_t type provides an interface to MPI runtime state
-//! information.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  The mpi_config_t type provides an interface to MPI runtime state
+  information.
+
+  @ingroup clog
+ */
 
 struct mpi_config_t {
 
-  //--------------------------------------------------------------------------//
-  //! Meyer's singleton instance.
-  //!
-  //! @return The single instance of this type.
-  //--------------------------------------------------------------------------//
+  /*!
+    Meyer's singleton instance.
+
+    @return The single instance of this type.
+   */
 
   static
   mpi_config_t &
@@ -1612,9 +1791,9 @@ struct mpi_config_t {
     return m;
   } // instance
 
-  //--------------------------------------------------------------------------//
-  //! Return the active rank as a constant reference.
-  //--------------------------------------------------------------------------//
+  /*!
+    Return the active rank as a constant reference.
+   */
 
   const
   size_t &
@@ -1623,9 +1802,9 @@ struct mpi_config_t {
     return active_rank_;
   } // active_rank
 
-  //--------------------------------------------------------------------------//
-  //! Return the active rank as a mutable reference.
-  //--------------------------------------------------------------------------//
+  /*!
+    Return the active rank as a mutable reference.
+   */
 
   size_t &
   active_rank()
@@ -1644,14 +1823,14 @@ private:
 
 }; // struct mpi_config_t
 
-//----------------------------------------------------------------------------//
-//! Return a boolean indicating whether the current runtime rank matches a
-//! statically defined value.
-//!
-//! @tparam RANK The static rank to use in the comparison.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  Return a boolean indicating whether the current runtime rank matches a
+  statically defined value.
+
+  @tparam RANK The static rank to use in the comparison.
+
+  @ingroup clog
+ */
 
 template<
   size_t RANK
@@ -1665,12 +1844,11 @@ is_static_rank()
   return part == RANK;
 } // is_static_rank
 
-//----------------------------------------------------------------------------//
-//! Return a boolean that indicates whether the current runtime rank is
-//! active.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  Return a boolean that indicates whether the current runtime rank is active.
+
+  @ingroup clog
+ */
 
 inline
 bool
@@ -1683,88 +1861,88 @@ is_active_rank()
 
 } // namespace
 
-//----------------------------------------------------------------------------//
-//! @def clog_rank(severity, rank)
-//!
-//! This handles all of the different logging modes for the insertion
-//! style logging interface.
-//!
-//! @param severity The severity level of the log entry.
-//! @param rank     The rank for which to output the message stream.
-//!
-//! @note The form "true && ..." is necessary for tertiary argument
-//!       evaluation so that the std::ostream & returned by the stream()
-//!       function can be implicitly converted to an int.
-//!
-//! @b Usage
-//! @code
-//! int value{20};
-//!
-//! // Print the value at info severity level on rank 0
-//! clog_rank(info, 0) << "Value: " << value << std::endl;
-//!
-//! // Print the value at warn severity level on rank 1
-//! clog_rank(warn, 1) << "Value: " << value << std::endl;
-//! @endcode
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_rank(severity, rank)
+
+  This handles all of the different logging modes for the insertion
+  style logging interface.
+
+  @param severity The severity level of the log entry.
+  @param rank     The rank for which to output the message stream.
+
+  @note The form "true && ..." is necessary for tertiary argument
+        evaluation so that the std::ostream & returned by the stream()
+        function can be implicitly converted to an int.
+
+  @b Usage
+  @code
+  int value{20};
+
+  // Print the value at info severity level on rank 0
+  clog_rank(info, 0) << "Value: " << value << std::endl;
+
+  // Print the value at warn severity level on rank 1
+  clog_rank(warn, 1) << "Value: " << value << std::endl;
+  @endcode
+
+  @ingroup clog
+ */
 
 #define clog_rank(severity, rank)                                              \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, true,          \
-    cinch::is_static_rank<rank>).stream()
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+    cinch::is_static_rank<rank>, false).stream()
 
-//----------------------------------------------------------------------------//
-//! @def clog_set_output_rank(rank)
-//!
-//! Set the output rank for calls to clog_one.
-//!
-//! @param rank The rank for which output will be generated.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_set_output_rank(rank)
+
+  Set the output rank for calls to clog_one.
+
+  @param rank The rank for which output will be generated.
+
+  @ingroup clog
+ */
 
 #define clog_set_output_rank(rank)                                             \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
   cinch::mpi_config_t::instance().active_rank() = rank
 
-//----------------------------------------------------------------------------//
-//! @def clog_one(severity)
-//!
-//! This handles all of the different logging modes for the insertion
-//! style logging interface. This will only output on the rank specified
-//! by clog_set_output_rank.
-//!
-//! @param severity The severity level of the log entry.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_one(severity)
+
+  This handles all of the different logging modes for the insertion
+  style logging interface. This will only output on the rank specified
+  by clog_set_output_rank.
+
+  @param severity The severity level of the log entry.
+
+  @ingroup clog
+ */
 
 #define clog_one(severity)                                                     \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::severity ## _log_message_t(__FILE__, __LINE__, false,         \
-    cinch::is_active_rank).stream()
+  true && cinch::severity ## _log_message_t(__FILE__, __LINE__,                \
+    cinch::is_active_rank, false).stream()
 
-//----------------------------------------------------------------------------//
-//! @def clog_container_rank(severity, banner, container, delimiter, rank)
-//!
-//! Output the contents of a standard container type on the specified
-//! rank. Valid container types must implement a forward iterator.
-//!
-//! @param severity  The severity level at which to output the message.
-//! @param banner    A top-level label for the container output.
-//! @param container The container to output.
-//! @param delimiter The output character to use to delimit container
-//!                  entries, e.g., newline, comma, space, etc. Valid
-//!                  delimiters are defined in clog_delimiters_t.
-//! @param rank      The rank for which to output the message stream.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_container_rank(severity, banner, container, delimiter, rank)
+
+  Output the contents of a standard container type on the specified
+  rank. Valid container types must implement a forward iterator.
+
+  @param severity  The severity level at which to output the message.
+  @param banner    A top-level label for the container output.
+  @param container The container to output.
+  @param delimiter The output character to use to delimit container
+                   entries, e.g., newline, comma, space, etc. Valid
+                   delimiters are defined in clog_delimiters_t.
+  @param rank      The rank for which to output the message stream.
+
+  @ingroup clog
+ */
 
 #define clog_container_rank(severity, banner, container, delimiter, rank)      \
 /* MACRO IMPLEMENTATION */                                                     \
@@ -1791,24 +1969,24 @@ is_active_rank()
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_rank(severity, rank) << ss.str() << std::endl;                          \
-  }
+  } /* scope */
 
-//----------------------------------------------------------------------------//
-//! @def clog_container_one(severity, banner, container, delimiter)
-//!
-//! Output the contents of a standard container type on the rank
-//! specified by clog_set_output_rank. Valid container types must
-//! implement a forward iterator.
-//!
-//! @param severity  The severity level at which to output the message.
-//! @param banner    A top-level label for the container output.
-//! @param container The container to output.
-//! @param delimiter The output character to use to delimit container
-//!                  entries, e.g., newline, comma, space, etc. Valid
-//!                  delimiters are defined in clog_delimiters_t.
-//!
-//! @ingroup clog
-//----------------------------------------------------------------------------//
+/*!
+  @def clog_container_one(severity, banner, container, delimiter)
+
+  Output the contents of a standard container type on the rank
+  specified by clog_set_output_rank. Valid container types must
+  implement a forward iterator.
+
+  @param severity  The severity level at which to output the message.
+  @param banner    A top-level label for the container output.
+  @param container The container to output.
+  @param delimiter The output character to use to delimit container
+                   entries, e.g., newline, comma, space, etc. Valid
+                   delimiters are defined in clog_delimiters_t.
+  
+  @ingroup clog
+ */
 
 #define clog_container_one(severity, banner, container, delimiter)             \
 /* MACRO IMPLEMENTATION */                                                     \
@@ -1835,7 +2013,7 @@ is_active_rank()
     (c != --container.end()) && ss << delim;                                   \
   }                                                                            \
   clog_one(severity) << ss.str() << std::endl;                                 \
-  }
+  } /* scope */
 
 #else
 
@@ -1856,10 +2034,3 @@ is_active_rank()
 #endif
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
-
-#endif // cinch_cinchlog_h
-
-/*~-------------------------------------------------------------------------~-*
- * Formatting options for vim.
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/
