@@ -13,7 +13,7 @@ option(ENABLE_CAPTURE_ENV_MOD
 if(ENABLE_CAPTURE_ENV_MOD)
 
     execute_process(
-        COMMAND bash ${CINCH_SOURCE_DIR}/cmake/capture_env_mods
+        COMMAND bash ${CINCH_SOURCE_DIR}/cmake/capture_environment
             ${CMAKE_PROJECT_NAME}
             "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-devel-module"
     )

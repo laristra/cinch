@@ -18,6 +18,10 @@ for module in $modules; do
   echo "   module load $module" >> $2
 done
 
+# set environment variables
+echo "   puts stderr \"setting CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH\"" >> $2
+echo "   setenv CMAKE_PREFIX_PATH \"$CMAKE_PREFIX_PATH\"" >> $2
+
 echo "}" >> $2
 echo >> $2
 
@@ -28,5 +32,9 @@ for module in $modules; do
   echo "   puts stderr \"unloading $module\"" >> $2
   echo "   module unload $module" >> $2
 done
+
+# unset environment variables
+echo "   puts stderr \"unsetting CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH\"" >> $2
+echo "   unsetenv CMAKE_PREFIX_PATH" >> $2
 
 echo "}" >> $2
