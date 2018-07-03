@@ -875,9 +875,10 @@ public:
   {
 #if defined(CLOG_ENABLE_TAGS)
 
-#if defined(CLOG_DEBUG)
+#if defined(CLOG_DEBUG) && 0
+    auto active_set = tag_bitset_.test(active_tag_) == 1 ? "true" : "false";
     std::cerr << COLOR_LTGRAY << "CLOG: tag " << active_tag_ << " is " <<
-      tag_bitset_.test(active_tag_) << COLOR_PLAIN << std::endl;
+      active_set << COLOR_PLAIN << std::endl;
 #endif
 
     // If the runtime context hasn't been initialized, return true only
@@ -1138,7 +1139,7 @@ struct log_message_t
     file_(file), line_(line), predicate_(predicate),
     can_send_to_one_(can_send_to_one), clean_color_(false), fatal_(false)
   {
-#if defined(CLOG_DEBUG)
+#if defined(CLOG_DEBUG) && 0
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
       file << " " << line << COLOR_PLAIN << std::endl;
 #endif
@@ -1147,7 +1148,7 @@ struct log_message_t
   virtual
   ~log_message_t()
   {
-#if defined(CLOG_DEBUG)
+#if defined(CLOG_DEBUG) && 0
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t destructor " <<
       COLOR_PLAIN << std::endl;
 #endif
