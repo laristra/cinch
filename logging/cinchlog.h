@@ -970,14 +970,16 @@ void flush_packets() {
     {
     std::lock_guard<std::mutex> guard(mpi_state_t::instance().packets_mutex());
 
-    std::sort(mpi_state_t::instance().packets().begin(),
-      mpi_state_t::instance().packets().end());
+    if(mpi_state_t::instance().packets().size()) {
+      std::sort(mpi_state_t::instance().packets().begin(),
+        mpi_state_t::instance().packets().end());
 
-    for(auto & p: mpi_state_t::instance().packets()) {
-      clog_t::instance().stream() << p.message();
-    } // for
+      for(auto & p: mpi_state_t::instance().packets()) {
+        clog_t::instance().stream() << p.message();
+      } // for
 
-    mpi_state_t::instance().packets().clear();
+      mpi_state_t::instance().packets().clear();
+    } // if
     } // scope
 
   } // while
