@@ -738,16 +738,10 @@ public:
 
     if(active == "all") {
       // Turn on all of the bits for "all".
-      tag_bitset_.flip();
+      tag_bitset_.set();
     }
     else if(active != "none") {
       // Turn on the bits for the selected groups.
-
-      #if defined(CLOG_DEBUG)
-        std::cerr << COLOR_LTGRAY << "CLOG: active tags (" <<
-          active << ")" << COLOR_PLAIN << std::endl;
-      #endif
-
       std::istringstream is(active);
       std::string tag;
       while(std::getline(is, tag, ',')) {
@@ -760,6 +754,12 @@ public:
         } // if
       } // while
     } // if
+
+    #if defined(CLOG_DEBUG)
+      std::cerr << COLOR_LTGRAY << "CLOG: active tags (" <<
+        active << ")" << COLOR_PLAIN << std::endl;
+    #endif
+
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
 
@@ -809,7 +809,6 @@ public:
   std::ostream &
   severity_stream(bool active = true)
   {
-    //return active ? *stream_ : null_stream_;
     return active ? buffer_stream_ : null_stream_;
   } // stream
 
@@ -877,7 +876,7 @@ public:
   {
 #if defined(CLOG_ENABLE_TAGS)
 
-#if defined(CLOG_DEBUG) && 0
+#if defined(CLOG_DEBUG)
     auto active_set = tag_bitset_.test(active_tag_) == 1 ? "true" : "false";
     std::cerr << COLOR_LTGRAY << "CLOG: tag " << active_tag_ << " is " <<
       active_set << COLOR_PLAIN << std::endl;
