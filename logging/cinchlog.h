@@ -313,8 +313,10 @@ private:
 
   ~mpi_state_t()
   {
-    end_flusher();
-    flusher_thread_.join();
+    if(initialized_) {
+      end_flusher();
+      flusher_thread_.join();
+    } // if
   }
 
   int rank_;
