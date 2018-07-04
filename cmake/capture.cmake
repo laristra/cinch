@@ -7,10 +7,10 @@
 # Add option to enable capture
 #------------------------------------------------------------------------------#
 
-option(ENABLE_CAPTURE_ENV_MOD
+option(ENABLE_CAPTURE_ENVIRONMENT
   "Capture the currently-loaded environment modules" OFF)
 
-if(ENABLE_CAPTURE_ENV_MOD)
+if(ENABLE_CAPTURE_ENVIRONMENT)
 
     execute_process(
         COMMAND bash ${CINCH_SOURCE_DIR}/cmake/capture_environment
