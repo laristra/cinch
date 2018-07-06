@@ -4,36 +4,29 @@
 #------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------#
-# Add option to enable Legion
+# Add option to enable Caliper
 #------------------------------------------------------------------------------#
 
-option(ENABLE_LEGION "Enable Legion" OFF)
+option(ENABLE_CALIPER "Enable Caliper" OFF)
 
-if(ENABLE_LEGION)
+if(ENABLE_CALIPER)
 
 #------------------------------------------------------------------------------#
-# Find Legion
+# Find Caliper
 #------------------------------------------------------------------------------#
 
-find_package(Legion REQUIRED)
+find_package(Caliper REQUIRED)
 
-  if(NOT Legion_FOUND)
-      message(FATAL_ERROR "Legion is required
-                     for this build configuration")
-  endif(NOT Legion_FOUND)
+    if(NOT Caliper_FOUND)
+        message(FATAL_ERROR "Caliper is required for this build configuration")
+    endif()
 
-  set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH}
-     ${LEGION_INSTALL_DIRS})
-  include_directories(${LEGION_INCLUDE_DIRS})
-  # old flags: remove once support for older Legion versions is not required
-  add_definitions( -DLEGION_CMAKE )
-  # new flags: required by newer Legion versions
-  add_definitions( -DLEGION_USE_CMAKE )
-  add_definitions( -DREALM_USE_CMAKE )
-  message(STATUS "Legion found: ${Legion_FOUND}")
+    message(STATUS "Found Caliper: ${Caliper_INCLUDE_DIRS}")
 
+    include_directories(${Caliper_INCLUDE_DIRS})
+    add_definitions(-DENABLE_CALIPER)
 
-endif(ENABLE_LEGION)
+endif()
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

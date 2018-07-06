@@ -3,13 +3,14 @@
  * All rights reserved.
  *~-------------------------------------------------------------------------~~*/
 
-#if defined(CINCH_ENABLE_MPI)
-  #include <mpi.h>
-#endif
+#include <hpx/hpx.hpp>
 
-#include <legion.h>
-#include <vector>
 #include <cstring>
+#include <vector>
+
+#if defined(CINCH_ENABLE_MPI)
+#include <mpi.h>
+#endif
 
 // Boost command-line options
 #if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
@@ -42,16 +43,14 @@
 
 #if defined(CINCH_DEVEL_TARGET)
 void print_devel_code_label(std::string name) {
-  // Print some test information.
+  // Print some test information to the root rank.
   clog_rank(info, 0) <<
     OUTPUT_LTGREEN("Executing development target " << name) << std::endl;
 
-#if defined(CINCH_ENABLE_MPI)
   // This is safe even if the user creates other comms, because we
   // execute this function before handing control over to the user
   // code logic.
   MPI_Barrier(MPI_COMM_WORLD);
-#endif // CINCH_ENABLE_MPI
 } // print_devel_code_label
 #endif
 
@@ -61,50 +60,28 @@ void print_devel_code_label(std::string name) {
 
 int main(int argc, char ** argv) {
 
-  int rank(0);
+  int rank = 0;
 
 #if defined(CINCH_ENABLE_MPI)
-  // Get the MPI version
-  int version, subversion;
-  MPI_Get_version(&version, &subversion);
-
-#if defined(GASNET_CONDUIT_MPI)
-  if(version==3 && subversion>0) {
-    int provided;
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
-    // If you fail this assertion, then your version of MPI
-    // does not support calls from multiple threads and you
-    // cannot use the GASNet MPI conduit
-    if (provided < MPI_THREAD_MULTIPLE)
-      printf("ERROR: Your implementation of MPI does not support "
-           "MPI_THREAD_MULTIPLE which is required for use of the "
-           "GASNet MPI conduit with the Legion-MPI Interop!\n");
-    assert(provided == MPI_THREAD_MULTIPLE);
-  }
-  else {
-    // Initialize the MPI runtime
-    MPI_Init(&argc, &argv);
-  } // if
-#else
+  // Initialize the MPI runtime
   MPI_Init(&argc, &argv);
-#endif
 
   // Disable XML output, if requested, everywhere but rank 0
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
   std::vector<char *> args(argv, argv+argc);
-  if (rank > 0) {
-    for (auto itr = args.begin(); itr != args.end(); ++itr) {
-      if (std::strncmp(*itr, "--gtest_output", 14) == 0) {
+  if(rank > 0) {
+    for(auto itr = args.begin(); itr != args.end(); ++itr) {
+      if(std::strncmp(*itr, "--gtest_output", 14) == 0) {
         args.erase(itr);
         break;
       } // if
     } // for
   } // if
 
-  argc = args.size();
+  argc = static_cast<int>(args.size());
   argv = args.data();
-
-#endif // CINCH_ENABLE_MPI
+#endif
 
 #if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
@@ -115,7 +92,7 @@ int main(int argc, char ** argv) {
   std::string tags("all");
 
 #if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
-  options_description desc("Cinch test options");  
+  options_description desc("Cinch test options");
 
   // Add command-line options
   desc.add_options()
@@ -148,6 +125,7 @@ int main(int argc, char ** argv) {
 #if defined(CINCH_ENABLE_MPI)
     MPI_Finalize();
 #endif
+
     return 1;
   } // if
 
@@ -155,9 +133,11 @@ int main(int argc, char ** argv) {
     if(rank == 0) {
       std::cout << desc << std::endl;
     } // if
+
 #if defined(CINCH_ENABLE_MPI)
     MPI_Finalize();
 #endif
+
     return 1;
   } // if
 #endif // ENABLE_BOOST_PROGRAM_OPTIONS
@@ -165,18 +145,14 @@ int main(int argc, char ** argv) {
   int result(0);
 
   if(tags == "0") {
-#if defined(CINCH_ENABLE_MPI)
     // Output the available tags
     if(rank == 0) {
-#endif
       std::cout << "Available tags (CLOG):" << std::endl;
 
       for(auto t: clog_tag_map()) {
         std::cout << "  " << t.first << std::endl;
       } // for
-#if defined(CINCH_ENABLE_MPI)
     } // if
-#endif
   }
   else {
     // Initialize the cinchlog runtime
@@ -190,8 +166,12 @@ int main(int argc, char ** argv) {
     // Call the user-provided initialization function
     driver_initialization(argc, argv);
 
-#if !defined(CINCH_DEVEL_TARGET)
-    ::testing::TestEventListeners &listeners =
+#if defined(CINCH_DEVEL_TARGET)
+    // Run the devel test.
+    user_devel_code_logic();
+#else
+    // Get GTest listeners
+    ::testing::TestEventListeners& listeners =
       ::testing::UnitTest::GetInstance()->listeners();
 
     // Adds a listener to the end.  Google Test takes the ownership.
@@ -203,12 +183,9 @@ int main(int argc, char ** argv) {
   } // if
 
 #if defined(CINCH_ENABLE_MPI)
-  // FIXME: This is some kind of GASNet bug (or maybe Legion).
   // Shutdown the MPI runtime
-#ifndef GASNET_CONDUIT_MPI
   MPI_Finalize();
 #endif
-#endif // CINCH_ENABLE_MPI
 
   return result;
 } // main

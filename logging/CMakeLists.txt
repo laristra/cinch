@@ -1,18 +1,15 @@
-#--------------------------------------------------------------------------#
-# Add clog logging
-#--------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+# Copyright (c) 2014 Los Alamos National Security, LLC
+# All rights reserved.
+#------------------------------------------------------------------------------#
 
-include_directories(${CINCH_SOURCE_DIR}/logging)
+#------------------------------------------------------------------------------#
+# Require some version of cmake
+#------------------------------------------------------------------------------#
 
-#--------------------------------------------------------------------------#
-# Install cinch logging utility
-#--------------------------------------------------------------------------#
-
-install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
-    DESTINATION include)
+cmake_minimum_required(VERSION 2.8)
 
 option(ENABLE_CLOG "Enable Cinch logging" OFF)
-
 if(ENABLE_CLOG)
     add_definitions(-DENABLE_CLOG)
 
@@ -22,14 +19,12 @@ if(ENABLE_CLOG)
 
     # Allow color output
     option(CLOG_COLOR_OUTPUT "Enable colorized clog logging" ON)
-
     if(CLOG_COLOR_OUTPUT)
         add_definitions(-DCLOG_COLOR_OUTPUT)
     endif()
 
     # Enable tag groups
     option(CLOG_ENABLE_TAGS "Enable tag groups" OFF)
-
     if(CLOG_ENABLE_TAGS)
         set(CLOG_TAG_BITS "64" CACHE STRING
             "Select the number of bits to use for tag groups")
@@ -40,27 +35,50 @@ if(ENABLE_CLOG)
     # Externally scoped messages
     option(CLOG_ENABLE_EXTERNAL
         "Enable messages that are defined at external scope" OFF)
-
     if(CLOG_ENABLE_EXTERNAL)
         add_definitions(-DCLOG_ENABLE_EXTERNAL)
     endif()
 
     # MPI
-    if(MPI_${MPI_LANGUAGE}_FOUND)
-        option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
+    find_package(MPI)
 
+    if(MPI_C_FOUND)
+        option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
         if(CLOG_ENABLE_MPI)
-            find_package(Threads)
+            include_directories(${MPI_C_INCLUDE_PATH})
             add_definitions(-DCLOG_ENABLE_MPI)
         endif()
+
+        set(CLOG_TURNSTILE_NWAY "1" CACHE STRING
+            "Set the turnstile rotation for MPI messages")
+        add_definitions(-DCLOG_TURNSTILE_NWAY=${CLOG_TURNSTILE_NWAY})
     endif()
 
     # Enable debugging
     option(CLOG_DEBUG "Enable clog debugging" OFF)
-
     if(CLOG_DEBUG)
         add_definitions(-DCLOG_DEBUG)
     endif()
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+find_package(Boost COMPONENTS program_options REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
+find_package(Threads)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(clog_test clog_test.cc)
+
+add_definitions(-DENABLE_CLOG)
+
+target_link_libraries(clog_test ${Boost_LIBRARIES})
+target_link_libraries(clog_test ${CMAKE_THREAD_LIBS_INIT})
+
+if(CLOG_ENABLE_MPI)
+    target_link_libraries(clog_test ${MPI_LIBRARIES})
 endif()
 
 #------------------------------------------------------------------------------#

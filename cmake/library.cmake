@@ -12,6 +12,17 @@ include(subdirlist)
 function(cinch_add_library_target target directory)
 
     #--------------------------------------------------------------------------#
+    # Setup argument options
+    #--------------------------------------------------------------------------#
+
+    set(options)
+    set(one_value_args EXPORT_TARGET)
+    set(multi_value_args)
+
+    cmake_parse_arguments(lib "${options}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
     # Add target to list
     #--------------------------------------------------------------------------#
 
@@ -21,13 +32,13 @@ function(cinch_add_library_target target directory)
     #--------------------------------------------------------------------------#
     # Add public headers
     #--------------------------------------------------------------------------#
-    
-    set( _SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${directory} )
+
+    set(_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${directory})
 
     if(EXISTS ${_SOURCE_DIR}/library.cmake)
         include(${_SOURCE_DIR}/library.cmake)
     endif()
-    
+
     #--------------------------------------------------------------------------#
     # add some random includes for convinience
     #--------------------------------------------------------------------------#
@@ -45,7 +56,7 @@ function(cinch_add_library_target target directory)
     # This is not true for levels below this one.  This allows some flexibility
     # while keeping the generic case as simple as possible.
     #--------------------------------------------------------------------------#
-    
+
     cinch_subdirlist(_SUBDIRECTORIES ${_SOURCE_DIR} False)
 
     #--------------------------------------------------------------------------#
@@ -79,6 +90,7 @@ function(cinch_add_library_target target directory)
             endif()
             list(APPEND HEADERS
                 ${_SUBDIR}/${_HEADER})
+            list(APPEND GLOBAL_HEADERS ${_SOURCE_DIR}/${_SUBDIR}/${_HEADER})
         endforeach()
     
         foreach(_SOURCE ${${_SUBDIR}_SOURCES})
@@ -92,15 +104,32 @@ function(cinch_add_library_target target directory)
 
     foreach(file ${HEADERS})
         get_filename_component(DIR ${file} DIRECTORY)
-        install(FILES ${directory}/${file} DESTINATION include/${target}/${DIR})
+        install(FILES ${directory}/${file}
+            DESTINATION include/${directory}/${DIR})
     endforeach()
 
-    install( TARGETS ${target} DESTINATION ${LIBDIR} )
+    if(lib_EXPORT_TARGET)
+        install(TARGETS ${target} EXPORT ${lib_EXPORT_TARGET}
+            DESTINATION ${LIBDIR})
+    else()
+        install(TARGETS ${target} DESTINATION ${LIBDIR})
+    endif()
 
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include)
     endforeach()
 
+    if(EXISTS ${PROJECT_SOURCE_DIR}/.clang-format)
+      find_program(CLANG_FORMAT "clang-format")
+      find_package_handle_standard_args(CLANG_FORMAT REQUIRED_VARS CLANG_FORMAT)
+      if (CLANG_FORMAT_FOUND)
+        add_custom_target(format-${target} COMMAND ${CLANG_FORMAT} -style=file -i ${GLOBAL_HEADERS} ${SOURCES})
+      else()
+        add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND} -E echo "No clang-format found")
+      endif()
+    else()
+      add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND} -E echo "No ${PROJECT_SOURCE_DIR}/.clang-format found")
+    endif()
 endfunction(cinch_add_library_target)
 
 #
@@ -109,18 +138,9 @@ endfunction(cinch_add_library_target)
 
 function(cinch_target_link_libraries target)
 
-    if (NOT ARGN)
-        message( 
-            FATAL_ERROR
-            "The list of libaries provided to link to target '${target}' is "
-            "empty" 
-        )
+    if (ARGN)
+        target_link_libraries( ${target} ${ARGN} )
     endif()
-
-    message(STATUS
-      "Linking target ${target} with libraries ${ARGN}")
-
-    target_link_libraries( ${target} ${ARGN} )
 
 endfunction()
 

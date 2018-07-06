@@ -29,6 +29,12 @@ function(cinch_add_doxygen)
         # respective project names.
         #----------------------------------------------------------------------#
 
+        if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+           set(CINCH_CONFIG_INFOTAG)
+        else()
+            set(CINCH_CONFIG_INFOTAG "${PROJECT_NAME}.")
+        endif()
+
         if(CINCH_CONFIG_INFOTAG)
             if(NOT EXISTS ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
                 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
@@ -56,10 +62,12 @@ function(cinch_add_doxygen)
             if ( TARGET doxygen )
                 add_dependencies(doxygen ${CINCH_CONFIG_INFOTAG}doxygen)
             endif()
+
             if ( TARGET install-doxygen )
                 add_dependencies(install-doxygen
                     ${CINCH_CONFIG_INFOTAG}install-doxygen)
             endif()
+
         else()
 
             #------------------------------------------------------------------#
@@ -116,8 +124,8 @@ function(cinch_add_doxygen)
         #----------------------------------------------------------------------#
 
         add_custom_target(${CINCH_CONFIG_INFOTAG}install-doxygen
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${_directory}/doxygen $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${_directory}/doxygen
+                $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
 
     endif(ENABLE_DOXYGEN)
 

@@ -45,7 +45,7 @@ void print_devel_code_label(std::string name) {
 //----------------------------------------------------------------------------//
 
 int main(int argc, char ** argv) {
-  
+
 #if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
   ::testing::InitGoogleTest(&argc, argv);
@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
   std::string tags("all");
 
 #if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
-  options_description desc("Cinch test options");  
+  options_description desc("Cinch test options");
 
   // Add command-line options
   desc.add_options()
@@ -73,7 +73,7 @@ if(vm.count("help")) {
   return 1;
 } // if
 #endif // ENABLE_BOOST_PROGRAM_OPTIONS
-	int result(0);
+  int result(0);
 
   if(tags == "0") {
     // Output the available tags
@@ -107,9 +107,9 @@ if(vm.count("help")) {
     // Run the tests for this target.
     result = RUN_ALL_TESTS();
 #endif
-	} // if
+  } // if
 
-	return result;
+  return result;
 } // main
 
 /*~------------------------------------------------------------------------~--*

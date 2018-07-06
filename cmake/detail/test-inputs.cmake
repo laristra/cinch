@@ -27,6 +27,11 @@
         add_custom_target(${name}_inputs DEPENDS ${_OUTPUT_FILES})
         add_dependencies(${name} ${name}_inputs)
 
+        if(test_FOLDER)
+            set_target_properties(${name}_inputs
+                PROPERTIES FOLDER "${test_FOLDER}/Inputs")
+        endif()
+
     endif()
 
 #------------------------------------------------------------------------------#

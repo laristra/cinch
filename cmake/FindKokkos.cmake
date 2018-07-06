@@ -10,7 +10,7 @@ if(NOT ${KOKKOS_ROOT})
 endif()
 
 find_path(KOKKOS_INCLUDE_DIR Kokkos_Core.hpp
-	HINTS ${KOKKOS_ROOT}/inlcude
+	HINTS ${KOKKOS_ROOT}/include
    PATHS ${KOKKOS_ROOT}/include)
 find_library(KOKKOS_CORE_LIBRARY NAMES kokkos
 	PATHS ${KOKKOS_ROOT}/lib ${KOKKOS_ROOT}/lib64)

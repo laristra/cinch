@@ -4,43 +4,24 @@
 #------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------#
-# Add option to enable MPI
+# Add option to enable HPX
 #------------------------------------------------------------------------------#
 
-option(ENABLE_MPI "Enable MPI" OFF)
-option(ENABLE_MPI_CXX_BINDINGS "Enable MPI C++ Bindings" OFF)
+option(ENABLE_HPX "Enable HPX" OFF)
 
-if(ENABLE_MPI)
-
-#------------------------------------------------------------------------------#
-# Find MPI
-#------------------------------------------------------------------------------#
-
-find_package(MPI REQUIRED)
+if(ENABLE_HPX)
 
 #------------------------------------------------------------------------------#
-# Skip C++ linkage of MPI
+# Find HPX
 #------------------------------------------------------------------------------#
 
-if(ENABLE_MPI_CXX_BINDINGS)
-    set(MPI_LANGUAGE CXX)
-else()
-    set(MPI_LANGUAGE C)
-    # Globally add these compile definitions for linking C++ applications
-    # with the C-version of MPI.  Might be a better way to do this.
-    add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
-endif(ENABLE_MPI_CXX_BINDINGS)
+  find_package(HPX REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
 
-if(MPI_${MPI_LANGUAGE}_FOUND)
+  include_directories(${HPX_INCLUDE_DIRS})
+  link_directories(${HPX_LIBRARY_DIR})
 
-    include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
-
-    # using mpich, there are extra spaces that cause some issues
-    separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
-
-endif(MPI_${MPI_LANGUAGE}_FOUND)
-
-if(MSVC)
+  add_definitions(-DENABLE_HPX)
+  if(MSVC)
     add_definitions(-D_SCL_SECURE_NO_WARNINGS)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
@@ -49,9 +30,11 @@ if(MSVC)
     add_definitions(-D_HAS_AUTO_PTR_ETC=1)
     add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
     add_definitions(-DGTEST_LANG_CXX11=1)
-endif()
+  endif()
 
-endif(ENABLE_MPI)
+  message(STATUS "HPX found: ${HPX_FOUND}")
+
+endif(ENABLE_HPX)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
