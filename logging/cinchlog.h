@@ -313,8 +313,10 @@ private:
 
   ~mpi_state_t()
   {
-    end_flusher();
-    flusher_thread_.join();
+    if(initialized_) {
+      end_flusher();
+      flusher_thread_.join();
+    } // if
   }
 
   int rank_;
@@ -736,16 +738,10 @@ public:
 
     if(active == "all") {
       // Turn on all of the bits for "all".
-      tag_bitset_.flip();
+      tag_bitset_.set();
     }
     else if(active != "none") {
       // Turn on the bits for the selected groups.
-
-      #if defined(CLOG_DEBUG)
-        std::cerr << COLOR_LTGRAY << "CLOG: active tags (" <<
-          active << ")" << COLOR_PLAIN << std::endl;
-      #endif
-
       std::istringstream is(active);
       std::string tag;
       while(std::getline(is, tag, ',')) {
@@ -758,6 +754,12 @@ public:
         } // if
       } // while
     } // if
+
+    #if defined(CLOG_DEBUG)
+      std::cerr << COLOR_LTGRAY << "CLOG: active tags (" <<
+        active << ")" << COLOR_PLAIN << std::endl;
+    #endif
+
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
 
@@ -807,7 +809,6 @@ public:
   std::ostream &
   severity_stream(bool active = true)
   {
-    //return active ? *stream_ : null_stream_;
     return active ? buffer_stream_ : null_stream_;
   } // stream
 
@@ -876,8 +877,9 @@ public:
 #if defined(CLOG_ENABLE_TAGS)
 
 #if defined(CLOG_DEBUG)
+    auto active_set = tag_bitset_.test(active_tag_) == 1 ? "true" : "false";
     std::cerr << COLOR_LTGRAY << "CLOG: tag " << active_tag_ << " is " <<
-      tag_bitset_.test(active_tag_) << COLOR_PLAIN << std::endl;
+      active_set << COLOR_PLAIN << std::endl;
 #endif
 
     // If the runtime context hasn't been initialized, return true only
@@ -968,14 +970,16 @@ void flush_packets() {
     {
     std::lock_guard<std::mutex> guard(mpi_state_t::instance().packets_mutex());
 
-    std::sort(mpi_state_t::instance().packets().begin(),
-      mpi_state_t::instance().packets().end());
+    if(mpi_state_t::instance().packets().size()) {
+      std::sort(mpi_state_t::instance().packets().begin(),
+        mpi_state_t::instance().packets().end());
 
-    for(auto & p: mpi_state_t::instance().packets()) {
-      clog_t::instance().stream() << p.message();
-    } // for
+      for(auto & p: mpi_state_t::instance().packets()) {
+        clog_t::instance().stream() << p.message();
+      } // for
 
-    mpi_state_t::instance().packets().clear();
+      mpi_state_t::instance().packets().clear();
+    } // if
     } // scope
 
   } // while
@@ -1138,7 +1142,7 @@ struct log_message_t
     file_(file), line_(line), predicate_(predicate),
     can_send_to_one_(can_send_to_one), clean_color_(false), fatal_(false)
   {
-#if defined(CLOG_DEBUG)
+#if defined(CLOG_DEBUG) && 0
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
       file << " " << line << COLOR_PLAIN << std::endl;
 #endif
@@ -1147,7 +1151,7 @@ struct log_message_t
   virtual
   ~log_message_t()
   {
-#if defined(CLOG_DEBUG)
+#if defined(CLOG_DEBUG) && 0
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t destructor " <<
       COLOR_PLAIN << std::endl;
 #endif
