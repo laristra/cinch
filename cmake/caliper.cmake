@@ -18,7 +18,7 @@ if(ENABLE_CALIPER)
 find_package(Caliper REQUIRED)
 
     if(NOT Caliper_FOUND)
-        message(FATAL_ERROR "Caliper is required for this build configuration")
+	    message(FATAL_ERROR "Caliper is required for this build configuration")
     endif()
 
     message(STATUS "Found Caliper: ${Caliper_INCLUDE_DIRS}")
