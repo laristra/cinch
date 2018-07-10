@@ -31,9 +31,9 @@ list(APPEND CMAKE_MODULE_PATH ${CINCH_SOURCE_DIR}/cmake)
 
 include(common_includes)
 
-#--------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 # add some random includes for convinience
-#--------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -48,9 +48,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 # Include project documentation
 #------------------------------------------------------------------------------#
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
-endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
+#if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
+#    include(${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
+#endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/documentation.cmake)
 
 #------------------------------------------------------------------------------#
 # Add support for Doxygen documentation

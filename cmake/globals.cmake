@@ -50,23 +50,6 @@ endif(CMAKE_FORTRAN_FLAGS)
 
 
 #------------------------------------------------------------------------------#
-# Create a version for the project
-#------------------------------------------------------------------------------#
-
-include(version)
-
-set(VERSION_CREATION "git describe" CACHE STRING "Set a static version")
-
-if(NOT "${VERSION_CREATION}" STREQUAL "git describe")
-    set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
-else()
-    cinch_make_version()
-endif(NOT "${VERSION_CREATION}" STREQUAL "git describe")
-
-message(STATUS "Creating build for version "
-    "${PROJECT_NAME}-${${PROJECT_NAME}_VERSION}")
-
-#------------------------------------------------------------------------------#
 # Keep users from creating insource builds.
 #------------------------------------------------------------------------------#
 

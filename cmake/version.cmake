@@ -6,7 +6,11 @@
 # This function creates a sequential version number using a call to
 # 'git describe master'
 
-function(cinch_make_version)
+set(VERSION_CREATION "git describe" CACHE STRING "Set a static version")
+
+if(NOT "${VERSION_CREATION}" STREQUAL "git describe")
+    set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
+else()
 
     #--------------------------------------------------------------------------#
     # Make sure that git is available
@@ -24,11 +28,11 @@ function(cinch_make_version)
         #----------------------------------------------------------------------#
 
     execute_process(COMMAND ${GIT_EXECUTABLE} describe HEAD
-            OUTPUT_VARIABLE _version
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_VARIABLE _version
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    endif(NOT GIT_FOUND)
+    endif()
 
     #--------------------------------------------------------------------------#
     # If 'git describe' failed somehow, create a dummy
@@ -37,15 +41,15 @@ function(cinch_make_version)
     if(NOT _version)
         message(WARNING "Git describe failed, using dummy version dummy-0.0.0")
         set(_version "dummy-0.0.0")
-    endif(NOT _version)
+    endif()
 
     #--------------------------------------------------------------------------#
     # Set the parent scope version variable
     #--------------------------------------------------------------------------#
 
-    set(${PROJECT_NAME}_VERSION ${_version} PARENT_SCOPE)
+    set(${PROJECT_NAME}_VERSION ${_version})
 
-endfunction(cinch_make_version)
+endif()
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
