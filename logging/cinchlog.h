@@ -749,7 +749,7 @@ public:
           tag_bitset_.set(tag_map_[tag]);
         }
         else {
-          std::cerr << "CLOG WARNING: " << tag <<
+          std::cerr << "CLOG WARNING: tag " << tag <<
             " has not been registered. Ignoring this group..." << std::endl;
         } // if
       } // while
