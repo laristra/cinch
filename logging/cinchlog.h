@@ -179,6 +179,45 @@ demangle(
 } // demangle
 
 inline
+void
+dumpstack()
+{
+#if defined __GNUC__
+  void * array[100];
+  size_t size;
+
+  size = size_t(backtrace(array, 100));  // backtrace returns int
+  char ** symbols = backtrace_symbols(array, int(size)); // func. takes int
+
+  std::ostream & stream = std::cerr;
+
+  for(size_t i(0); i<size; ++i) {
+    std::string re = symbols[i];
+
+    // Look for a mangled name
+    auto start = re.find_first_of('(');
+    auto end = re.find_first_of('+');
+
+    std::string symbol;
+
+    if(start != std::string::npos && end != std::string::npos) {
+      symbol = re.substr(0, start+1) +
+        demangle(re.substr(start+1, end-1-start).c_str()) +
+        re.substr(end, re.size());
+    }
+    else {
+      symbol = re;
+    } // if
+
+    // Output the demangled result
+    stream << symbol << std::endl;
+  } // for
+#else
+  std::cerr << "dumpstack: disabled because __GNUC__ is undefined" << std::endl;
+#endif
+} // dumpstack
+
+inline
 std::string
 timestamp(bool underscores = false)
 {
@@ -1344,22 +1383,6 @@ severity_message_t(error, decltype(cinch::true_state),
     return stream;
   });
 
-// FIXME: This probably does not have the behavior we want, i.e.,
-//        fatal errors should not be predicated.
-// Fatal
-severity_message_t(fatal, decltype(cinch::true_state),
-  {
-    std::ostream & stream = std::cerr;
-
-    {
-    stream << OUTPUT_RED("[F" << message_stamp << "] ") << COLOR_LTRED;
-    } // scope
-
-    clean_color_ = true;
-    fatal_ = true;
-    return stream;
-  });
-
 } // namespace cinch
 
 //----------------------------------------------------------------------------//
@@ -1592,8 +1615,7 @@ severity_message_t(fatal, decltype(cinch::true_state),
 /*!
   @def clog_fatal(message)
 
-  Method style interface for fatal level severity log entries. Fatal
-  log entries exit by calling std::exit(1).
+  Throw a runtime exception with the provided message.
 
   @param message The stream message to be printed.
 
@@ -1615,7 +1637,13 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_fatal(message)                                                    \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  true && cinch::fatal_log_message_t(__FILE__, __LINE__).stream() << message
+  {                                                                            \
+  std::stringstream _sstream;                                                  \
+  _sstream << OUTPUT_LTRED("FATAL ERROR " << message) << std::endl             \
+    << OUTPUT_YELLOW("Dumping stack...");                                      \
+  cinch::dumpstack();                                                          \
+  throw std::runtime_error(_sstream.str());                                    \
+  } /* scope */
 
 /*!
   @def clog_assert(test, message)
@@ -1645,7 +1673,8 @@ severity_message_t(fatal, decltype(cinch::true_state),
 #define clog_assert(test, message)                                             \
 /* MACRO IMPLEMENTATION */                                                     \
                                                                                \
-  !(test) && clog_fatal(message)
+  if(!(test)) { clog_fatal(message); }
+//  !(test) && clog_fatal(message)
 
 /*!
   @def clog_add_buffer(name, ostream, colorized)

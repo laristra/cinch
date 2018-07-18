@@ -123,6 +123,8 @@ int main(int argc, char ** argv) {
   MPI_Finalize();
 #endif
 
+  clog_fatal("testing fatal error");
+
   return 0;
 } // main
 
