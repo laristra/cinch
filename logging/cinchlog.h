@@ -191,6 +191,8 @@ dumpstack()
 
   std::ostream & stream = std::cerr;
 
+  std::cerr << OUTPUT_YELLOW("Dumping stack...") << std::endl;
+
   for(size_t i(0); i<size; ++i) {
     std::string re = symbols[i];
 
@@ -212,6 +214,8 @@ dumpstack()
     // Output the demangled result
     stream << symbol << std::endl;
   } // for
+
+  stream << std::flush;
 #else
   std::cerr << "dumpstack: disabled because __GNUC__ is undefined" << std::endl;
 #endif
@@ -1639,9 +1643,7 @@ severity_message_t(error, decltype(cinch::true_state),
                                                                                \
   {                                                                            \
   std::stringstream _sstream;                                                  \
-  _sstream << OUTPUT_LTRED("FATAL ERROR " << message) << std::endl             \
-    << OUTPUT_YELLOW("Dumping stack...");                                      \
-  cinch::dumpstack();                                                          \
+  _sstream << OUTPUT_LTRED("FATAL ERROR " << message) << std::endl;            \
   throw std::runtime_error(_sstream.str());                                    \
   } /* scope */
 
