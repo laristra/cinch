@@ -160,6 +160,9 @@ namespace cinch {
 // Helper functions.
 //----------------------------------------------------------------------------//
 
+// The demangle and dumpstack functions are currently unused. I've left them
+// here in case they are needed in the future.
+#if 0
 inline
 std::string
 demangle(
@@ -220,6 +223,7 @@ dumpstack()
   std::cerr << "dumpstack: disabled because __GNUC__ is undefined" << std::endl;
 #endif
 } // dumpstack
+#endif
 
 inline
 std::string
@@ -1160,20 +1164,18 @@ struct log_message_t
   /*!
     Constructor.
 
-    This method initializes the \e fatal_ data member to false. Derived
-    classes wishing to force exit should set this to true in their
-    override of the stream method.
-
     @tparam P Predicate function type.
 
-    @param file      The current file (where the log message was created).
-                     In general, this will always use the __FILE__ parameter
-                     from the calling macro.
-    @param line      The current line (where the log message was called).
-                     In general, this will always use the __LINE__ parameter
-                     from the calling macro.
-    @param predicate The predicate function to determine whether or not
-                     the calling runtime should produce output.
+    @param file            The current file (where the log message was
+                           created).  In general, this will always use the
+                           __FILE__ parameter from the calling macro.
+    @param line            The current line (where the log message was called).
+                           In general, this will always use the __LINE__
+                           parameter from the calling macro.
+    @param predicate       The predicate function to determine whether or not
+                           the calling runtime should produce output.
+    @param can_send_to_one A boolean indicating whether the calling scope
+                           can route messages through one rank.
    */
   log_message_t(
     const char * file,
@@ -1183,9 +1185,9 @@ struct log_message_t
   )
   :
     file_(file), line_(line), predicate_(predicate),
-    can_send_to_one_(can_send_to_one), clean_color_(false), fatal_(false)
+    can_send_to_one_(can_send_to_one), clean_color_(false)
   {
-#if defined(CLOG_DEBUG) && 0
+#if defined(CLOG_DEBUG)
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t constructor " <<
       file << " " << line << COLOR_PLAIN << std::endl;
 #endif
@@ -1194,7 +1196,7 @@ struct log_message_t
   virtual
   ~log_message_t()
   {
-#if defined(CLOG_DEBUG) && 0
+#if defined(CLOG_DEBUG)
     std::cerr << COLOR_LTGRAY << "CLOG: log_message_t destructor " <<
       COLOR_PLAIN << std::endl;
 #endif
@@ -1211,47 +1213,6 @@ struct log_message_t
 #endif
 
     clog_t::instance().buffer_stream().str(std::string{});
-
-    if(fatal_ && predicate_()) {
-
-      // Create a backtrace.
-      // This is only defined for platforms that have glibc.
-#if defined __GNUC__
-      void * array[100];
-      size_t size;
-
-      size = size_t(backtrace(array, 100));  // backtrace returns int
-      char ** symbols = backtrace_symbols(array, int(size)); // func. takes int
-
-      std::ostream & stream = std::cerr;
-      if ( clean_color_ ) stream << COLOR_PLAIN;
-
-      for(size_t i(0); i<size; ++i) {
-        std::string re = symbols[i];
-
-        // Look for a mangled name
-        auto start = re.find_first_of('(');
-        auto end = re.find_first_of('+');
-
-        std::string symbol;
-
-        if(start != std::string::npos && end != std::string::npos) {
-          symbol = re.substr(0, start+1) +
-            demangle(re.substr(start+1, end-1-start).c_str()) +
-            re.substr(end, re.size());
-        }
-        else {
-          symbol = re;
-        } // if
-
-        // Output the demangled result
-        stream << symbol << std::endl;
-      } // for
-#endif
-
-      // Exit with error condition.
-      std::exit(1);
-    } // if
   } // ~log_message_t
 
   ///
@@ -1272,7 +1233,6 @@ protected:
   P & predicate_;
   bool can_send_to_one_;
   bool clean_color_;
-  bool fatal_;
 
 }; // struct log_message_t
 
