@@ -19,6 +19,7 @@ if(ENABLE_HPX)
 
   include_directories(${HPX_INCLUDE_DIRS})
   link_directories(${HPX_LIBRARY_DIR})
+  list(APPEND CINCH_RUNTIME_LIBRARIES ${HPX_LIBRARIES})
 
   add_definitions(-DENABLE_HPX)
   if(MSVC)

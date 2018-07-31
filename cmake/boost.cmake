@@ -20,6 +20,7 @@ if(ENABLE_BOOST_PROGRAM_OPTIONS)
     find_package(Boost COMPONENTS program_options REQUIRED QUIET)
     include_directories(${Boost_INCLUDE_DIRS})
     add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
+    list(APPEND CINCH_RUNTIME_LIBRARIES ${Boost_LIBRARIES})
 endif()
 
 #------------------------------------------------------------------------------#
