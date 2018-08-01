@@ -17,7 +17,7 @@ pkg_check_modules(PC_LAPACKE lapacke)
 
 find_path(LAPACKE_INCLUDE_DIR lapacke.h HINTS ${PC_LAPACKE_INCLUDE_DIRS} PATH_SUFFIXES lapacke)
 
-find_library(LAPACKE_LIBRARY NAMES lapacke ${PC_LAPACKE_LIBRARIES} HINTS ${PC_LAPACKE_LIBRARY_DIRS} )
+find_library(LAPACKE_LIBRARY NAMES lapacke openblas ${PC_LAPACKE_LIBRARIES} HINTS ${PC_LAPACKE_LIBRARY_DIRS} )
 
 find_package(LAPACK)
 
