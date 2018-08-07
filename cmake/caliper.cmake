@@ -21,6 +21,7 @@ if(ENABLE_CALIPER)
     include_directories(${Caliper_INCLUDE_DIRS})
     add_definitions(-DENABLE_CALIPER)
     list(APPEND CINCH_RUNTIME_LIBRARIES ${Caliper_LIBRARIES})
+    list(APPEND CINCH_RUNTIME_LIBRARIES ${Caliper_MPI_LIBRARIES})
 endif()
 
 #------------------------------------------------------------------------------#
