@@ -11,6 +11,10 @@ option(ENABLE_DEVEL_TARGETS "Enable development targets" OFF)
 
 function(cinch_add_devel_target name)
 
+    if(NOT ENABLE_DEVEL_TARGETS)
+        return()
+    endif()
+
     set(_TARGET_DIR devel)
 
     #--------------------------------------------------------------------------#
