@@ -1274,7 +1274,7 @@ struct severity ## _log_message_t                                              \
 //----------------------------------------------------------------------------//
 
 #define message_stamp                                                          \
-  timestamp() << " " << rstrip<'/'>(file_) << ":" << line_
+  timestamp() << " " << cinch::rstrip<'/'>(file_) << ":" << line_
 
 #if !defined(SERIAL) && defined(CLOG_ENABLE_MPI)
 #define mpi_stamp \
@@ -1603,7 +1603,9 @@ severity_message_t(error, decltype(cinch::true_state),
                                                                                \
   {                                                                            \
   std::stringstream _sstream;                                                  \
-  _sstream << OUTPUT_LTRED("FATAL ERROR " << message) << std::endl;            \
+  _sstream << OUTPUT_LTRED("FATAL ERROR ") <<                                  \
+    OUTPUT_YELLOW(cinch::rstrip<'/'>(__FILE__) << ":" << __LINE__ << " ") <<   \
+    OUTPUT_LTRED(message) << std::endl;                                        \
   throw std::runtime_error(_sstream.str());                                    \
   } /* scope */
 
