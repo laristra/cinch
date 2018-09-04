@@ -15,14 +15,14 @@
 FIND_PATH(FleCSI_INCLUDE_DIR NAMES flecsi.h)
 
 # Look for the library.
-FIND_LIBRARY(FleCSI_LIBRARY NAMES flecsi libflecsi)
+FIND_LIBRARY(FleCSI_LIBRARY NAMES FleCSI libFleCSI)
 
 # Look for the runtime driver
 FIND_PATH(FleCSI_RUNTIME
 	NAMES
 		runtime_driver.cc
 	PATH_SUFFIXES
-		share/flecsi/runtime
+		share/FleCSI/runtime
 )
 
 # handle the QUIETLY and REQUIRED arguments and set FleCSI_FOUND to TRUE if 
