@@ -32,12 +32,12 @@ else()
 endif(ENABLE_MPI_CXX_BINDINGS)
 
 if(MPI_${MPI_LANGUAGE}_FOUND)
-
     include_directories(${MPI_${MPI_LANGUAGE}_INCLUDE_PATH})
 
     # using mpich, there are extra spaces that cause some issues
     separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
 
+    list(APPEND CINCH_RUNTIME_LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES})
 endif(MPI_${MPI_LANGUAGE}_FOUND)
 
 if(MSVC)
