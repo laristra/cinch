@@ -57,22 +57,8 @@ int main(int argc, char ** argv) {
 
   // Initialize the MPI runtime
   MPI_Init(&argc, &argv);
-
-  // Disable XML output, if requested, everywhere but rank 0
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  std::vector<char *> args(argv, argv+argc);
-  if(rank > 0) {
-    for(auto itr = args.begin(); itr != args.end(); ++itr) {
-      if(std::strncmp(*itr, "--gtest_output", 14) == 0) {
-        args.erase(itr);
-        break;
-      } // if
-    } // for
-  } // if
-
-  argc = args.size();
-  argv = args.data();
 
 #if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
@@ -141,6 +127,11 @@ int main(int argc, char ** argv) {
     // Get GTest listeners
     ::testing::TestEventListeners& listeners =
       ::testing::UnitTest::GetInstance()->listeners();
+
+    // Disable XML output, if requested, everywhere but rank 0
+    if(rank > 0) {
+      delete listeners.Release(listeners.default_xml_generator());
+    } // if
 
     // Adds a listener to the end.  Google Test takes the ownership.
     listeners.Append(new cinch::listener);
