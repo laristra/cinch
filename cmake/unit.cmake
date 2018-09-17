@@ -196,7 +196,7 @@ function(cinch_add_unit name)
       set(unit_policy_libraries ${PFUNIT_LIBRARY})
       set(unit_policy_defines ${PFUNIT_DEFINES})
 
-    elseif(MPI_${MPI_LANGUAGE}_FOUND AND unit_policy_main STREQUAL "MPI")
+    elseif(MPI_${MPI_LANGUAGE}_FOUND AND unit_policy_main STREQUAL "MPI" AND (NOT HPX_FOUND))
 
       set(unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-mpi.cc)
       set(unit_policy_flags ${MPI_${MPI_LANGUAGE}_COMPILE_FLAGS})
@@ -231,7 +231,7 @@ function(cinch_add_unit name)
       set(unit_policy_libraries ${Legion_LIBRARIES} ${Legion_LIB_FLAGS})
 
     elseif(MPI_${MPI_LANGUAGE}_FOUND AND HPX_FOUND AND
-        unit_policy_main STREQUAL "HPX")
+        (unit_policy_main STREQUAL "HPX" OR unit_policy_main STREQUAL "MPI"))
 
       set(unit_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-hpx.cc)
       set(unit_policy_flags ${HPX_CXX_FLAGS})
