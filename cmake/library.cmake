@@ -110,6 +110,9 @@ function(cinch_add_library_target target directory)
       else()
         install(TARGETS ${target} DESTINATION ${LIBDIR})
       endif()
+    # else this is a header only interface
+    else()
+      add_library(${target} INTERFACE)
     endif()
 
     foreach(file ${HEADERS})
