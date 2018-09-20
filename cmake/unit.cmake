@@ -398,9 +398,7 @@ function(cinch_add_unit name)
       target_link_libraries(${name} ${unit_LIBRARIES})
     endif()
 
-    if(ENABLE_BOOST_PROGRAM_OPTIONS)
-        target_link_libraries(${name} ${Boost_LIBRARIES})
-    endif()
+    target_link_libraries(${name} ${CINCH_RUNTIME_LIBRARIES})
 
     if(unit_policy_libraries)
       target_link_libraries(${name} ${unit_policy_libraries})
