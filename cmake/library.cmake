@@ -99,9 +99,17 @@ function(cinch_add_library_target target directory)
         endforeach()
     
     endforeach(_SUBDIR)
-   
+  
+    # if there are source files, build a library
     if (SOURCES)
       add_library(${target} ${SOURCES})
+      # if an export target has been specified
+      if(lib_EXPORT_TARGET)
+        install(TARGETS ${target} EXPORT ${lib_EXPORT_TARGET}
+            DESTINATION ${LIBDIR})
+      else()
+        install(TARGETS ${target} DESTINATION ${LIBDIR})
+      endif()
     endif()
 
     foreach(file ${HEADERS})
@@ -110,14 +118,6 @@ function(cinch_add_library_target target directory)
             DESTINATION include/${directory}/${DIR})
     endforeach()
 
-    if (SOURCES)
-      if(lib_EXPORT_TARGET)
-        install(TARGETS ${target} EXPORT ${lib_EXPORT_TARGET}
-            DESTINATION ${LIBDIR})
-      else()
-        install(TARGETS ${target} DESTINATION ${LIBDIR})
-      endif()
-    endif()
 
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include)
