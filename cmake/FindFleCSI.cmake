@@ -12,17 +12,17 @@
 #  FleCSI_FOUND        - True if flecsi found.
 
 # Look for the header file.
-FIND_PATH(FleCSI_INCLUDE_DIR NAMES flecsi.h)
+FIND_PATH(FleCSI_INCLUDE_DIR NAMES flecsi.h flecsi-config.h)
 
 # Look for the library.
-FIND_LIBRARY(FleCSI_LIBRARY NAMES FleCSI libFleCSI)
+FIND_LIBRARY(FleCSI_LIBRARY NAMES flecsi libflecsi FleCSI libFleCSI)
 
 # Look for the runtime driver
 FIND_PATH(FleCSI_RUNTIME
 	NAMES
 		runtime_driver.cc
 	PATH_SUFFIXES
-		share/FleCSI/runtime
+		share/FleCSI/runtime share/flecsi/runtime
 )
 
 # handle the QUIETLY and REQUIRED arguments and set FleCSI_FOUND to TRUE if 
