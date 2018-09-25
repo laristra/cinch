@@ -11,23 +11,27 @@
 #  EXODUSII_FOUND        - True if exodus found.
 #
 
-find_path(EXODUSII_INCLUDE_DIR exodusII.h)
+find_path(EXODUSII_INCLUDE_DIR exodusII.h
+  PATH_SUFFIXES include)
 
 #v6.09 calls it libexodus
 #debian calls it libexoIIv2
 #other distros libexoIIv2c
-find_library(EXODUSII_LIBRARY NAMES exodus exoIIv2 exoIIv2c)
+find_library(EXODUSII_LIBRARY NAMES exodus exoIIv2 exoIIv2c
+  PATH_SUFFIXES lib)
 
 set(EXODUSII_LIBRARIES ${EXODUSII_LIBRARY} )
 set(EXODUSII_INCLUDE_DIRS ${EXODUSII_INCLUDE_DIR} )
 
 # if you are not using dynamic libraries, you probably need netCDF too
 # fortunately, new versions have a pretty elaborite config file
-find_package(netCDF QUIET)
-if (netCDF_FOUND)
-  include( ${netCDF_CONFIG} )
-  list( APPEND EXODUSII_INCLUDE_DIRS ${netCDF_INCLUDE_DIRS} )
-  list( APPEND EXODUSII_LIBRARIES ${netCDF_LIBRARIES} )
+find_package(NetCDF QUIET)
+if (NetCDF_FOUND)
+  if (EXISTS ${NetCDF_CONFIG} )
+    include( ${NetCDF_CONFIG} )
+  endif()
+  list( APPEND EXODUSII_INCLUDE_DIRS ${NETCDF_INCLUDE_DIRS} )
+  list( APPEND EXODUSII_LIBRARIES ${NETCDF_LIBRARIES} )
 endif()
 
 include(FindPackageHandleStandardArgs)
