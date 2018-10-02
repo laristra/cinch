@@ -106,8 +106,6 @@ endif(ENABLE_UNIT_TESTS)
   ``NOOPENMPI``
     Test does NOT get run (but still build) if
     ENV{'OPENMPI'} is "true".
-  ``FOLDER``
-    Specify a project 'folder' to associate th eunit test with.
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -121,7 +119,7 @@ function(cinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     set(options NOCI NOOPENMPI)
-    set(one_value_args POLICY FOLDER)
+    set(one_value_args POLICY)
     set(multi_value_args
         SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS
     )
@@ -349,9 +347,16 @@ function(cinch_add_unit name)
             PRIVATE ${unit_policy_flags})
     endif()
 
-    if(unit_FOLDER)
-        set_target_properties(${name} PROPERTIES FOLDER "${unit_FOLDER}")
-    endif()
+    #--------------------------------------------------------------------------#
+    # Set the folder property for VS and XCode
+    #--------------------------------------------------------------------------#
+
+    get_filename_component(_leafdir ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+    string(SUBSTRING ${_leafdir} 0 1 _first)
+    string(TOUPPER ${_first} _first)
+    string(REGEX REPLACE "^.(.*)" "${_first}\\1" _leafdir "${_leafdir}")
+    string(CONCAT _folder "Tests/" ${_leafdir})
+    set_target_properties(${name} PROPERTIES FOLDER "${_folder}")
 
     #--------------------------------------------------------------------------#
     # Check for defines.
@@ -384,9 +389,8 @@ function(cinch_add_unit name)
         endforeach()
         add_custom_target(${name}_inputs
             DEPENDS ${_OUTPUT_FILES})
-        if(unit_FOLDER)
-            set_target_properties(${name}_inputs PROPERTIES FOLDER "${unit_FOLDER}/Inputs")
-        endif()
+        set_target_properties(${name}_inputs
+            PROPERTIES FOLDER "${_folder}/Inputs")
         add_dependencies(${name} ${name}_inputs)
     endif()
 
