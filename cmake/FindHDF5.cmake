@@ -1,4 +1,4 @@
-# This is taken directly from the HDF5 source tree. May need tweaks for cinch
+# This is taken directly from the CMake source tree. May need tweaks for cinch
 #   -- dringo
 #
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
