@@ -110,8 +110,9 @@
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
-include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+include(SelectLibraryConfigurations)
+include(FindPackageHandleStandardArgs)
 
 # List of the valid HDF5 components
 set(HDF5_VALID_LANGUAGE_BINDINGS C CXX Fortran)
