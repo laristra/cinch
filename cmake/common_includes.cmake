@@ -26,6 +26,7 @@ include(info)
 include(insource)
 include(library)
 include(packages)
+include(spack)
 include(subdirlist)
 include(subproject)
 
