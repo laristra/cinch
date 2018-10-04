@@ -21,8 +21,15 @@ if(ENABLE_HDF5)
 
     include_directories(${HDF5_INCLUDE_DIRS})
 
+    list(APPEND CINCH_RUNTIME_LIBRARIES ${HDF5_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
-    list(APPEND CINCH_RUNTIME_LIBRARIES ${HDF5_LIBRARIES})
+    if(EXISTS "${HDF5_INCLUDE_DIRS}/../lib/libhdf5_cpp_debug.so")
+     list(APPEND CINCH_RUNTIME_LIBRARIES ${HDF5_INCLUDE_DIRS}/../lib/libhdf5_cpp_debug.so )
+    endif()
+
+    if(EXISTS "${HDF5_INCLUDE_DIRS}/../lib/libhdf5_cpp.so")
+     list(APPEND CINCH_RUNTIME_LIBRARIES ${HDF5_INCLUDE_DIRS}/../lib/libhdf5_cpp.so )
+    endif()
 
     message(STATUS "HDF5 found: ${HDF5_FOUND}")
 
