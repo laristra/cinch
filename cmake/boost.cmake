@@ -15,6 +15,15 @@ endif()
 
 option(ENABLE_BOOST "Enable Boost" OFF)
 
+option(ENABLE_BOOST_PROGRAM_OPTIONS
+     "Enable Boost program options for command-line flags" OFF)
+
+if (ENABLE_BOOST_PROGRAM_OPTIONS)
+  set(ENABLE_BOOST ON CACHE BOOL "Enable Boost" FORCE)
+  message (WARNING "ENABLE_BOOST_PROGRAM_OPTIONS option is deprecated. Please
+    replace it with ENABLE_BOOST one" )
+endif()
+
 if(ENABLE_BOOST)
     find_package(Boost REQUIRED QUIET)
     include_directories(${Boost_INCLUDE_DIRS})
