@@ -13,12 +13,13 @@ endif()
 # Add Boost program options.
 #--------------------------------------------------------------------------#
 
-option(ENABLE_BOOST_PROGRAM_OPTIONS
-    "Enable Boost program options for command-line flags" OFF)
+option(ENABLE_BOOST "Enable Boost" OFF)
 
-if(ENABLE_BOOST_PROGRAM_OPTIONS)
-    find_package(Boost COMPONENTS program_options REQUIRED QUIET)
+if(ENABLE_BOOST)
+    find_package(Boost REQUIRED QUIET)
     include_directories(${Boost_INCLUDE_DIRS})
+    #FIXME rmove add_definition below after we replace 
+    # ENABLE_BOOST_PROGRAM_OPTIONS with ENABLE_BOOST in FleCSI
     add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
     list(APPEND CINCH_RUNTIME_LIBRARIES ${Boost_LIBRARIES})
 endif()
