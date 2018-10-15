@@ -34,6 +34,7 @@ if(ENABLE_BOOST)
       QUIET)
 
     include_directories(${Boost_INCLUDE_DIRS})
+    link_directories(${Boost_LIBRARY_DIRS})
     #FIXME rmove add_definition below after we replace 
     # ENABLE_BOOST_PROGRAM_OPTIONS with ENABLE_BOOST in FleCSI
     add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
