@@ -1,5 +1,10 @@
 #! /usr/bin/env bash
 
+if [ -e .version ] ; then
+  cat .version
+  exit 0
+fi
+
 # Check for git on the system
 git=`which git`
 
