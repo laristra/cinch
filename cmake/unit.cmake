@@ -31,9 +31,23 @@ if(ENABLE_UNIT_TESTS)
           add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
         endif()
 
+    endif()
+
+    # if GTEST_INCLUDE_DIRS and GTEST_LIBRARIES are not set, set them
+    # to cinch's
+    if (NOT GTEST_INCLUDE_DIRS)
+        set(GTEST_INCLUDE_DIRS
+          ${CINCH_SOURCE_DIR}/gtest/googlemock/include
+          ${CINCH_SOURCE_DIR}/gtest/googletest
+          ${CINCH_SOURCE_DIR}/gtest/googletest/include)
+    endif()
+    if (NOT GTEST_LIBRARIES)
+        set(GTEST_LIBRARIES gtest)
+    endif()
+
     # gtest was not found, so we need to build it.  but since this gets called
     # multiple times, protect ourselves from redifining the same target
-    elseif(NOT TARGET gtest)
+    if(NOT TARGET gtest AND NOT GTEST_FOUND)
 
         find_package(Threads)
         add_library(gtest
@@ -48,18 +62,6 @@ if(ENABLE_UNIT_TESTS)
                 COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
         endif()
 
-    endif()
-
-    # if GTEST_INCLUDE_DIRS and GTEST_LIBRARIES are not set, set them
-    # to cinch's
-    if (NOT GTEST_INCLUDE_DIRS)
-        set(GTEST_INCLUDE_DIRS
-          ${CINCH_SOURCE_DIR}/gtest/googlemock/include
-          ${CINCH_SOURCE_DIR}/gtest/googletest
-          ${CINCH_SOURCE_DIR}/gtest/googletest/include)
-    endif()
-    if (NOT GTEST_LIBRARIES)
-        set(GTEST_LIBRARIES gtest)
     endif()
 
     #--------------------------------------------------------------------------#
