@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+# Check for git on the system
+git=`which git`
+
+if [ "$git" = "" ] ; then
+  echo "ERROR! You must have git installed to use this script!!!"
+  exit
+fi
+
+git_branch=`git branch | grep "*" | awk '{print $2}' | sed 's,\/.*,,'`
+git_abbrev=`git describe --abbrev=0`
+
+if [ "$git_branch" = "master" ] ; then
+  git describe | awk -F"-" '{print $1"."$2}'
+else
+  echo $git_abbrev
+fi
