@@ -9,10 +9,19 @@ if [ "$git" = "" ] ; then
 fi
 
 git_branch=`git branch | grep "*" | awk '{print $2}' | sed 's,\/.*,,'`
-git_abbrev=`git describe --abbrev=0`
 
 if [ "$git_branch" = "master" ] ; then
+
+  # If we're on the master branch, use git describe to get the last
+  # annotated tag and the commit to make major.minor.patch
+
   git describe | awk -F"-" '{print $1"."$2}'
+
 else
-  echo $git_abbrev
+
+  # Any other branches should have an annotated tag that specifies
+  # major.minor.patch, so we just remove the commit and hash
+
+  git describe --abbrev=0
+
 fi
