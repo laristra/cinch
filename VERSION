@@ -1,9 +1,12 @@
 #! /usr/bin/env bash
 
-if [ -e .version ] ; then
-  cat .version
-  exit 0
-fi
+#if [ -e .version ] ; then
+#  cat .version
+#  exit 0
+#fi
+
+branch=`git branch | grep "*" | awk '{print $2}' | sed 's,\/.*,,'`
+echo $branch
 
 # Check for git on the system
 git=`which git`
