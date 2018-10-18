@@ -12,8 +12,8 @@ git_branch=`git branch | grep "*" | awk '{print $2}' | sed 's,\/.*,,'`
 
 if [ "$git_branch" = "master" ] || [[ "$git_branch" =~ feature ]] ; then
 
-  # If we're on the master branch, use git describe to get the last
-  # annotated tag and the commit to make major.minor.patch
+  # If we're on the master branch or a feature branch, use git describe
+  # to get the last annotated tag and the commit to make major.minor.patch
 
   git describe | awk -F"-" '{print $1"."$2}'
 
