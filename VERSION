@@ -12,13 +12,7 @@ git_branch=`git branch | grep "*" | awk '{print $2}' | sed 's,\/.*,,'`
 git_abbrev=`git describe --abbrev=0`
 
 if [ "$git_branch" = "master" ] ; then
-  git_patch=`git describe | sed 's,^.*[\-]\([0-9]\)*\-.*,\1,g'`
-
-  if [ "$git_patch" != "$git_abbrev" ] ; then
-    echo "$git_abbrev.$git_patch"
-  else
-    echo $git_abbrev
-  fi
+  git describe | awk -F"-" '{print $1"."$2}'
 else
   echo $git_abbrev
 fi
