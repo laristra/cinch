@@ -12,7 +12,8 @@ function(cinch_minimum_required)
     cmake_parse_arguments(_cinch "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
-    execute_process(COMMAND ${CINCH_SOURCE_DIR}/utils/version
+    execute_process(COMMAND utils/version
+      WORKING_DIRECTORY ${CINCH_SOURCE_DIR}
       OUTPUT_VARIABLE CINCH_VERSION)
     string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
 
