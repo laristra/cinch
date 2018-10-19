@@ -2,14 +2,14 @@
 
 # Branch Naming Conventions
 
-The Cinch *master* branch is the primary development branch for the
+The *master* branch is the primary development branch for the
 proejct. Commits to master require that continuous integration tests
 pass before they may be merged.
 
 Please use the following naming conventions when creating branches:
 
 * **release**/*major.minor*<br>
-  The *release* prefix is reserved for supported Cinch release
+  The *release* prefix is reserved for supported release
   branches. Actual releases and pre-releases will be identified using
   tags.
   
@@ -45,6 +45,10 @@ Please use the following naming conventions when creating branches:
   a reference number or name, e.g., issue number or the related release
   tag.
 
-## Creating a Release Branch
+# Managing Release Branches
+
+
+
+# Creating a Distribution
 
 <!-- vim: set tabstop=2 shiftwidth=2 expandtab fo=cqt tw=72 : -->
