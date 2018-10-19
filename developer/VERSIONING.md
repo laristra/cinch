@@ -26,6 +26,8 @@ Please use the following naming conventions when creating branches:
     * Release candidate 2 of release 1.0.0 would be *1.0.0-rc.2*.
     * Alpha release 1 of release 1.0.0 would be *1.0.0-alpha.1*.
 
+  * Must branch from: **master**
+
 * **stable**/*branch\_name*<br>
   A *stable* branch is a development or feature branch that is
   guaranteed to build and pass the FleCSI continuous integration test
@@ -40,12 +42,59 @@ Please use the following naming conventions when creating branches:
   to primarily be developed by an individual, it should include the
   *username* as part of the branch.
 
+  * Must branch from: **master**
+  * Must merge to: **master**
+
 * **fix**/*reference*<br>
   Bug-fix branches should use the *fix* prefix, and should include
   a reference number or name, e.g., issue number or the related release
   tag.
 
-# Managing Release Branches
+  * Must branch from: **release branch**
+  * Must merge to: **master *and* release branch**
+
+# Managing Branches
+
+Blah Blah
+
+## Feature Branches
+
+All new development is done on a feature branch.
+
+### Creating
+To create a new feature branch:
+```bash
+# Make sure that you are up-to-date on the master branch
+$ git checkout master
+$ git pull
+
+# Create a new feature branch
+$ git checkout -b feature/name
+```
+Once you make changes to your feature branch, you can push them to
+the remote--**after considering classification and export control
+implications**--using the following:
+```
+git push --set-upstream origin feature/name
+```
+
+### Merging
+Once you are done developing a feature, you should merge your feature
+branch with master using the *no fast-forward (--no-ff)* flag to git:
+```bash
+# Make sure that you are up-to-date on the master branch
+$ git checkout master
+$ git pull
+
+# Merge your branch into master
+$ git merge --no-ff feature/name
+```
+The *--no-ff* flag preserves information about the existence of the
+feature branch after it is removed.
+
+Once you have merged your changes into master, you should submit a pull
+request. This can be done on the [github
+website](https://github.com/laristra), or from the command-line:
 
 
 
