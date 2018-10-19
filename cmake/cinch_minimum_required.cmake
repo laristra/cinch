@@ -12,6 +12,12 @@ function(cinch_minimum_required)
     cmake_parse_arguments(_cinch "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
+    find_package(Git)
+
+    if(NOT Git_FOUND)
+        message(FATAL_ERROR "You must have git installed to use cinch!!!")
+    endif()
+
     execute_process(COMMAND utils/version
       WORKING_DIRECTORY ${CINCH_SOURCE_DIR} OUTPUT_VARIABLE CINCH_VERSION)
     string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
