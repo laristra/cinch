@@ -26,6 +26,14 @@ Please use the following naming conventions when creating branches:
     * Release candidate 2 of release 1.0.0 would be *1.0.0-rc.2*.
     * Alpha release 1 of release 1.0.0 would be *1.0.0-alpha.1*.
 
+* **stable**/*branch\_name*<br>
+  A *stable* branch is a development or feature branch that is
+  guaranteed to build and pass the FleCSI continuous integration test
+  suite, but one which incorporates new features or capabilities that
+  are not available in a release branch. This label should not be used
+  for a branch that is intended to become a release candidate (Use
+  *release* instead.)
+
 * **feature/username**/*branch\_name* or **feature**/*branch\_name*<br>
   A *feature* branch is where new development is done. However, master
   should be merged periodically into a feature branch. If the branch is
