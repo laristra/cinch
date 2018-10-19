@@ -18,7 +18,7 @@ function(cinch_minimum_required)
         message(FATAL_ERROR "You must have git installed to use cinch!!!")
     endif()
 
-    execute_process(COMMAND $GIT_EXECUTABLE describe --abbrev=0
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0
       WORKING_DIRECTORY ${CINCH_SOURCE_DIR} OUTPUT_VARIABLE CINCH_VERSION)
     string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
 
