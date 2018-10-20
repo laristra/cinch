@@ -54,34 +54,37 @@ Please use the following naming conventions when creating branches:
   * Must merge to: **master *and* release branch**
 
 # Managing Branches
-
-Blah Blah
+Please use the following sections as a guide to creating and managing
+branches.
 
 ## Feature Branches
-
 All new development is done on a feature branch.
 
 ### Creating
 To create a new feature branch:
-```bash
+```
 # Make sure that you are up-to-date on the master branch
 $ git checkout master
 $ git pull
 
+# If the project uses submodules you should also make sure
+# that they are up-to-date
+$ git submodule update --recursive
+
 # Create a new feature branch
 $ git checkout -b feature/name
 ```
-Once you make changes to your feature branch, you can push them to
-the remote--**after considering classification and export control
+Once you make a change to your feature branch, you can push it to the
+remote--**after considering classification and export control
 implications**--using the following:
 ```
 git push --set-upstream origin feature/name
 ```
 
 ### Merging
-Once you are done developing a feature, you should merge your feature
+When you are done developing a feature, you should merge your feature
 branch with master using the *no fast-forward (--no-ff)* flag to git:
-```bash
+```
 # Make sure that you are up-to-date on the master branch
 $ git checkout master
 $ git pull
@@ -92,11 +95,89 @@ $ git merge --no-ff feature/name
 The *--no-ff* flag preserves information about the existence of the
 feature branch after it is removed.
 
-Once you have merged your changes into master, you should submit a pull
-request. This can be done on the [github
-website](https://github.com/laristra), or from the command-line:
+After you have merged your changes into **master**, you should submit a
+pull request. This can be done on the [github
+website](https://github.com/laristra).
 
+Once the pull request has been accepted, you can safetly remove the
+feature branch:
+```
+# Remove the local branch
+$ git branch -d feature/name
 
+# Remove the remote branch
+$ git push origin --delete feature/name
+```
+After the feature branch is removed, it will no longer appear in the
+commit messages for the project. However, because we used *--no-ff*, the
+structure of the branch will be retained, e.g., try *git log --graph*.
+The name of the branch will also appear in the message at the merge
+point, provided that you used the default message provided by git.
+
+## Release Branches
+A release branch is used to prepare and maintain supported releases.
+
+### Creating
+Creating a release branch is similar to creating a feature branch,
+except that the naming convention for release branches is more
+restrictive, i.e., the branch name must have the form
+*release/major.minor*:
+```
+# Make sure that you are up-to-date on the master branch
+$ git checkout master
+$ git pull
+
+# If the project uses submodules you should also make sure
+# that they are up-to-date
+$ git submodule update --recursive
+
+# Create a new release branch
+$ git checkout -b release/major.minor
+```
+
+### Finishing
+**Properly completing work on a release branch in preparation for a
+supported release requires a combination of command-line and server-side
+operations. These instructions assume that the server is GitHub. These
+directions also assume that you have completed a *CHANGELOG* of the
+changes for the new release.**
+
+1. When you are ready to create an actual release on a release branch, you
+need to create an annotated tag with the release version:
+```
+$ git tag -a -m "Release major.minor.patch" major.minor.patch
+```
+The *major.minor* part of the version must be consistent with the branch
+name. The patch level should be sequential, and should use the next
+integer value from the last tag on the branch, e.g.:
+ * 1.0: Initial release tag
+ * 1.0.1: First patch tag
+ * 1.0.2: Second patch tag
+
+   *Tags should be consistent with the branch name, but they are
+unrelated to the number of commits on the branch.*
+
+2. Once you have created the tag, you should go to the GitHub project site,
+and click on the *releases* link. This will take you to the release page
+for the project.
+
+3. Next, you should click on the *Draft a new release* button. This will
+bring up a page with several edit fields.
+
+4. In the *Tag version* edit field, enter the tag that you created in the
+previous steps.
+
+5. Create a release title of the form *Release major.minor.patch* (*patch*
+should only be used when appropriate.)
+
+6. Cut and paste the information from your *CHANGELOG* file into the
+*Describe this release* field, and make any other changes or additions
+that are appropriate.
+
+7. Once you have completed filling out the information, press the *Publish
+release* button.
+
+### Fixes
 
 # Creating a Distribution
 
