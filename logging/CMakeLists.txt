@@ -76,7 +76,6 @@ add_definitions(-DENABLE_CLOG)
 
 target_link_libraries(clog_test ${Boost_LIBRARIES})
 target_link_libraries(clog_test ${CMAKE_THREAD_LIBS_INIT})
-
 if(CLOG_ENABLE_MPI)
     target_link_libraries(clog_test ${MPI_LIBRARIES})
 endif()
