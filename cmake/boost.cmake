@@ -28,7 +28,7 @@ if(ENABLE_BOOST)
 #set( Boost_USE_MULTITHREADED OFF )
 #set( Boost_USE_STATIC_LIBS ON )
 set( Boost_NO_SYSTEM_PATHS on CACHE BOOL "Do not search system for Boost" )
-set (Boost_REALPATH ON)
+#set (Boost_REALPATH ON)
 
     find_package(Boost  REQUIRED 
       program_options
@@ -45,9 +45,8 @@ set (Boost_REALPATH ON)
     add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
     list(APPEND CINCH_RUNTIME_LIBRARIES ${Boost_LIBRARIES})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${Boost_LIBRARY_DIRS}")
-    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -L${Boost_LIBRARY_DIRS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${Boost_LIBRARY_DIRS}")
-message (WARNING "BOOST : " ${CINCH_RUNTIME_LIBRARIES})
+#    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -L${Boost_LIBRARY_DIRS}")
+#    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${Boost_LIBRARY_DIRS}")
 
 endif()
 
