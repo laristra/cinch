@@ -106,28 +106,30 @@ function(cinch_add_sphinx)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py.in
             ${_directory}/.sphinx/conf.py)
 
+        file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst
+            DESTINATION ${_directory}/.sphinx)
+        file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static
+            DESTINATION ${_directory}/.sphinx)
+
         #----------------------------------------------------------------------#
         # Add the Sphinx target
         #----------------------------------------------------------------------#
 
+        message(STATUS "SPHINX: ${CMAKE_CURRENT_SOURCE_DIR}/sphinx")
         add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx
             COMMAND ${SPHINX_EXECUTABLE} -q -b html
                 -c ${_directory}/.sphinx
                 ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
-                ${CMAKE_BINARY_DIR}/sphinx
+                ${_directory}/sphinx
         )
-        #        add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx
-        #    ${SPHINX_EXECUTABLE}
-        #    WORKING_DIRECTORY ${_directory}/.sphinx
-        #    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/config.py.in)
 
         #----------------------------------------------------------------------#
         # Add install target
         #----------------------------------------------------------------------#
 
-        #        add_custom_target(${CINCH_CONFIG_INFOTAG}install-sphinx
-        #    COMMAND ${CMAKE_COMMAND} -E copy_directory ${_directory}/sphinx
-        #        $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
+        add_custom_target(${CINCH_CONFIG_INFOTAG}install-sphinx
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${_directory}/sphinx
+            $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
 
     endif(ENABLE_SPHINX)
 
