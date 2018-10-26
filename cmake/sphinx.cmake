@@ -110,6 +110,12 @@ function(cinch_add_sphinx)
         # Add the Sphinx target
         #----------------------------------------------------------------------#
 
+        add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx
+            COMMAND ${SPHINX_EXECUTABLE} -q -b html
+                -c ${_directory}/.sphinx
+                ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
+                ${CMAKE_BINARY_DIR}/sphinx
+        )
         #        add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx
         #    ${SPHINX_EXECUTABLE}
         #    WORKING_DIRECTORY ${_directory}/.sphinx
