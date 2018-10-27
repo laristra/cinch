@@ -88,8 +88,7 @@ function(cinch_add_sphinx)
             #------------------------------------------------------------------#
             # Install in its own directory
             #------------------------------------------------------------------#
-
-            set(_install ${CMAKE_PROJECT_NAME})
+set(_install ${CMAKE_PROJECT_NAME})
 
         endif()
 
@@ -131,6 +130,13 @@ function(cinch_add_sphinx)
 
         add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx
             COMMAND ${SPHINX_EXECUTABLE} -q -b html
+                -c ${_directory}/.sphinx
+                ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
+                ${_directory}/sphinx
+        )
+
+        add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx-man
+            COMMAND ${SPHINX_EXECUTABLE} -q -b man
                 -c ${_directory}/.sphinx
                 ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
                 ${_directory}/sphinx
