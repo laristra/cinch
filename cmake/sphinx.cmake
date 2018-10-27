@@ -3,6 +3,8 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
+include(copy_directory)
+
 function(cinch_add_sphinx)
 
     #--------------------------------------------------------------------------#
@@ -92,12 +94,26 @@ function(cinch_add_sphinx)
         endif()
 
         #----------------------------------------------------------------------#
-        # Create directory for intermediate files
+        # Create directories for intermediate files
         #----------------------------------------------------------------------#
 
         if(NOT EXISTS ${_directory}/.sphinx)
             file(MAKE_DIRECTORY ${_directory}/.sphinx)
-        endif(NOT EXISTS ${_directory}/.sphinx)
+        endif()
+
+        if(NOT EXISTS ${_directory}/.sphinx/_static)
+            file(MAKE_DIRECTORY ${_directory}/.sphinx/_static)
+        endif()
+
+        cinch_copy_directory(${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static
+            doc/.sphinx/_static)
+
+        if(NOT EXISTS ${_directory}/.sphinx/_templates)
+            file(MAKE_DIRECTORY ${_directory}/.sphinx/_templates)
+        endif()
+
+        cinch_copy_directory(${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_templates
+            doc/.sphinx/_templates)
 
         #----------------------------------------------------------------------#
         # Generate the Sphinx config file
@@ -108,14 +124,11 @@ function(cinch_add_sphinx)
 
         file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst
             DESTINATION ${_directory}/.sphinx)
-        file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static
-            DESTINATION ${_directory}/.sphinx)
 
         #----------------------------------------------------------------------#
         # Add the Sphinx target
         #----------------------------------------------------------------------#
 
-        message(STATUS "SPHINX: ${CMAKE_CURRENT_SOURCE_DIR}/sphinx")
         add_custom_target(${CINCH_CONFIG_INFOTAG}sphinx
             COMMAND ${SPHINX_EXECUTABLE} -q -b html
                 -c ${_directory}/.sphinx
