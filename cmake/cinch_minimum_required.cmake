@@ -27,8 +27,12 @@ function(cinch_minimum_required)
         string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
     endif()
 
+    # remove v prefix from the version so that CMake can compare the version
+    # number
+    string(REGEX REPLACE "^v" "" CINCH_VERSION ${CINCH_VERSION})
+
     if(CINCH_VERSION VERSION_LESS ${_cinch_VERSION})
-        message(FATAL_ERROR "${PROJECT_NAME} requries Cinch "
+        message(FATAL_ERROR "${PROJECT_NAME} requires Cinch "
             "version ${_cinch_VERSION} (found version ${CINCH_VERSION})"
         )
     else()
