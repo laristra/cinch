@@ -16,10 +16,36 @@ function(cinch_add_sphinx)
     if(ENABLE_SPHINX)
 
         #----------------------------------------------------------------------#
-        # Find Sphinx
+        # Find Sphinx, and Pip 3
         #----------------------------------------------------------------------#
 
         find_package(Sphinx REQUIRED)
+        find_package(Pip3 REQUIRED)
+
+        execute_process(COMMAND ${PIP3_EXECUTABLE} show breathe
+            OUTPUT_VARIABLE _breathe)
+
+        if("${_breathe}" STREQUAL "")
+            message(FATAL_ERROR "Breathe project not installed "
+                "(pip3 install breathe)")
+        endif()
+
+        string(REPLACE "\n" ";" _breathe ${_breathe})
+        set(CINCH_BREATHE_PACKAGE_DIR)
+        foreach(line ${_breathe})
+            if(line MATCHES "Location:.*")
+                string(REPLACE ":" ";" line ${line})
+                list(GET line 1 _path)
+                string(STRIP ${_path} _path)
+                set(CINCH_BREATHE_PACKAGE_DIR ${_path})
+                break()
+            endif()
+        endforeach()
+
+
+        #----------------------------------------------------------------------#
+        # Make sure that the Breathe package is installed
+        #----------------------------------------------------------------------#
 
         #----------------------------------------------------------------------#
         # Create the output directory if it doesn't exist. This is where
@@ -88,7 +114,7 @@ function(cinch_add_sphinx)
             #------------------------------------------------------------------#
             # Install in its own directory
             #------------------------------------------------------------------#
-set(_install ${CMAKE_PROJECT_NAME})
+            set(_install ${CMAKE_PROJECT_NAME})
 
         endif()
 
