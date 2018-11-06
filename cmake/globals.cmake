@@ -8,7 +8,7 @@
 #------------------------------------------------------------------------------#
 
 # We are using target_include_directories, which is a cmake-3.0 feature
-set(CINCH_REQUIRED_CMAKE_VERSION 3.0)
+set(CINCH_REQUIRED_CMAKE_VERSION 3.3)
 
 cmake_minimum_required(VERSION ${CINCH_REQUIRED_CMAKE_VERSION})
 
