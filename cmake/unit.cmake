@@ -390,12 +390,7 @@ function(cinch_add_unit name)
         foreach(input ${unit_INPUTS})
             get_filename_component(_OUTPUT_NAME ${input} NAME)
             get_filename_component(_PATH ${input} ABSOLUTE)
-            add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${_PATH}
-                ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                DEPENDS ${input}
-                COMMENT "Copying ${input} for ${name}")
+            configure_file(${_PATH} ${_OUTPUT_DIR}/${_OUTPUT_NAME} COPYONLY)
             list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}/${_OUTPUT_NAME})
         endforeach()
         add_custom_target(${name}_inputs
