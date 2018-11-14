@@ -154,9 +154,7 @@ function(cinch_add_unit name)
     #--------------------------------------------------------------------------#
 
     if("expensive" IN_LIST unit_TESTLABELS)
-      # message(STATUS "Test " ${name} " is labeled expensive")
       if(NOT "${ENABLE_EXPENSIVE_TESTS}")
-        # message(STATUS "skipping expensive test " ${name})
         return()
       endif()
     endif()  # expensive in TESTLABELS
