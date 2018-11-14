@@ -9,6 +9,7 @@
 
 option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
 option(ENABLE_COLOR_UNIT_TESTS "Enable colorized unit testing output" OFF)
+option(ENABLE_EXPENSIVE_TESTS "Enable tests labeled 'expensive'" OFF)
 option(ENABLE_JENKINS_OUTPUT
     "Generate jenkins xml output for every test" OFF)
 
@@ -111,6 +112,10 @@ endif(ENABLE_UNIT_TESTS)
     Defines to set when building target
   ``DRIVER <driver_sources>...``
     Source files to build custom runtime driver.
+  ``ARGUMENTS <argle-bargle>...``
+    Arguements supplied to the test command line, one supposes
+  ``TESTLABELS <labels>...``
+    Labels attached to this test, for use with 'ctest -L'
   ``NOCI``
     Test does NOT get run (but still build) if
     ENV{'CI'} is "true".
@@ -120,6 +125,12 @@ endif(ENABLE_UNIT_TESTS)
 #]=============================================================================]
 
 function(cinch_add_unit name)
+
+    #--------------------------------------------------------------------------#
+    # ENABLE IN_LIST.
+    #--------------------------------------------------------------------------#
+
+    cmake_policy(SET CMP0057 NEW)
 
     if(NOT ENABLE_UNIT_TESTS)
       return()
@@ -132,10 +143,21 @@ function(cinch_add_unit name)
     set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
     set(multi_value_args
-        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS
+        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS TESTLABELS
     )
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
+    # Is this an expensive test? If so, and if this build does not enable
+    # expensive tests, then skip it
+    #--------------------------------------------------------------------------#
+
+    if("expensive" IN_LIST unit_TESTLABELS)
+      if(NOT "${ENABLE_EXPENSIVE_TESTS}")
+        return()
+      endif()
+    endif()  # expensive in TESTLABELS
 
     #--------------------------------------------------------------------------#
     # Set output directory
@@ -485,6 +507,8 @@ function(cinch_add_unit name)
                     ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
+            set_tests_properties("${_TEST_PREFIX}${name}_${instance}"
+              PROPERTIES LABELS ${unit_TESTLABELS})
         endforeach(instance)
 
     else()
@@ -519,7 +543,8 @@ function(cinch_add_unit name)
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endif()
-
+        set_tests_properties("${_TEST_PREFIX}${name}" PROPERTIES
+          LABELS "${unit_TESTLABELS}")
     endif(${thread_instances} GREATER 1)
 
 endfunction(cinch_add_unit)
