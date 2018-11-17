@@ -18,11 +18,13 @@ find_path(Legion_INCLUDE_DIR legion.h
     PATHS ${Legion_ROOT}
     PATH_SUFFIXES include)
 
-set(Legion_INCLUDE_DIRS
+if(Legion_INCLUDE_DIR)
+  set(Legion_INCLUDE_DIRS
     ${Legion_INCLUDE_DIR}
     ${Legion_INCLUDE_DIR}/legion
     ${Legion_INCLUDE_DIR}/realm
     ${Legion_INCLUDE_DIR}/mappers)
+endif()
 
 #------------------------------------------------------------------------------#
 # Find the legion and realm libraries

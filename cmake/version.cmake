@@ -27,7 +27,7 @@ else()
         # Call 'git describe'
         #----------------------------------------------------------------------#
 
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe HEAD
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 HEAD
         OUTPUT_VARIABLE _version
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -48,6 +48,23 @@ else()
     #--------------------------------------------------------------------------#
 
     set(${PROJECT_NAME}_VERSION ${_version})
+
+    # Count the number of occurances of '.' in the version
+    string(REGEX MATCHALL "\\." _matches ${_version})
+    list(LENGTH _matches _matches)
+
+    # Create list from tokens in version delimited by '.'
+    string(REGEX REPLACE "\\..*" "" _major ${_version})
+    string(REPLACE "." ";" version_list ${_version})
+
+    # These must be defined because of Cinch version conventions
+    list(GET version_list 0 ${PROJECT_NAME}_MAJOR)
+    list(GET version_list 1 ${PROJECT_NAME}_MINOR)
+
+    set(${PROJECT_NAME}_PATCH 0)
+    if(${_matches} STREQUAL "2")
+        list(GET version_list 2 ${PROJECT_NAME}_PATCH)
+    endif()
 
 endif()
 

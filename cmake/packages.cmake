@@ -14,6 +14,7 @@ macro(cinch_load_extras)
   include(boost)
   include(coverage)
   include(doxygen)
+  include(sphinx)
 
   if(opt_in_LEGION)
     include(legion)
