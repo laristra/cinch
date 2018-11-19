@@ -7,8 +7,10 @@
 # Require some version of cmake
 #------------------------------------------------------------------------------#
 
+
 # We are c++17, which is a cmake-3.9 feature
 set(CINCH_REQUIRED_CMAKE_VERSION 3.9)
+
 
 cmake_minimum_required(VERSION ${CINCH_REQUIRED_CMAKE_VERSION})
 
