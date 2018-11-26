@@ -20,8 +20,14 @@ if(ENABLE_HPX)
   include_directories(${HPX_INCLUDE_DIRS})
   link_directories(${HPX_LIBRARY_DIR})
   list(APPEND CINCH_RUNTIME_LIBRARIES ${HPX_LIBRARIES})
+  set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} ${HPX_INSTALL_DIRS})
+
+  if (NOT ENABLE_BOOST)
+    message(ERROR "Boost is required for the HPX runtime")
+  endif()
 
   add_definitions(-DENABLE_HPX)
+
   if(MSVC)
     add_definitions(-D_SCL_SECURE_NO_WARNINGS)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
