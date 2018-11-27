@@ -13,7 +13,7 @@
 #endif
 
 // Boost command-line options
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   #include <boost/program_options.hpp>
   using namespace boost::program_options;
 #endif
@@ -91,7 +91,7 @@ int main(int argc, char ** argv) {
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
 
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   options_description desc("Cinch test options");
 
   // Add command-line options
@@ -119,7 +119,7 @@ int main(int argc, char ** argv) {
 
     return 1;
   } // if
-#endif // ENABLE_BOOST_PROGRAM_OPTIONS
+#endif // ENABLE_BOOST
 
   int result(0);
 
