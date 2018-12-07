@@ -12,7 +12,7 @@
 #include <cstring>
 
 // Boost command-line options
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   #include <boost/program_options.hpp>
   using namespace boost::program_options;
 #endif
@@ -68,7 +68,6 @@ int main(int argc, char ** argv) {
   int version, subversion;
   MPI_Get_version(&version, &subversion);
 
-#if defined(GASNET_CONDUIT_MPI)
   if(version==3 && subversion>0) {
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -85,9 +84,6 @@ int main(int argc, char ** argv) {
     // Initialize the MPI runtime
     MPI_Init(&argc, &argv);
   } // if
-#else
-  MPI_Init(&argc, &argv);
-#endif
 
   // Disable XML output, if requested, everywhere but rank 0
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -114,7 +110,7 @@ int main(int argc, char ** argv) {
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
 
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   options_description desc("Cinch test options");  
 
   // Add command-line options
@@ -135,12 +131,9 @@ int main(int argc, char ** argv) {
     if(rank == 0) {
       std::cout << desc << std::endl;
     } // if
-#if defined(CINCH_ENABLE_MPI)
-    MPI_Finalize();
-#endif
     return 1;
   } // if
-#endif // ENABLE_BOOST_PROGRAM_OPTIONS
+#endif // ENABLE_BOOST
 
   int result(0);
 
@@ -181,14 +174,6 @@ int main(int argc, char ** argv) {
     result = RUN_ALL_TESTS();
 #endif
   } // if
-
-#if defined(CINCH_ENABLE_MPI)
-  // FIXME: This is some kind of GASNet bug (or maybe Legion).
-  // Shutdown the MPI runtime
-#ifndef GASNET_CONDUIT_MPI
-  MPI_Finalize();
-#endif
-#endif // CINCH_ENABLE_MPI
 
   return result;
 } // main

@@ -3,7 +3,8 @@
  * All rights reserved.
  *----------------------------------------------------------------------------*/
 
-#pragma once
+#ifndef cinchlog_h
+#define cinchlog_h
 
 /*! @file */
 
@@ -2031,3 +2032,5 @@ is_active_rank()
 #endif
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
+
+#endif // cinchlog_h
