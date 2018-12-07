@@ -28,7 +28,7 @@ if(ENABLE_CLOG)
     endif()
 
     # Enable tag groups
-    option(CLOG_ENABLE_TAGS "Enable tag groups" OFF)
+    option(CLOG_ENABLE_TAGS "Enable tag groups" ${ENABLE_BOOST})
 
     if(CLOG_ENABLE_TAGS)
         set(CLOG_TAG_BITS "64" CACHE STRING
@@ -47,7 +47,7 @@ if(ENABLE_CLOG)
 
     # MPI
     if(MPI_${MPI_LANGUAGE}_FOUND)
-        option(CLOG_ENABLE_MPI "Enable clog MPI functions" OFF)
+        option(CLOG_ENABLE_MPI "Enable clog MPI functions" ${ENABLE_MPI})
 
         if(CLOG_ENABLE_MPI)
             find_package(Threads)
