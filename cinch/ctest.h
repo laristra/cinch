@@ -6,9 +6,8 @@
 #ifndef cinchtest_h
 #define cinchtest_h
 
-#include "../cinch/clog.h"
+#include "clog.h"
 #include "check_collections.h"
-#include "listener.h"
 #include "output.h"
 
 // Provide access to the output stream to allow user to capture output
