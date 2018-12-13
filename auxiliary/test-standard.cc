@@ -15,7 +15,7 @@
   #include "cinchdevel.h"
 #else
   #include <gtest/gtest.h>
-  #include "cinchtest.h"
+  #include "cinch/ctest.h"
 #endif
 
 //----------------------------------------------------------------------------//
@@ -97,13 +97,6 @@ if(vm.count("help")) {
     // Run the devel test.
     user_devel_code_logic();
 #else
-    // Get GTest listeners
-    ::testing::TestEventListeners& listeners =
-      ::testing::UnitTest::GetInstance()->listeners();
-
-    // Adds a listener to the end.  Google Test takes the ownership.
-    listeners.Append(new cinch::listener);
-
     // Run the tests for this target.
     result = RUN_ALL_TESTS();
 #endif

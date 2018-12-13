@@ -23,7 +23,7 @@
   #include "cinchdevel.h"
 #else
   #include <gtest/gtest.h>
-  #include "cinchtest.h"
+  #include "../cinch/ctest.h"
 #endif
 
 //----------------------------------------------------------------------------//
@@ -164,12 +164,6 @@ int main(int argc, char ** argv) {
     driver_initialization(argc, argv);
 
 #if !defined(CINCH_DEVEL_TARGET)
-    ::testing::TestEventListeners &listeners =
-      ::testing::UnitTest::GetInstance()->listeners();
-
-    // Adds a listener to the end.  Google Test takes the ownership.
-    listeners.Append(new cinch::listener);
-
     // Run the tests for this target.
     result = RUN_ALL_TESTS();
 #endif

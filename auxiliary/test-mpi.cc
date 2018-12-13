@@ -124,18 +124,6 @@ int main(int argc, char ** argv) {
     // Run the devel test.
     user_devel_code_logic();  
 #else
-    // Get GTest listeners
-    ::testing::TestEventListeners& listeners =
-      ::testing::UnitTest::GetInstance()->listeners();
-
-    // Disable XML output, if requested, everywhere but rank 0
-    if(rank > 0) {
-      delete listeners.Release(listeners.default_xml_generator());
-    } // if
-
-    // Adds a listener to the end.  Google Test takes the ownership.
-    listeners.Append(new cinch::listener);
-
     // Run the tests for this target.
     result = RUN_ALL_TESTS();
 #endif
