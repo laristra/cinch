@@ -9,6 +9,7 @@ include_directories(${CINCH_SOURCE_DIR})
 #--------------------------------------------------------------------------#
 
 set(CINCH_ENABLE_BOOST ${ENABLE_BOOST})
+set(CINCH_ENABLE_CLOG ${ENABLE_CLOG})
 
 configure_file(${CINCH_SOURCE_DIR}/config/cinch-config.h.in
   ${CMAKE_BINARY_DIR}/cinch-config.h @ONLY)

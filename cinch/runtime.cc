@@ -15,7 +15,10 @@
 
 #include <cinch-config.h>
 
-#include <cinch/clog.h>
+#if defined(CINCH_ENABLE_CLOG)
+  #include <cinch/clog.h>
+#endif
+
 #include <cinch/runtime.h>
 
 #include <iostream>
@@ -41,8 +44,10 @@ int main(int argc, char ** argv) {
   // Invoke registered runtime initializations
   runtime_.initialize_runtimes(argc, argv);
 
+#if defined(CINCH_ENABLE_CLOG)
   // Initialize clog tags to output all tag groups
   std::string tags("all");
+#endif
 
 #if defined(CINCH_ENABLE_BOOST)
   std::string program(argv[0]);
@@ -51,9 +56,11 @@ int main(int argc, char ** argv) {
     // Add command-line options
   desc.add_options()
     ("help,h", "Print this message and exit.")
+#if defined(CINCH_ENABLE_CLOG)
     ("tags,t", value(&tags)->implicit_value("0"),
      "Enable the specified output tags, e.g., --tags=tag1,tag2."
      " Passing --tags by itself will print the available tags.")
+#endif
     ;
   variables_map vm;
   parsed_options parsed =
@@ -92,6 +99,7 @@ int main(int argc, char ** argv) {
 
   int result{0};
 
+#if defined(CINCH_ENABLE_CLOG)
   if(tags == "0") {
     if(runtime_.participate_in_output(argc, argv)) {
       std::cout << "Available tags (CLOG): " << std::endl;
@@ -106,12 +114,15 @@ int main(int argc, char ** argv) {
     clog_init(tags);
 
     clog_assert(runtime_.driver(), "you have not set the runtime driver");
+#endif
 
     // Invoke the primary callback
     result = runtime_.driver()(argc, argv);
 
+#if defined(CINCH_ENABLE_CLOG)
     clog_assert(result == 0, "non-zero return from runtime driver");
   } // if
+#endif
 
   // Invoke registered runtime finalizations
   runtime_.finalize_runtimes(argc, argv, exit_mode_t::success);
