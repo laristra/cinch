@@ -119,6 +119,16 @@ private:
   // FIXME: Make the singleton safe.
   runtime_t() {}
 
+  ~runtime_t() {}
+
+  // These are deleted because this type is a singleton, i.e.,
+  // we don't want anyone to be able to make copies or references.
+
+  runtime_t(const runtime_t &) = delete;
+  runtime_t & operator=(const runtime_t &) = delete;
+  runtime_t(runtime_t &&) = delete;
+  runtime_t & operator=(runtime_t &&) = delete;
+
   std::string program_;
   std::function<int(int, char **)> driver_;
   std::vector<runtime_handler_t> handlers_;
