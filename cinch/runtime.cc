@@ -15,8 +15,8 @@
 
 #include <cinch-config.h>
 
-#include <cinch/utils/cinchlog.h>
-#include <cinch/runtime/runtime.h>
+#include <cinch/clog.h>
+#include <cinch/runtime.h>
 
 #include <iostream>
 #include <string>
@@ -26,7 +26,7 @@
   using namespace boost::program_options;
 #endif
 
-using namespace cinch::runtime;
+using namespace cinch;
 
 /*!
   The main function makes use of Boost program options (optionally). These

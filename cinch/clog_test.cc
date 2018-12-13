@@ -9,7 +9,7 @@
 // #define CLOG_COLOR_OUTPUT 
 // #define CLOG_ENABLE_TAGS
 
-#include <cinchlog.h>
+#include <clog.h>
 
 using namespace boost::program_options;
 

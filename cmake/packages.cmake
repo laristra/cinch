@@ -30,8 +30,8 @@ macro(cinch_load_extras)
 
   include(openmp)
 
-  # load clog after mpi
-  include(logging)
+  # load cinch files
+  include(cinch)
 
   # load unit after legion and mpi
   include(unit)

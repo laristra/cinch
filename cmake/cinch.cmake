@@ -1,15 +1,30 @@
 #--------------------------------------------------------------------------#
-# Add clog logging
+# Add cinch include directory
 #--------------------------------------------------------------------------#
 
-include_directories(${CINCH_SOURCE_DIR}/logging)
+include_directories(${CINCH_SOURCE_DIR})
 
 #--------------------------------------------------------------------------#
-# Install cinch logging utility
+# Configure header
 #--------------------------------------------------------------------------#
 
-install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
-    DESTINATION include)
+set(CINCH_ENABLE_BOOST ${ENABLE_BOOST})
+
+configure_file(${CINCH_SOURCE_DIR}/config/cinch-config.h.in
+  ${CMAKE_BINARY_DIR}/cinch-config.h @ONLY)
+
+#--------------------------------------------------------------------------#
+# Install cinch source files
+#--------------------------------------------------------------------------#
+
+install(FILES ${CMAKE_BINARY_DIR}/cinch-config.h
+  DESTINATION include)
+install(FILES ${CMAKE_SOURCE_DIR}/cinch/utils/clog.h
+    DESTINATION include/cinch/utils)
+install(FILES ${CMAKE_SOURCE_DIR}/cinch/runtime/runtime.h
+    DESTINATION include/cinch/runtime)
+install(FILES ${CMAKE_SOURCE_DIR}/cinch/runtime/runtime.cc
+    DESTINATION include/cinch/runtime)
 
 option(ENABLE_CLOG "Enable Cinch logging" OFF)
 
@@ -61,6 +76,8 @@ if(ENABLE_CLOG)
     if(CLOG_DEBUG)
         add_definitions(-DCLOG_DEBUG)
     endif()
+
+    list(APPEND CINCH_RUNTIME_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 #------------------------------------------------------------------------------#

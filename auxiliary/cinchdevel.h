@@ -6,7 +6,7 @@
 #ifndef cinch_cinchdevel_h
 #define cinch_cinchdevel_h
 
-#include "../logging/cinchlog.h"
+#include "../cinch/clog.h"
 #include <functional>
 
 ///

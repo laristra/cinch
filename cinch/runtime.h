@@ -19,7 +19,6 @@
 #include <vector>
 
 namespace cinch {
-namespace runtime {
 
 enum exit_mode_t : size_t {
   success,
@@ -127,10 +126,9 @@ private:
 }; // runtime_t
 
 } // namespace cinch
-} // namespace runtime
 
 /*!
-  @def flecsi_register_runtime_driver(driver)
+  @def cinch_register_runtime_driver(driver)
 
   Register the primary runtime driver function.
 
@@ -138,14 +136,14 @@ private:
                 that should be invoked by the FleCSI runtime.
  */
 
-#define flecsi_register_runtime_driver(driver)                                 \
+#define cinch_register_runtime_driver(driver)                                  \
   /* MACRO IMPLEMENTATION */                                                   \
                                                                                \
-  inline bool flecsi_registered_driver_##driver =                              \
-    cinch::runtime::runtime_t::instance().register_driver(driver)
+  inline bool cinch_registered_driver_##driver =                               \
+    cinch::runtime_t::instance().register_driver(driver)
 
 /*!
-  @def flecsi_register_runtime_handler(handler)
+  @def cinch_register_runtime_handler(handler)
 
   Register a runtime handler with the FleCSI runtime. Runtime handlers
   are invoked at fixed control points in the FleCSI control model for
@@ -156,8 +154,8 @@ private:
                  initialize, finalize, and output functions.                
  */
 
-#define flecsi_append_runtime_handler(handler)                                 \
+#define cinch_append_runtime_handler(handler)                                  \
   /* MACRO DEFINITION */                                                       \
                                                                                \
-  inline bool flecsi_append_runtime_handler_##handler =                        \
-    cinch::runtime::runtime_t::instance().append_runtime_handler(handler)
+  inline bool cinch_append_runtime_handler_##handler =                         \
+    cinch::runtime_t::instance().append_runtime_handler(handler)
