@@ -9,6 +9,7 @@
 
 option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
 option(ENABLE_COLOR_UNIT_TESTS "Enable colorized unit testing output" OFF)
+option(ENABLE_EXPENSIVE_TESTS "Enable tests labeled 'expensive'" OFF)
 option(ENABLE_JENKINS_OUTPUT
     "Generate jenkins xml output for every test" OFF)
 
@@ -22,23 +23,33 @@ if(ENABLE_UNIT_TESTS)
 
     find_package(GTest QUIET)
 
+    # we found gtest, just set/include what we need
     if(GTEST_FOUND)
+
         include_directories(${GTEST_INCLUDE_DIRS})
         if(MSVC)
           # suppress stupid TR1 warnings issued by MSVC while compiling GTest
           add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
         endif()
+
     endif()
 
+    # if GTEST_INCLUDE_DIRS and GTEST_LIBRARIES are not set, set them
+    # to cinch's
     if (NOT GTEST_INCLUDE_DIRS)
         set(GTEST_INCLUDE_DIRS
           ${CINCH_SOURCE_DIR}/gtest/googlemock/include
           ${CINCH_SOURCE_DIR}/gtest/googletest
           ${CINCH_SOURCE_DIR}/gtest/googletest/include)
+    endif()
+    if (NOT GTEST_LIBRARIES)
         set(GTEST_LIBRARIES gtest)
     endif()
 
-    if(NOT TARGET gtest)
+    # gtest was not found, so we need to build it.  but since this gets called
+    # multiple times, protect ourselves from redifining the same target
+    if(NOT TARGET gtest AND NOT GTEST_FOUND)
+
         find_package(Threads)
         add_library(gtest
             ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
@@ -51,6 +62,7 @@ if(ENABLE_UNIT_TESTS)
             set_target_properties(gtest PROPERTIES
                 COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
         endif()
+
     endif()
 
     #--------------------------------------------------------------------------#
@@ -100,6 +112,10 @@ endif(ENABLE_UNIT_TESTS)
     Defines to set when building target
   ``DRIVER <driver_sources>...``
     Source files to build custom runtime driver.
+  ``ARGUMENTS <argle-bargle>...``
+    Arguements supplied to the test command line, one supposes
+  ``TESTLABELS <labels>...``
+    Labels attached to this test, for use with 'ctest -L'
   ``NOCI``
     Test does NOT get run (but still build) if
     ENV{'CI'} is "true".
@@ -109,6 +125,12 @@ endif(ENABLE_UNIT_TESTS)
 #]=============================================================================]
 
 function(cinch_add_unit name)
+
+    #--------------------------------------------------------------------------#
+    # ENABLE IN_LIST.
+    #--------------------------------------------------------------------------#
+
+    cmake_policy(SET CMP0057 NEW)
 
     if(NOT ENABLE_UNIT_TESTS)
       return()
@@ -121,10 +143,21 @@ function(cinch_add_unit name)
     set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
     set(multi_value_args
-        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS
+        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS TESTLABELS
     )
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
+
+    #--------------------------------------------------------------------------#
+    # Is this an expensive test? If so, and if this build does not enable
+    # expensive tests, then skip it
+    #--------------------------------------------------------------------------#
+
+    if("expensive" IN_LIST unit_TESTLABELS)
+      if(NOT "${ENABLE_EXPENSIVE_TESTS}")
+        return()
+      endif()
+    endif()  # expensive in TESTLABELS
 
     #--------------------------------------------------------------------------#
     # Set output directory
@@ -379,12 +412,7 @@ function(cinch_add_unit name)
         foreach(input ${unit_INPUTS})
             get_filename_component(_OUTPUT_NAME ${input} NAME)
             get_filename_component(_PATH ${input} ABSOLUTE)
-            add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${_PATH}
-                ${_OUTPUT_DIR}/${_OUTPUT_NAME}
-                DEPENDS ${input}
-                COMMENT "Copying ${input} for ${name}")
+            configure_file(${_PATH} ${_OUTPUT_DIR}/${_OUTPUT_NAME} COPYONLY)
             list(APPEND _OUTPUT_FILES ${_OUTPUT_DIR}/${_OUTPUT_NAME})
         endforeach()
         add_custom_target(${name}_inputs
@@ -479,6 +507,8 @@ function(cinch_add_unit name)
                     ${unit_policy_exec_postflags}
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
+            set_tests_properties("${_TEST_PREFIX}${name}_${instance}"
+              PROPERTIES LABELS ${unit_TESTLABELS})
         endforeach(instance)
 
     else()
@@ -513,7 +543,8 @@ function(cinch_add_unit name)
                     ${UNIT_FLAGS}
                 WORKING_DIRECTORY ${_OUTPUT_DIR})
         endif()
-
+        set_tests_properties("${_TEST_PREFIX}${name}" PROPERTIES
+          LABELS "${unit_TESTLABELS}")
     endif(${thread_instances} GREATER 1)
 
 endfunction(cinch_add_unit)

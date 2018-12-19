@@ -23,7 +23,9 @@ macro(cinch_subdirlist result directory recursive)
         set(dir_list ${dir_list} ${dir})
     endforeach()
 
-    list(REMOVE_DUPLICATES dir_list)    
+    if(dir_list)
+      list(REMOVE_DUPLICATES dir_list)    
+    endif()
 
     set(${result} ${dir_list})
 endmacro(cinch_subdirlist)

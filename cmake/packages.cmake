@@ -15,6 +15,7 @@ macro(cinch_load_extras)
   include(coverage)
   include(doxygen)
   include(hdf5)
+  include(sphinx)
 
   if(opt_in_LEGION)
     include(legion)
