@@ -1,14 +1,166 @@
-/*~--------------------------------------------------------------------------~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
- * All rights reserved.
- *~--------------------------------------------------------------------------~*/
+/*
+    :::::::: ::::::::::: ::::    :::  ::::::::  :::    :::
+   :+:    :+:    :+:     :+:+:   :+: :+:    :+: :+:    :+:
+   +:+           +:+     :+:+:+  +:+ +:+        +:+    +:+
+   +#+           +#+     +#+ +:+ +#+ +#+        +#++:++#++
+   +#+           +#+     +#+  +#+#+# +#+        +#+    +#+
+   #+#    #+#    #+#     #+#   #+#+# #+#    #+# #+#    #+#
+    ######## ########### ###    ####  ########  ###    ###
 
-#ifndef cinchtest_h
-#define cinchtest_h
+   Copyright (c) 2016, Los Alamos National Security, LLC
+   All rights reserved.
+                                                                              */
+
+#ifndef ctest_h
+#define ctest_h
 
 #include "clog.h"
 #include "check_collections.h"
 #include "output.h"
+
+#include <iostream>
+#include <cstring>
+
+namespace cinch {
+
+struct fatal_handler_t {
+
+  fatal_handler_t(const char * condition, const char * file, int line) {
+    std::cerr << OUTPUT_RED("ERROR") << ": assertion '" << condition <<
+      "' failed in " << OUTPUT_CYAN(file << ":" << line) <<
+      COLOR_YELLOW << " "; 
+  } // fatal_handler_t
+
+  ~fatal_handler_t() {
+    std::cerr << COLOR_PLAIN << std::endl;
+    std::exit(1);
+  } // ~fatal_handler_t
+
+  std::ostream & stream() {
+    return std::cerr;
+  } // stream
+
+}; // fatal_handler_t
+
+struct nonfatal_handler_t {
+
+  nonfatal_handler_t(const char * condition, const char * file, int line) {
+    std::cerr << OUTPUT_YELLOW("WARNING") << ": unexpected '" << condition <<
+      "' occurred in " << OUTPUT_CYAN(file << ":" << line) <<
+      COLOR_YELLOW << " "; 
+  } // nonfatal_handler_t
+
+  ~nonfatal_handler_t() {
+    std::cerr << COLOR_PLAIN << std::endl;
+  } // ~nonfatal_handler_t
+
+  std::ostream & stream() {
+    return std::cerr;
+  } // stream
+
+}; // nonfatal_handler_t
+
+inline bool string_compare(const char * lhs, const char * rhs) {
+  if(lhs == nullptr) { return rhs == nullptr; }
+  if(rhs == nullptr) { return false; }
+  return strcmp(lhs, rhs) == 0;
+} // string_compare
+
+inline bool string_case_compare(const char * lhs, const char * rhs) {
+  if(lhs == nullptr) { return rhs == nullptr; }
+  if(rhs == nullptr) { return false; }
+  return strcasecmp(lhs, rhs) == 0;
+} // string_case_compare
+
+} // namespace cinch
+
+#define EXPECT_TRUE(condition)                                                 \
+  (condition) ||                                                               \
+  cinch::nonfatal_handler_t(#condition, __FILE__, __LINE__).stream()
+
+#define EXPECT_FALSE(condition)                                                \
+  !(condition) ||                                                              \
+  cinch::nonfatal_handler_t(#condition, __FILE__, __LINE__).stream()
+
+#define ASSERT_TRUE(condition)                                                 \
+  (condition) ||                                                               \
+  cinch::fatal_handler_t(#condition, __FILE__, __LINE__).stream()
+
+#define ASSERT_FALSE(condition)                                                \
+  !(condition) ||                                                              \
+  cinch::fatal_handler_t(#condition, __FILE__, __LINE__).stream()
+
+#define ASSERT_EQ(val1, val2)                                                  \
+  ASSERT_TRUE((val1) == (val2))
+
+#define EXPECT_EQ(val1, val2)                                                  \
+  EXPECT_TRUE((val1) == (val2))
+
+#define ASSERT_NE(val1, val2)                                                  \
+  ASSERT_TRUE((val1) != (val2))
+
+#define EXPECT_NE(val1, val2)                                                  \
+  EXPECT_TRUE((val1) != (val2))
+
+#define ASSERT_LT(val1, val2)                                                  \
+  ASSERT_TRUE((val1) < (val2))
+
+#define EXPECT_LT(val1, val2)                                                  \
+  EXPECT_TRUE((val1) < (val2))
+
+#define ASSERT_LE(val1, val2)                                                  \
+  ASSERT_TRUE((val1) <= (val2))
+
+#define EXPECT_LE(val1, val2)                                                  \
+  EXPECT_TRUE((val1) <= (val2))
+
+#define ASSERT_GT(val1, val2)                                                  \
+  ASSERT_TRUE((val1) > (val2))
+
+#define EXPECT_GT(val1, val2)                                                  \
+  EXPECT_TRUE((val1) > (val2))
+
+#define ASSERT_GE(val1, val2)                                                  \
+  ASSERT_TRUE((val1) >= (val2))
+
+#define EXPECT_GE(val1, val2)                                                  \
+  EXPECT_TRUE((val1) >= (val2))
+
+#define ASSERT_STREQ(str1, str2)                                               \
+  cinch::string_compare(str1, str2) ||                                         \
+  cinch::fatal_handler_t(str1 " == " str2, __FILE__, __LINE__).stream()
+
+#define EXPECT_STREQ(str1, str2)                                               \
+  cinch::string_compare(str1, str2) ||                                         \
+  cinch::nonfatal_handler_t(str1 " == " str2, __FILE__, __LINE__).stream()
+
+#define ASSERT_STRNE(str1, str2)                                               \
+  !cinch::string_compare(str1, str2) ||                                        \
+  cinch::fatal_handler_t(str1 " != " str2, __FILE__, __LINE__).stream()
+
+#define EXPECT_STRNE(str1, str2)                                               \
+  !cinch::string_compare(str1, str2) ||                                        \
+  cinch::nonfatal_handler_t(str1 " != " str2, __FILE__, __LINE__).stream()
+
+#define ASSERT_STRCASEEQ(str1, str2)                                           \
+  cinch::string_case_compare(str1, str2) ||                                    \
+  cinch::fatal_handler_t(str1 " == " str2 " (case insensitive)",               \
+    __FILE__, __LINE__).stream()
+
+#define EXPECT_STRCASEEQ(str1, str2)                                           \
+  cinch::string_case_compare(str1, str2) ||                                    \
+  cinch::nonfatal_handler_t(str1 " == " str2 " (case insensitive)",            \
+    __FILE__, __LINE__).stream()
+
+#define ASSERT_STRCASENE(str1, str2)                                           \
+  !cinch::string_case_compare(str1, str2) ||                                   \
+  cinch::fatal_handler_t(str1 " != " str2 " (case insensitive)",               \
+    __FILE__, __LINE__).stream()
+
+#define EXPECT_STRCASENE(str1, str2)                                           \
+  !cinch::string_case_compare(str1, str2) ||                                   \
+  cinch::nonfatal_handler_t(str1 " != " str2 " (case insensitive)",            \
+    __FILE__, __LINE__).stream()
 
 // Provide access to the output stream to allow user to capture output
 #define CINCH_CAPTURE() \
@@ -56,8 +208,4 @@
 #define CINCH_EXPECT_EQUAL_COLLECTIONS(...) \
   EXPECT_TRUE( cinch::CheckEqualCollections(__VA_ARGS__) ) << CINCH_DUMP()
 
-#endif // cinchtest_h
-
-/*~-------------------------------------------------------------------------~-*
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/
+#endif // ctest_h
