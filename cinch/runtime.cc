@@ -14,11 +14,6 @@
 /*! @file */
 
 #include <cinch-config.h>
-
-#if defined(CINCH_ENABLE_CLOG)
-  #include <cinch/clog.h>
-#endif
-
 #include <cinch/runtime.h>
 
 #include <iostream>
@@ -41,14 +36,6 @@ int main(int argc, char ** argv) {
 
   runtime_t & runtime_ = runtime_t::instance();
 
-  // Invoke registered runtime initializations
-  runtime_.initialize_runtimes(argc, argv);
-
-#if defined(CINCH_ENABLE_CLOG)
-  // Initialize clog tags to output all tag groups
-  std::string tags("all");
-#endif
-
 #if defined(CINCH_ENABLE_BOOST)
   std::string program(argv[0]);
   options_description desc(program.substr(program.find('/')+1).c_str());
@@ -56,12 +43,11 @@ int main(int argc, char ** argv) {
     // Add command-line options
   desc.add_options()
     ("help,h", "Print this message and exit.")
-#if defined(CINCH_ENABLE_CLOG)
-    ("tags,t", value(&tags)->implicit_value("0"),
-     "Enable the specified output tags, e.g., --tags=tag1,tag2."
-     " Passing --tags by itself will print the available tags.")
-#endif
     ;
+
+  // Invoke add options functions
+  runtime_.add_options(desc);
+
   variables_map vm;
   parsed_options parsed =
     command_line_parser(argc, argv).options(desc).allow_unregistered().run();
@@ -75,54 +61,29 @@ int main(int argc, char ** argv) {
     collect_unrecognized(parsed.options, include_positional);
 
   if(unrecog_options.size()) {
-    if(runtime_.participate_in_output(argc, argv)) {
-      std::cout << std::endl << "Unrecognized options: ";
-      for ( int i=0; i<unrecog_options.size(); ++i ) {
-        std::cout << unrecog_options[i] << " ";
-      }
-      std::cout << std::endl << std::endl << desc << std::endl;
-    } // if
-
-    return runtime_.finalize_runtimes(argc, argv,
-      exit_mode_t::unrecognized_option);
+    std::cout << std::endl << "Unrecognized options: ";
+    for ( int i=0; i<unrecog_options.size(); ++i ) {
+      std::cout << unrecog_options[i] << " ";
+    }
+    std::cout << std::endl << std::endl << desc << std::endl;
+    return 1;
   } // if
 
   if(vm.count("help")) {
-    if(runtime_.participate_in_output(argc, argv)) {
-      std::cout << desc << std::endl;
-    } // if
-
-    return runtime_.finalize_runtimes(argc, argv,
-      exit_mode_t::help);
+    std::cout << desc << std::endl;
+    return 1;
   } // if
 #endif
 
-  int result{0};
-
-#if defined(CINCH_ENABLE_CLOG)
-  if(tags == "0") {
-    if(runtime_.participate_in_output(argc, argv)) {
-      std::cout << "Available tags (CLOG): " << std::endl;
-
-      for(auto t: clog_tag_map()) {
-        std::cout << "  " << t.first << std::endl;
-      } // for
-    } // if
-  }
-  else {
-    // Initialize clog runtime
-    clog_init(tags);
-
-    clog_assert(runtime_.driver(), "you have not set the runtime driver");
+  // Invoke registered runtime initializations
+#if defined(CINCH_ENABLE_BOOST)
+  runtime_.initialize_runtimes(argc, argv, parsed);
+#else
+  runtime_.initialize_runtimes(argc, argv);
 #endif
 
-    // Invoke the primary callback
-    result = runtime_.driver()(argc, argv);
-
-#if defined(CINCH_ENABLE_CLOG)
-    clog_assert(result == 0, "non-zero return from runtime driver");
-  } // if
-#endif
+  // Invoke the primary callback
+  int result = runtime_.driver()(argc, argv);
 
   // Invoke registered runtime finalizations
   runtime_.finalize_runtimes(argc, argv, exit_mode_t::success);

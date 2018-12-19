@@ -14,6 +14,13 @@
 
 /*! @file */
 
+#include <cinch-config.h>
+
+#if defined(CINCH_ENABLE_BOOST)
+  #include <boost/program_options.hpp>
+  using namespace boost::program_options;
+#endif
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -31,9 +38,16 @@ enum exit_mode_t : size_t {
  */
 
 struct runtime_handler_t {
+#if defined(CINCH_ENABLE_BOOST)
+  std::function<int(int, char **, parsed_options &)> initialize;
+#else
   std::function<int(int, char **)> initialize;
+#endif
   std::function<int(int, char **, exit_mode_t)> finalize;
-  std::function<bool(int, char **)> output;
+#if defined(CINCH_ENABLE_BOOST)
+  std::function<void(options_description &)> add_options =
+    [](options_description &){};
+#endif  
 }; // struct runtime_handler_t
 
 /*!
@@ -76,14 +90,34 @@ struct runtime_t {
   } // runtimes
 
   /*!
+    Invoke runtime options callbacks.
+   */
+
+#if defined(CINCH_ENABLE_BOOST)
+  void add_options(options_description & desc) {
+    for(auto r: handlers_) {
+      r.add_options(desc);
+    } // for
+  } // add_options
+#endif // CINCH_ENABLE_BOOST
+
+  /*!
     Invoke runtime intiailzation callbacks.
    */
 
+#if defined(CINCH_ENABLE_BOOST)
+  void initialize_runtimes(int argc, char ** argv, parsed_options & parsed) {
+    for(auto r: handlers_) {
+      r.initialize(argc, argv, parsed);
+    } // for
+  } // initialize_runtimes
+#else
   void initialize_runtimes(int argc, char ** argv) {
     for(auto r: handlers_) {
       r.initialize(argc, argv);
     } // for
   } // initialize_runtimes
+#endif
 
   /*!
     Invoke runtime finalization callbacks.
@@ -99,24 +133,8 @@ struct runtime_t {
     return result;
   } // finalize_runtimes
 
-  /*!
-    Return a boolean value indicating whether or not this runtime instance
-    should participate in output.
-   */
-
-  bool participate_in_output(int argc, char ** argv) {
-    bool result{true};
-
-    for(auto r: handlers_) {
-      result = r.output(argc, argv) ? result : false;
-    } // for
-
-    return result;
-  } // participate_in_output
-
 private:
 
-  // FIXME: Make the singleton safe.
   runtime_t() {}
 
   ~runtime_t() {}
@@ -157,11 +175,12 @@ private:
 
   Register a runtime handler with the FleCSI runtime. Runtime handlers
   are invoked at fixed control points in the FleCSI control model for
-  initialization, finalization, and output participation. The finalization
-  function has an additional argument that specifies the exit mode.
+  add options, initialization, and finalization. The finalization function
+  has an additional argument that specifies the exit mode. Adding options
+  is only enabled with CINCH_ENABLE_BOOST.
 
   @param handler A runtime_handler_t that references the appropriate
-                 initialize, finalize, and output functions.                
+                 initialize, finalize, and add_options functions.
  */
 
 #define cinch_append_runtime_handler(handler)                                  \
