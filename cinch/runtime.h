@@ -106,16 +106,24 @@ struct runtime_t {
    */
 
 #if defined(CINCH_ENABLE_BOOST)
-  void initialize_runtimes(int argc, char ** argv, parsed_options & parsed) {
+  int initialize_runtimes(int argc, char ** argv, parsed_options & parsed) {
+    int result{0};
+
     for(auto r: handlers_) {
-      r.initialize(argc, argv, parsed);
+      result |= r.initialize(argc, argv, parsed);
     } // for
+
+    return result;
   } // initialize_runtimes
 #else
-  void initialize_runtimes(int argc, char ** argv) {
+  int initialize_runtimes(int argc, char ** argv) {
+    int result{0};
+
     for(auto r: handlers_) {
-      r.initialize(argc, argv);
+      result |= r.initialize(argc, argv);
     } // for
+
+    return result;
   } // initialize_runtimes
 #endif
 

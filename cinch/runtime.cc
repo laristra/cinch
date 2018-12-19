@@ -11,11 +11,10 @@
    All rights reserved.
                                                                               */
 
-/*! @file */
-
 #include <cinch-config.h>
 #include <cinch/runtime.h>
 
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -26,24 +25,16 @@
 
 using namespace cinch;
 
-/*!
-  The main function makes use of Boost program options (optionally). These
-  allow the user to control output from clog. It is also possible to add
-  additional command-line options.
- */
-
 int main(int argc, char ** argv) {
 
   runtime_t & runtime_ = runtime_t::instance();
 
 #if defined(CINCH_ENABLE_BOOST)
   std::string program(argv[0]);
-  options_description desc(program.substr(program.find('/')+1).c_str());
+  options_description desc(program.substr(program.rfind('/')+1).c_str());
 
-    // Add command-line options
-  desc.add_options()
-    ("help,h", "Print this message and exit.")
-    ;
+  // Add help option
+  desc.add_options()("help,h", "Print this message and exit.");
 
   // Invoke add options functions
   runtime_.add_options(desc);
@@ -76,17 +67,23 @@ int main(int argc, char ** argv) {
 #endif
 
   // Invoke registered runtime initializations
+  if(
 #if defined(CINCH_ENABLE_BOOST)
-  runtime_.initialize_runtimes(argc, argv, parsed);
+    runtime_.initialize_runtimes(argc, argv, parsed)
 #else
-  runtime_.initialize_runtimes(argc, argv);
+    runtime_.initialize_runtimes(argc, argv)
 #endif
+  ) {
+    std::exit(1);
+  } // if
 
   // Invoke the primary callback
   int result = runtime_.driver()(argc, argv);
 
   // Invoke registered runtime finalizations
-  runtime_.finalize_runtimes(argc, argv, exit_mode_t::success);
+  if(runtime_.finalize_runtimes(argc, argv, exit_mode_t::success)) {
+    std::exit(1);
+  } // if
 
   return result;
 } // main
