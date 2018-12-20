@@ -28,7 +28,7 @@ function(cinch_minimum_required)
     endif()
 
     if(CINCH_VERSION VERSION_LESS ${_cinch_VERSION})
-        message(FATAL_ERROR "${PROJECT_NAME} requries Cinch "
+        message(FATAL_ERROR "${PROJECT_NAME} requires Cinch "
             "version ${_cinch_VERSION} (found version ${CINCH_VERSION})"
         )
     else()
