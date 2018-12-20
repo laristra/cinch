@@ -11,6 +11,10 @@ option(ENABLE_DEVEL_TARGETS "Enable development targets" OFF)
 
 function(cinch_add_devel_target name)
 
+    if(NOT ENABLE_DEVEL_TARGETS)
+        return()
+    endif()
+
     set(_TARGET_DIR devel)
 
     #--------------------------------------------------------------------------#
@@ -55,9 +59,16 @@ function(cinch_add_devel_target name)
 
     include(detail/test-inputs)
 
-    if(test_FOLDER)
-        set_target_properties(${name} PROPERTIES FOLDER "${test_FOLDER}")
-    endif()
+    #--------------------------------------------------------------------------#
+    # Set the folder property for VS and XCode
+    #--------------------------------------------------------------------------#
+
+    get_filename_component(_leafdir ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+    string(SUBSTRING ${_leafdir} 0 1 _first)
+    string(TOUPPER ${_first} _first)
+    string(REGEX REPLACE "^.(.*)" "${_first}\\1" _leafdir "${_leafdir}")
+    string(CONCAT _folder "Tests/" ${_leafdir})
+    set_target_properties(${name} PROPERTIES FOLDER "${_folder}")
 
 endfunction(cinch_add_devel_target)
 

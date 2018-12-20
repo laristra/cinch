@@ -13,7 +13,7 @@
 #endif
 
 // Boost command-line options
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   #include <boost/program_options.hpp>
   using namespace boost::program_options;
 #endif
@@ -91,7 +91,7 @@ int main(int argc, char ** argv) {
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
 
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   options_description desc("Cinch test options");
 
   // Add command-line options
@@ -108,27 +108,6 @@ int main(int argc, char ** argv) {
 
   notify(vm);
 
-  // Gather the unregistered options, if there are any, print a help message
-  // and die nicely.
-  std::vector<std::string> unrecog_options =
-    collect_unrecognized(parsed.options, include_positional);
-
-  if(unrecog_options.size()) {
-    if(rank == 0) {
-      std::cout << std::endl << "Unrecognized options: ";
-      for ( int i=0; i<unrecog_options.size(); ++i ) {
-        std::cout << unrecog_options[i] << " ";
-      }
-      std::cout << std::endl << std::endl << desc << std::endl;
-    } // if
-
-#if defined(CINCH_ENABLE_MPI)
-    MPI_Finalize();
-#endif
-
-    return 1;
-  } // if
-
   if(vm.count("help")) {
     if(rank == 0) {
       std::cout << desc << std::endl;
@@ -140,7 +119,7 @@ int main(int argc, char ** argv) {
 
     return 1;
   } // if
-#endif // ENABLE_BOOST_PROGRAM_OPTIONS
+#endif // ENABLE_BOOST
 
   int result(0);
 

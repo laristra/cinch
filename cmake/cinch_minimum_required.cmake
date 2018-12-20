@@ -3,15 +3,33 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_minimum_required version)
+function(cinch_minimum_required)
 
-    file(READ ${CINCH_SOURCE_DIR}/.version CINCH_VERSION)
-    string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
+    set(options)
+    set(one_value_args VERSION)
+    set(multi_value_args)
 
+    cmake_parse_arguments(_cinch "${options}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
 
-    if(CINCH_VERSION VERSION_LESS ${version})
-        message(FATAL_ERROR "${PROJECT_NAME} requries Cinch version ${version}"
-            " (found version ${CINCH_VERSION})"
+    if(EXISTS ${CINCH_SOURCE_DIR}/.version)
+        file(READ ${CINCH_SOURCE_DIR}/.version CINCH_VERSION)
+        string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
+    else()
+        find_package(Git)
+
+        if(NOT Git_FOUND)
+            message(FATAL_ERROR "You must have git installed to use cinch!!!")
+        endif()
+
+        execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0
+          WORKING_DIRECTORY ${CINCH_SOURCE_DIR} OUTPUT_VARIABLE CINCH_VERSION)
+        string(STRIP "${CINCH_VERSION}" CINCH_VERSION)
+    endif()
+
+    if(CINCH_VERSION VERSION_LESS ${_cinch_VERSION})
+        message(FATAL_ERROR "${PROJECT_NAME} requires Cinch "
+            "version ${_cinch_VERSION} (found version ${CINCH_VERSION})"
         )
     else()
         message(STATUS "Cinch version ${CINCH_VERSION} (${CINCH_SOURCE_DIR})")

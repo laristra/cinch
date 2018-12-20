@@ -39,8 +39,10 @@ function(_METIS_GET_VERSION _OUT_major _OUT_minor _OUT_micro _metisversion_hdr)
         set(${_OUT_minor} ${${_OUT_minor}} PARENT_SCOPE)
         set(${_OUT_micro} ${${_OUT_micro}} PARENT_SCOPE)
 
-    else()
-        message(FATAL_ERROR "Include file ${_metisversion_hdr} does not exist")
+    elseif(EXISTS ${_metisversion_hdr})
+        message(FATAL_ERROR "No METIS_VER_MINOR found in ${_metisversion_hdr} (metis too old")        
+    else()        
+	message(FATAL_ERROR "Include file ${_metisversion_hdr} does not exist")
     endif()
 endfunction()
 

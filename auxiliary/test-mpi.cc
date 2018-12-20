@@ -8,7 +8,7 @@
 #include <vector>
 
 // Boost command-line options
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   #include <boost/program_options.hpp>
   using namespace boost::program_options;
 #endif
@@ -57,22 +57,8 @@ int main(int argc, char ** argv) {
 
   // Initialize the MPI runtime
   MPI_Init(&argc, &argv);
-
-  // Disable XML output, if requested, everywhere but rank 0
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  std::vector<char *> args(argv, argv+argc);
-  if(rank > 0) {
-    for(auto itr = args.begin(); itr != args.end(); ++itr) {
-      if(std::strncmp(*itr, "--gtest_output", 14) == 0) {
-        args.erase(itr);
-        break;
-      } // if
-    } // for
-  } // if
-
-  argc = args.size();
-  argv = args.data();
 
 #if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
@@ -82,7 +68,7 @@ int main(int argc, char ** argv) {
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
 
-#if defined(ENABLE_BOOST_PROGRAM_OPTIONS)
+#if defined(ENABLE_BOOST)
   options_description desc("Cinch test options");  
 
   // Add command-line options
@@ -99,25 +85,6 @@ int main(int argc, char ** argv) {
 
   notify(vm);
 
-  // Gather the unregistered options, if there are any, print a help message
-  // and die nicely.
-  std::vector<std::string> unrecog_options =
-    collect_unrecognized(parsed.options, include_positional);
-
-  if(unrecog_options.size()) {
-    if(rank == 0) {
-      std::cout << std::endl << "Unrecognized options: ";
-      for ( int i=0; i<unrecog_options.size(); ++i ) {
-        std::cout << unrecog_options[i] << " ";
-      }
-      std::cout << std::endl << std::endl << desc << std::endl;
-    } // if
-
-    MPI_Finalize();
-
-    return 1;
-  } // if
-
   if(vm.count("help")) {
     if(rank == 0) {
       std::cout << desc << std::endl;
@@ -127,7 +94,7 @@ int main(int argc, char ** argv) {
 
     return 1;
   } // if
-#endif // ENABLE_BOOST_PROGRAM_OPTIONS
+#endif // ENABLE_BOOST
 
   int result(0);
 
@@ -160,6 +127,11 @@ int main(int argc, char ** argv) {
     // Get GTest listeners
     ::testing::TestEventListeners& listeners =
       ::testing::UnitTest::GetInstance()->listeners();
+
+    // Disable XML output, if requested, everywhere but rank 0
+    if(rank > 0) {
+      delete listeners.Release(listeners.default_xml_generator());
+    } // if
 
     // Adds a listener to the end.  Google Test takes the ownership.
     listeners.Append(new cinch::listener);

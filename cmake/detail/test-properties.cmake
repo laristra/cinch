@@ -47,11 +47,11 @@
     # Add library dependencies.
     #--------------------------------------------------------------------------#
 
-    if(ENABLE_BOOST_PROGRAM_OPTIONS)
+    if(ENABLE_BOOST)
         find_package(Boost COMPONENTS program_options REQUIRED QUIET)
         target_include_directories(${name} PRIVATE ${Boost_INCLUDE_DIRS})
         target_compile_definitions(${name} PRIVATE
-            ENABLE_BOOST_PROGRAM_OPTIONS)
+            ENABLE_BOOST)
         target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
 
