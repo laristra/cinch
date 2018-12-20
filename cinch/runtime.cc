@@ -57,7 +57,6 @@ int main(int argc, char ** argv) {
       std::cout << unrecog_options[i] << " ";
     }
     std::cout << std::endl << std::endl << desc << std::endl;
-    return 1;
   } // if
 
   if(vm.count("help")) {
