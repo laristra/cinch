@@ -33,9 +33,6 @@ macro(cinch_load_extras)
   # load cinch files
   include(cinch)
 
-  # load unit after legion and mpi
-  include(unit)
-
   # load caliper
   include(caliper)
 
