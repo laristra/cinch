@@ -10,12 +10,9 @@
    Copyright (c) 2016, Los Alamos National Security, LLC
    All rights reserved.
                                                                               */
+#pragma once
 
-#ifndef ctest_h
-#define ctest_h
-
-#include "clog.h"
-#include "check_collections.h"
+#include "colors.h"
 #include "output.h"
 
 #include <iostream>
@@ -26,13 +23,13 @@ namespace cinch {
 struct fatal_handler_t {
 
   fatal_handler_t(const char * condition, const char * file, int line) {
-    std::cerr << OUTPUT_RED("ERROR") << ": assertion '" << condition <<
-      "' failed in " << OUTPUT_CYAN(file << ":" << line) <<
-      COLOR_YELLOW << " "; 
+    std::cerr << CLOG_OUTPUT_RED("ERROR") << ": assertion '" << condition <<
+      "' failed in " << CLOG_OUTPUT_CYAN(file << ":" << line) <<
+      CLOG_COLOR_YELLOW << " "; 
   } // fatal_handler_t
 
   ~fatal_handler_t() {
-    std::cerr << COLOR_PLAIN << std::endl;
+    std::cerr << CLOG_COLOR_PLAIN << std::endl;
     std::exit(1);
   } // ~fatal_handler_t
 
@@ -45,13 +42,13 @@ struct fatal_handler_t {
 struct nonfatal_handler_t {
 
   nonfatal_handler_t(const char * condition, const char * file, int line) {
-    std::cerr << OUTPUT_YELLOW("WARNING") << ": unexpected '" << condition <<
-      "' occurred in " << OUTPUT_CYAN(file << ":" << line) <<
-      COLOR_YELLOW << " "; 
+    std::cerr << CLOG_OUTPUT_YELLOW("WARNING") << ": unexpected '" <<
+      condition << "' occurred in " <<
+      CLOG_OUTPUT_CYAN(file << ":" << line) << CLOG_COLOR_YELLOW << " "; 
   } // nonfatal_handler_t
 
   ~nonfatal_handler_t() {
-    std::cerr << COLOR_PLAIN << std::endl;
+    std::cerr << CLOG_COLOR_PLAIN << std::endl;
   } // ~nonfatal_handler_t
 
   std::ostream & stream() {
@@ -207,5 +204,3 @@ inline bool string_case_compare(const char * lhs, const char * rhs) {
 
 #define CINCH_EXPECT_EQUAL_COLLECTIONS(...) \
   EXPECT_TRUE( cinch::CheckEqualCollections(__VA_ARGS__) ) << CINCH_DUMP()
-
-#endif // ctest_h

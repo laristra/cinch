@@ -1,18 +1,21 @@
-/*~--------------------------------------------------------------------------~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
- * All rights reserved.
- *~--------------------------------------------------------------------------~*/
+/*
+    :::::::: ::::::::::: ::::    :::  ::::::::  :::    :::
+   :+:    :+:    :+:     :+:+:   :+: :+:    :+: :+:    :+:
+   +:+           +:+     :+:+:+  +:+ +:+        +:+    +:+
+   +#+           +#+     +#+ +:+ +#+ +#+        +#++:++#++
+   +#+           +#+     +#+  +#+#+# +#+        +#+    +#+
+   #+#    #+#    #+#     #+#   #+#+# #+#    #+# #+#    #+#
+    ######## ########### ###    ####  ########  ###    ###
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include <gtest/internal/gtest-internal.h>
+   Copyright (c) 2016, Los Alamos National Security, LLC
+   All rights reserved.
+                                                                              */
+#pragma once
+
 #include <memory>
 #include <regex>
 #include <iostream>
 #include <fstream>
-
-#ifndef output_h
-#define output_h
 
 namespace cinch {
 
@@ -91,9 +94,3 @@ private:
 }; // class test_output_t
 
 } // namespace cinch
-
-#endif // output_h
-
-/*~-------------------------------------------------------------------------~-*
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/
