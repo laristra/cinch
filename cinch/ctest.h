@@ -16,44 +16,100 @@
 #include "output.h"
 
 #include <iostream>
-#include <cstring>
+#include <string>
+//#include <sstream>
 
 namespace cinch {
 
+struct ctest_runtime_t {
+
+  ctest_runtime_t(std::string name) {
+    name_ = name;
+    error_stream_.str(std::string());
+  } // initialize
+
+  ~ctest_runtime_t() {
+    if(error_stream_.str().size()) {
+      std::stringstream stream;
+      stream << CLOG_OUTPUT_LTRED("TEST " << name_ << " FAILED") <<
+        CLOG_COLOR_PLAIN << std::endl;
+      stream << error_stream_.str();
+      std::cerr << stream.str();
+      std::exit(1);
+    } // if
+  } // process
+
+  std::stringstream & stringstream() {
+    return error_stream_;
+  } // stream
+
+private:
+
+  std::string name_;
+  std::stringstream error_stream_;
+
+}; // struct ctest_runtime_t
+
 struct fatal_handler_t {
 
-  fatal_handler_t(const char * condition, const char * file, int line) {
-    std::cerr << CLOG_OUTPUT_RED("ERROR") << ": assertion '" << condition <<
-      "' failed in " << CLOG_OUTPUT_CYAN(file << ":" << line) <<
-      CLOG_COLOR_YELLOW << " "; 
+  fatal_handler_t(
+    const char * condition,
+    const char * file,
+    int line,
+    std::stringstream & stream
+  )
+    :
+      stream_(stream)
+  {
+    stream_ << CLOG_OUTPUT_LTRED("ASSERT FAILED") << ": assertion '" <<
+      condition << "' failed in " << CLOG_OUTPUT_BROWN(file << ":" << line) <<
+      CLOG_COLOR_BROWN << " "; 
   } // fatal_handler_t
 
   ~fatal_handler_t() {
-    std::cerr << CLOG_COLOR_PLAIN << std::endl;
+    stream_ << CLOG_COLOR_PLAIN << std::endl;
+    std::cerr << stream_.str();
     std::exit(1);
   } // ~fatal_handler_t
 
   std::ostream & stream() {
-    return std::cerr;
+    return stream_;
   } // stream
+
+private:
+
+  std::stringstream & stream_;
 
 }; // fatal_handler_t
 
 struct nonfatal_handler_t {
 
-  nonfatal_handler_t(const char * condition, const char * file, int line) {
-    std::cerr << CLOG_OUTPUT_YELLOW("WARNING") << ": unexpected '" <<
-      condition << "' occurred in " <<
-      CLOG_OUTPUT_CYAN(file << ":" << line) << CLOG_COLOR_YELLOW << " "; 
+  nonfatal_handler_t(
+    const char * condition,
+    const char * file,
+    int line,
+    std::stringstream & stream
+  )
+    :
+      stream_(stream)
+  {
+    stream_ <<
+      CLOG_OUTPUT_YELLOW("EXPECT FAILED") <<
+      ": unexpected '" << condition << "' occurred in " <<
+      CLOG_OUTPUT_BROWN(file << ":" << line) << CLOG_COLOR_BROWN << " "; 
   } // nonfatal_handler_t
 
   ~nonfatal_handler_t() {
-    std::cerr << CLOG_COLOR_PLAIN << std::endl;
+    stream_ << CLOG_COLOR_PLAIN << std::endl;
   } // ~nonfatal_handler_t
 
   std::ostream & stream() {
-    return std::cerr;
+    return stream_;
   } // stream
+
+private:
+
+  std::stringstream & stream_;
 
 }; // nonfatal_handler_t
 
@@ -71,21 +127,28 @@ inline bool string_case_compare(const char * lhs, const char * rhs) {
 
 } // namespace cinch
 
+#define CINCH_TEST(name)                                                       \
+  cinch::ctest_runtime_t __cinch_test_runtime_instance(#name)
+
 #define EXPECT_TRUE(condition)                                                 \
   (condition) ||                                                               \
-  cinch::nonfatal_handler_t(#condition, __FILE__, __LINE__).stream()
+  cinch::nonfatal_handler_t(#condition, __FILE__, __LINE__,                    \
+    __cinch_test_runtime_instance.stringstream()).stream()
 
 #define EXPECT_FALSE(condition)                                                \
   !(condition) ||                                                              \
-  cinch::nonfatal_handler_t(#condition, __FILE__, __LINE__).stream()
+  cinch::nonfatal_handler_t(#condition, __FILE__, __LINE__,                    \
+    __cinch_test_runtime_instance.stringstream()).stream()
 
 #define ASSERT_TRUE(condition)                                                 \
   (condition) ||                                                               \
-  cinch::fatal_handler_t(#condition, __FILE__, __LINE__).stream()
+  cinch::fatal_handler_t(#condition, __FILE__, __LINE__,                       \
+    __cinch_test_runtime_instance.stringstream()).stream()
 
 #define ASSERT_FALSE(condition)                                                \
   !(condition) ||                                                              \
-  cinch::fatal_handler_t(#condition, __FILE__, __LINE__).stream()
+  cinch::fatal_handler_t(#condition, __FILE__, __LINE__,                       \
+    __cinch_test_runtime_instance.stringstream()).stream()
 
 #define ASSERT_EQ(val1, val2)                                                  \
   ASSERT_TRUE((val1) == (val2))
