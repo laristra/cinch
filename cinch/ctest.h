@@ -36,6 +36,10 @@ struct ctest_runtime_t {
       stream << error_stream_.str();
       std::cerr << stream.str();
       std::exit(1);
+    }
+    else {
+      std::cerr << CLOG_OUTPUT_LTGREEN("TEST " << name_ << " PASSED") <<
+        CLOG_COLOR_PLAIN << std::endl;
     } // if
   } // process
 
