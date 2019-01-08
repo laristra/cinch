@@ -268,7 +268,7 @@ function(cinch_add_unit name)
       set(unit_policy_flags ${HPX_CXX_FLAGS})
       set(unit_policy_includes ${HPX_INCLUDE_DIRS})
       set(unit_policy_libraries ${HPX_LIBRARIES} ${HPX_LIB_FLAGS})
-
+      set(unit_policy_exec ${MPIEXEC})
       set(unit_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
       set(unit_policy_exec_preflags ${MPIEXEC_PREFLAGS})
       set(unit_policy_exec_postflags ${MPIEXEC_POSTFLAGS})
