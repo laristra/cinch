@@ -14,7 +14,6 @@
 #include <cinch-config.h>
 #include <cinch/runtime.h>
 
-#include <filesystem>
 #include <iostream>
 #include <string>
 
