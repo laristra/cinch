@@ -4,6 +4,3 @@
 [submodule "pfunit"]
 	path = pfunit
 	url = ../../laristra/pfunit.git
-[submodule "boost/preprocessor"]
-	path = boost/preprocessor
-	url = ../../boostorg/preprocessor.git
