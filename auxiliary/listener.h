@@ -1,8 +1,3 @@
-/*~--------------------------------------------------------------------------~*
- * Copyright (c) 2015 Los Alamos National Security, LLC
- * All rights reserved.
- *~--------------------------------------------------------------------------~*/
-
 #ifndef cinch_listener_h
 #define cinch_listener_h
 
@@ -30,8 +25,3 @@ public:
 } // namespace cinch
 
 #endif // cinch_listener_h
-
-/*~-------------------------------------------------------------------------~-*
- * Formatting options for vim.
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/

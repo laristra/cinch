@@ -1,8 +1,3 @@
-/*~--------------------------------------------------------------------------~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
- * All rights reserved.
- *~--------------------------------------------------------------------------~*/
-
 #ifndef cinchtest_h
 #define cinchtest_h
 
@@ -58,7 +53,3 @@
   EXPECT_TRUE( cinch::CheckEqualCollections(__VA_ARGS__) ) << CINCH_DUMP()
 
 #endif // cinchtest_h
-
-/*~-------------------------------------------------------------------------~-*
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/

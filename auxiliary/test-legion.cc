@@ -1,8 +1,3 @@
-/*~-------------------------------------------------------------------------~~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
- * All rights reserved.
- *~-------------------------------------------------------------------------~~*/
-
 #if defined(CINCH_ENABLE_MPI)
   #include <mpi.h>
 #endif
@@ -17,14 +12,8 @@
   using namespace boost::program_options;
 #endif
 
-// This define lets us use the same test driver for gtest and internal
-// devel tests.
-#if defined(CINCH_DEVEL_TARGET)
-  #include "cinchdevel.h"
-#else
-  #include <gtest/gtest.h>
-  #include "../cinch/ctest.h"
-#endif
+#include <gtest/gtest.h>
+#include "../cinch/ctest.h"
 
 //----------------------------------------------------------------------------//
 // Allow extra initialization steps to be added by the user.
@@ -34,25 +23,6 @@
   int driver_initialization(int argc, char ** argv);
 #else
   inline int driver_initialization(int argc, char ** argv) { return 0; }
-#endif
-
-//----------------------------------------------------------------------------//
-// Implement a function to print test information for the user.
-//----------------------------------------------------------------------------//
-
-#if defined(CINCH_DEVEL_TARGET)
-void print_devel_code_label(std::string name) {
-  // Print some test information.
-  clog_rank(info, 0) <<
-    OUTPUT_LTGREEN("Executing development target " << name) << std::endl;
-
-#if defined(CINCH_ENABLE_MPI)
-  // This is safe even if the user creates other comms, because we
-  // execute this function before handing control over to the user
-  // code logic.
-  MPI_Barrier(MPI_COMM_WORLD);
-#endif // CINCH_ENABLE_MPI
-} // print_devel_code_label
 #endif
 
 //----------------------------------------------------------------------------//
@@ -102,10 +72,8 @@ int main(int argc, char ** argv) {
 
 #endif // CINCH_ENABLE_MPI
 
-#if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
   ::testing::InitGoogleTest(&argc, argv);
-#endif
 
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
@@ -155,23 +123,12 @@ int main(int argc, char ** argv) {
     // Initialize the cinchlog runtime
     clog_init(tags);
 
-#if defined(CINCH_DEVEL_TARGET)
-    // Perform test initialization.
-    cinch_devel_code_init(print_devel_code_label);
-#endif
-
     // Call the user-provided initialization function
     driver_initialization(argc, argv);
 
-#if !defined(CINCH_DEVEL_TARGET)
     // Run the tests for this target.
     result = RUN_ALL_TESTS();
-#endif
   } // if
 
   return result;
 } // main
-
-/*~------------------------------------------------------------------------~--*
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~------------------------------------------------------------------------~--*/

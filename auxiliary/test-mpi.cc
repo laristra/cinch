@@ -1,8 +1,3 @@
-/*~-------------------------------------------------------------------------~~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
- * All rights reserved.
- *~-------------------------------------------------------------------------~~*/
-
 #include <cstring>
 #include <mpi.h>
 #include <vector>
@@ -13,14 +8,8 @@
   using namespace boost::program_options;
 #endif
 
-// This define lets us use the same test driver for gtest and internal
-// devel tests.
-#if defined(CINCH_DEVEL_TARGET)
-  #include "cinchdevel.h"
-#else
-  #include <gtest/gtest.h>
-  #include "cinchtest.h"
-#endif
+#include <gtest/gtest.h>
+#include "cinchtest.h"
 
 //----------------------------------------------------------------------------//
 // Allow extra initialization steps to be added by the user.
@@ -30,23 +19,6 @@
   int driver_initialization(int argc, char ** argv);
 #else
   inline int driver_initialization(int argc, char ** argv) { return 0; }
-#endif
-
-//----------------------------------------------------------------------------//
-// Implement a function to print test information for the user.
-//----------------------------------------------------------------------------//
-
-#if defined(CINCH_DEVEL_TARGET)
-void print_devel_code_label(std::string name) {
-  // Print some test information to the root rank.
-  clog_rank(info, 0) <<
-    OUTPUT_LTGREEN("Executing development target " << name) << std::endl;
-
-  // This is safe even if the user creates other comms, because we
-  // execute this function before handing control over to the user
-  // code logic.
-  MPI_Barrier(MPI_COMM_WORLD);
-} // print_devel_code_label
 #endif
 
 //----------------------------------------------------------------------------//
@@ -60,10 +32,8 @@ int main(int argc, char ** argv) {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-#if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
   ::testing::InitGoogleTest(&argc, argv);
-#endif
 
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
@@ -112,21 +82,11 @@ int main(int argc, char ** argv) {
     // Initialize the cinchlog runtime
     clog_init(tags);
 
-#if defined(CINCH_DEVEL_TARGET)
-    // Perform test initialization.
-    cinch_devel_code_init(print_devel_code_label);
-#endif
-
     // Call the user-provided initialization function
     driver_initialization(argc, argv);
 
-#if defined(CINCH_DEVEL_TARGET)
-    // Run the devel test.
-    user_devel_code_logic();  
-#else
     // Run the tests for this target.
     result = RUN_ALL_TESTS();
-#endif
   } // if
 
   // Shutdown the MPI runtime
@@ -134,7 +94,3 @@ int main(int argc, char ** argv) {
 
   return result;
 } // main
-
-/*~------------------------------------------------------------------------~--*
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~------------------------------------------------------------------------~--*/

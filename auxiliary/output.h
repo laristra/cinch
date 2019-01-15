@@ -1,8 +1,3 @@
-/*~--------------------------------------------------------------------------~*
- * Copyright (c) 2014 Los Alamos National Security, LLC
- * All rights reserved.
- *~--------------------------------------------------------------------------~*/
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <gtest/internal/gtest-internal.h>
@@ -93,7 +88,3 @@ private:
 } // namespace cinch
 
 #endif // output_h
-
-/*~-------------------------------------------------------------------------~-*
- * vim: set tabstop=2 shiftwidth=2 expandtab :
- *~-------------------------------------------------------------------------~-*/
