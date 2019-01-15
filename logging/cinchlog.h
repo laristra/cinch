@@ -1,5 +1,10 @@
-#ifndef clog_h
-#define clog_h
+/*----------------------------------------------------------------------------*
+ * Copyright (c) 2016 Los Alamos National Security, LLC
+ * All rights reserved.
+ *----------------------------------------------------------------------------*/
+
+#ifndef cinchlog_h
+#define cinchlog_h
 
 /*! @file */
 
@@ -2028,4 +2033,4 @@ is_active_rank()
 
 #endif // !SERIAL && CLOG_ENABLE_MPI
 
-#endif // clog_h
+#endif // cinchlog_h
