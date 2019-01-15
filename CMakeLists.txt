@@ -14,50 +14,13 @@ cmake_minimum_required(VERSION 3.0)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 include(insource)
-include(documentation)
 include(version)
 
 #------------------------------------------------------------------------------#
-# Add distclean target
+# Add spotless target
 #------------------------------------------------------------------------------#
 
-add_custom_target(distclean rm -rf ${CMAKE_BINARY_DIR}/*)
-
-#------------------------------------------------------------------------------#
-# Add version options and creation
-#------------------------------------------------------------------------------#
-
-set(VERSION_CREATION "git describe" CACHE STRING
-    "Set a static version instead of using git describe")
-
-if(NOT ${VERSION_CREATION} STREQUAL "git describe")
-    set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
-else()
-    cinch_make_version()
-endif(NOT ${VERSION_CREATION} STREQUAL "git describe")
-
-#------------------------------------------------------------------------------#
-# Add documentation target
-#------------------------------------------------------------------------------#
-
-configure_file(${CMAKE_SOURCE_DIR}/doc/cinchheader.tex.in
-    ${CMAKE_BINARY_DIR}/doc/cinchheader.tex)
-configure_file(${CMAKE_SOURCE_DIR}/doc/cinchtitle.tex.in
-    ${CMAKE_BINARY_DIR}/doc/cinchtitle.tex)
-
-set(ug_pandoc_options
-    "--toc"
-    "--toc-depth=2"
-    "--include-in-header=${CMAKE_SOURCE_DIR}/tex/addtolength.tex"
-    "--include-in-header=${CMAKE_BINARY_DIR}/doc/cinchheader.tex"
-    "--include-in-header=${CMAKE_BINARY_DIR}/doc/cinchtitle.tex"
-    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/maketitle.tex"
-    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/firstpageempty.tex"
-    "--include-before-body=${CMAKE_SOURCE_DIR}/tex/titlebreak.tex"
-)
-
-cinch_add_doc(${PROJECT_NAME}-ug ugconfig.py . cinch-ug-${cinch_VERSION}.pdf
-    PANDOC_OPTIONS ${ug_pandoc_options})
+add_custom_target(spotless rm -rf ${CMAKE_BINARY_DIR}/*)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
