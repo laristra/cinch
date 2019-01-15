@@ -13,12 +13,9 @@ include(globals)
 # Cinch includes
 #------------------------------------------------------------------------------#
 
-include(application)
 include(cinch_minimum_required)
 include(colors)
 include(common)
-include(header_depends)
-include(include_links)
 include(info)
 include(insource)
 include(library)
