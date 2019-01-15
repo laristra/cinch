@@ -11,7 +11,7 @@ function(cinch_prevent_insource_builds)
         message(FATAL_ERROR "\nIn-place builds are not supported!!!\n"
 "######################################################################\n"
 "You must first clean up the current directory by executing:\n"
-"  `cmake -P cinch/cmake/distclean.cmake`\n"
+"  `cmake -P cinch/cmake/spotless.cmake`\n"
 "!!!Failure to do so will prevent all builds!!!\n"
 "Then create a build directory in a suitable location and execute:\n"
 "  `cmake ${CMAKE_CURRENT_SOURCE_DIR}`\n"

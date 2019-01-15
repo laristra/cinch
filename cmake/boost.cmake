@@ -3,6 +3,7 @@
 #--------------------------------------------------------------------------#
 
 option(ENABLE_BOOST "Enable Boost" OFF)
+mark_as_advanced(ENABLE_BOOST)
 
 if(ENABLE_BOOST)
 

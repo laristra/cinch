@@ -36,12 +36,6 @@ macro(cinch_load_extras)
   # load caliper
   include(caliper)
 
-  # development tests
-  include(devel)
-
-  # environment modules
-  include(capture)
-
 endmacro()
 
 #------------------------------------------------------------------------------#
