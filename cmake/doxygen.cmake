@@ -11,6 +11,7 @@ function(cinch_add_doxygen)
 
     option(ENABLE_DOXYGEN "Enable Doxygen documentation" OFF)
     option(ENABLE_DOXYGEN_WARN "Enable Doxygen warnings" OFF)
+    mark_as_advanced(ENABLE_DOXYGEN_WARN)
 
     if(ENABLE_DOXYGEN)
 

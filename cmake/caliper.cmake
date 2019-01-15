@@ -8,6 +8,7 @@
 #------------------------------------------------------------------------------#
 
 option(ENABLE_CALIPER "Enable Caliper" OFF)
+mark_as_advanced(ENABLE_CALIPER)
 
 if(ENABLE_CALIPER)
     find_package(Caliper REQUIRED)
