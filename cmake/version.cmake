@@ -7,6 +7,7 @@
 # 'git describe master'
 
 set(VERSION_CREATION "git describe" CACHE STRING "Set a static version")
+mark_as_advanced(VERSION_CREATION)
 
 if(NOT "${VERSION_CREATION}" STREQUAL "git describe")
     set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})

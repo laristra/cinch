@@ -55,7 +55,8 @@ find_package_handle_standard_args(Legion
         Legion_INCLUDE_DIRS
         Legion_LIBRARIES)
 
-mark_as_advanced(Legion_INCLUDE_DIR Legion_INCLUDE_DIRS)
+mark_as_advanced(Legion_INCLUDE_DIR Legion_INCLUDE_DIRS Legion_LIBRARY
+    Legion_ROOT REALM_LIBRARY)
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
