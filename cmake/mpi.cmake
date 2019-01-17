@@ -15,18 +15,14 @@ mark_as_advanced(ENABLE_MPI_CXX_BINDINGS)
 if(ENABLE_MPI)
 
 #------------------------------------------------------------------------------#
-# Find MPI
-#------------------------------------------------------------------------------#
-
-find_package(MPI REQUIRED)
-
-#------------------------------------------------------------------------------#
 # Skip C++ linkage of MPI
 #------------------------------------------------------------------------------#
 
 if(ENABLE_MPI_CXX_BINDINGS)
+    find_package(MPI REQUIRED COMPONENTS CXX)
     set(MPI_LANGUAGE CXX)
 else()
+    find_package(MPI REQUIRED COMPONENTS C)
     set(MPI_LANGUAGE C)
     # Globally add these compile definitions for linking C++ applications
     # with the C-version of MPI.  Might be a better way to do this.

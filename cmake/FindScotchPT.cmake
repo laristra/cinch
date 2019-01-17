@@ -123,7 +123,7 @@ if (SCOTCH_INCLUDE_DIR AND PTSCOTCH_LIBRARY AND PTSCOTCHERR_LIBRARY)
   endif()
 
   # Test requires MPI
-  find_package(MPI QUIET REQUIRED)
+  find_package(MPI QUIET REQUIRED COMPONENTS C)
 
   # Set flags for building test program
   set(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR} ${MPI_INCLUDE_PATH})

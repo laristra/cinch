@@ -87,7 +87,7 @@ endif()
 if (PARMETIS_INCLUDE_DIR AND PARMETIS_LIBRARY AND METIS_LIBRARY)
 
   # Test requires MPI
-  find_package(MPI QUIET REQUIRED)
+  find_package(MPI QUIET REQUIRED COMPONENTS C)
 
   # Set flags for building test program
   set(CMAKE_REQUIRED_INCLUDES ${PARMETIS_INCLUDE_DIR} ${MPI_INCLUDE_PATH})
