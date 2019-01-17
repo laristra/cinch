@@ -39,7 +39,7 @@ enum exit_mode_t : size_t {
 
 struct runtime_handler_t {
 #if defined(CINCH_ENABLE_BOOST)
-  std::function<int(int, char **, parsed_options &)> initialize;
+  std::function<int(int, char **, variables_map &)> initialize;
 #else
   std::function<int(int, char **)> initialize;
 #endif
@@ -106,11 +106,11 @@ struct runtime_t {
    */
 
 #if defined(CINCH_ENABLE_BOOST)
-  int initialize_runtimes(int argc, char ** argv, parsed_options & parsed) {
+  int initialize_runtimes(int argc, char ** argv, variables_map & vm) {
     int result{0};
 
     for(auto r: handlers_) {
-      result |= r.initialize(argc, argv, parsed);
+      result |= r.initialize(argc, argv, vm);
     } // for
 
     return result;

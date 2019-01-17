@@ -67,7 +67,7 @@ int main(int argc, char ** argv) {
   // Invoke registered runtime initializations
   if(
 #if defined(CINCH_ENABLE_BOOST)
-    runtime_.initialize_runtimes(argc, argv, parsed)
+    runtime_.initialize_runtimes(argc, argv, vm)
 #else
     runtime_.initialize_runtimes(argc, argv)
 #endif
