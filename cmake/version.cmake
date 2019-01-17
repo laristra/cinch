@@ -28,10 +28,10 @@ else()
         # Call 'git describe'
         #----------------------------------------------------------------------#
 
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 HEAD
-        OUTPUT_VARIABLE _version
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 HEAD
+            OUTPUT_VARIABLE _version
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     endif()
 
