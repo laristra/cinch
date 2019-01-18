@@ -51,6 +51,9 @@ struct runtime_handler_t {
 }; // struct runtime_handler_t
 
 /*!
+  The runtime_t type provides a stateful interface for registering and
+  executing user-defined actions at initialization and finalization
+  control points.
  */
 
 struct runtime_t {
@@ -76,6 +79,7 @@ struct runtime_t {
     Append the given runtime handler to the vector of handlers. Handlers
     will be executed in the order in which they are appended.
    */
+
   bool append_runtime_handler(runtime_handler_t const & handler) {
     handlers_.push_back(handler);
     return true;
