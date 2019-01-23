@@ -15,6 +15,17 @@
 # GRAPHVIZ_LIBRARIES	- List of libraries when using GraphViz.
 # GRAPHVIZ_FOUND	- True if GraphViz found.
 
+find_package(PkgConfig)
+
+pkg_check_modules(PC_Graphviz graphviz)
+
+#pkg_check_modules(GRAPHVIZ_GVC_PKG cdt)
+#pkg_check_modules(GRAPHVIZ_CGRAPH_PKG cgraph)
+#pkg_check_modules(GRAPHVIZ_CDT_PKG gvc)
+#pkg_check_modules(GRAPHVIZ_GVC_PKG gvpr)
+#pkg_check_modules(GRAPHVIZ_CGRAPH_PKG pathplan)
+#pkg_check_modules(GRAPHVIZ_CDT_PKG xdot)
+
 # Look for the header file.
 FIND_PATH(GRAPHVIZ_INCLUDE_DIR NAMES graphviz/cgraph.h)
 
@@ -37,7 +48,8 @@ SET(GRAPHVIZ_LIBRARY
 
 # Handle the QUIETLY and REQUIRED arguments and set GRAPHVIZ_FOUND to TRUE if all listed variables are TRUE.
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GRAPHVIZ DEFAULT_MSG GRAPHVIZ_LIBRARY GRAPHVIZ_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GRAPHVIZ DEFAULT_MSG 
+	GRAPHVIZ_LIBRARY GRAPHVIZ_INCLUDE_DIR)
 
 # Copy the results to the output variables.
 IF(GRAPHVIZ_FOUND)
