@@ -20,7 +20,7 @@ configure_file(${CINCH_SOURCE_DIR}/config/cinch-config.h.in
 
 install(FILES ${CMAKE_BINARY_DIR}/cinch-config.h
   DESTINATION include)
-install(FILES ${CMAKE_SOURCE_DIR}/cinch/runtime/runtime.h
-  DESTINATION include/cinch/runtime)
-install(FILES ${CMAKE_SOURCE_DIR}/cinch/runtime/runtime.cc
-  DESTINATION include/cinch/runtime)
+install(FILES ${CMAKE_SOURCE_DIR}/cinch/cinch/runtime.h
+  DESTINATION include/cinch)
+install(FILES ${CMAKE_SOURCE_DIR}/cinch/cinch/runtime.cc
+  DESTINATION include/cinch)
