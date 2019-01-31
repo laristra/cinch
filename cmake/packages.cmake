@@ -36,6 +36,9 @@ macro(cinch_load_extras)
   # load caliper
   include(caliper)
 
+  # load graphviz
+  include(graphviz)
+
 endmacro()
 
 #------------------------------------------------------------------------------#
