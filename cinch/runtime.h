@@ -21,9 +21,20 @@
   using namespace boost::program_options;
 #endif
 
+#if defined(CINCH_RUNTIME_DEBUG)
+  #include <iostream>
+#endif
+
 #include <functional>
 #include <string>
 #include <vector>
+
+#if defined(CINCH_RUNTIME_DEBUG)
+  #define cinch_function() std::cout << __FILE__ << " " <<                     \
+    __FUNCTION__ << std::endl;
+#else
+  #define cinch_function()
+#endif
 
 namespace cinch {
 
@@ -59,6 +70,7 @@ struct runtime_handler_t {
 struct runtime_t {
 
   static runtime_t & instance() {
+    cinch_function();
     static runtime_t r;
     return r;
   } // instance
@@ -67,11 +79,13 @@ struct runtime_t {
   std::string & program() { return program_; }
 
   bool register_driver(std::function<int(int, char **)> const & driver) {
+    cinch_function();
     driver_ = driver;
     return true;
   } // register_driver
 
   std::function<int(int, char **)> const & driver() const {
+    cinch_function();
     return driver_;
   } // driver
 
@@ -81,6 +95,7 @@ struct runtime_t {
    */
 
   bool append_runtime_handler(runtime_handler_t const & handler) {
+    cinch_function();
     handlers_.push_back(handler);
     return true;
   } // register_runtime_handler
@@ -90,6 +105,7 @@ struct runtime_t {
    */
 
   std::vector<runtime_handler_t> & runtimes() {
+    cinch_function();
     return handlers_;
   } // runtimes
 
@@ -99,6 +115,7 @@ struct runtime_t {
 
 #if defined(CINCH_ENABLE_BOOST)
   void add_options(options_description & desc) {
+    cinch_function();
     for(auto r: handlers_) {
       r.add_options(desc);
     } // for
@@ -111,6 +128,7 @@ struct runtime_t {
 
 #if defined(CINCH_ENABLE_BOOST)
   int initialize_runtimes(int argc, char ** argv, variables_map & vm) {
+    cinch_function();
     int result{0};
 
     for(auto r: handlers_) {
@@ -121,6 +139,7 @@ struct runtime_t {
   } // initialize_runtimes
 #else
   int initialize_runtimes(int argc, char ** argv) {
+    cinch_function();
     int result{0};
 
     for(auto r: handlers_) {
@@ -136,6 +155,7 @@ struct runtime_t {
    */
 
   int finalize_runtimes(int argc, char ** argv, exit_mode_t mode) {
+    cinch_function();
     int result{0};
 
     for(auto r: handlers_) {
@@ -147,9 +167,13 @@ struct runtime_t {
 
 private:
 
-  runtime_t() {}
+  runtime_t() {
+    cinch_function();
+  }
 
-  ~runtime_t() {}
+  ~runtime_t() {
+    cinch_function();
+  }
 
   // These are deleted because this type is a singleton, i.e.,
   // we don't want anyone to be able to make copies or references.
