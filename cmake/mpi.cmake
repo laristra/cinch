@@ -9,6 +9,8 @@
 
 option(ENABLE_MPI "Enable MPI" OFF)
 option(ENABLE_MPI_CXX_BINDINGS "Enable MPI C++ Bindings" OFF)
+option(ENABLE_MPI_THREAD_MULITPLE "Enable MPI_THREAD_MULTIPLE" OFF)
+mark_as_advanced(ENABLE_MPI_THREAD_MULITPLE)
 
 mark_as_advanced(ENABLE_MPI_CXX_BINDINGS)
 
@@ -34,6 +36,10 @@ if(MPI_${MPI_LANGUAGE}_FOUND)
 
     # using mpich, there are extra spaces that cause some issues
     separate_arguments(MPI_${MPI_LANGUAGE}_COMPILE_FLAGS)
+
+    if(ENABLE_MPI_THREAD_MULITPLE)
+      add_definitions(-DCINCH_ENABLE_MPI_THREAD_MULTIPLE)
+    endif()
 
     list(APPEND CINCH_RUNTIME_LIBRARIES ${MPI_${MPI_LANGUAGE}_LIBRARIES})
 endif(MPI_${MPI_LANGUAGE}_FOUND)

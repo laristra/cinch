@@ -27,8 +27,33 @@
 
 int main(int argc, char ** argv) {
 
+#if defined(CINCH_ENABLE_MPI_THREAD_MULTIPLE)
+  // Get the MPI version
+  int version, subversion;
+  MPI_Get_version(&version, &subversion);
+
+  if(version==3 && subversion>0) {
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    // If you fail this assertion, then your version of MPI
+    // does not support calls from multiple threads and you
+    // cannot use the GASNet MPI conduit
+    if (provided < MPI_THREAD_MULTIPLE)
+      printf("ERROR: Your implementation of MPI does not support "
+           "MPI_THREAD_MULTIPLE which is required for use of the "
+           "GASNet MPI conduit with the Legion-MPI Interop!\n");
+    assert(provided == MPI_THREAD_MULTIPLE);
+  }
+  else {
+    printf("ERROR: Your implementation of MPI does not support "
+         "MPI_THREAD_MULTIPLE which is required for use of the "
+         "GASNet MPI conduit with the Legion-MPI Interop!\n");
+  } // if
+#else
   // Initialize the MPI runtime
   MPI_Init(&argc, &argv);
+#endif // CINCH_ENABLE_MPI_THREAD_MULTIPLE
+
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
