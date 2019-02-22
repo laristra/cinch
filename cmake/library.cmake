@@ -146,7 +146,12 @@ endfunction(cinch_add_library_target)
 function(cinch_target_link_libraries target)
 
     if (ARGN)
-        target_link_libraries( ${target} ${ARGN} )
+        get_target_property(_type ${target} TYPE)
+        if ( ${_type} STREQUAL "INTERFACE_LIBRARY")
+            target_link_libraries( ${target} INTERFACE ${ARGN} )
+        else()
+            target_link_libraries( ${target} ${ARGN} )
+        endif()
     endif()
 
 endfunction()
