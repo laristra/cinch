@@ -7,7 +7,7 @@ find_program(PIP3_EXECUTABLE NAMES pip3
  
 include(FindPackageHandleStandardArgs)
  
-find_package_handle_standard_args(pip3 DEFAULT_MSG
+find_package_handle_standard_args(Pip3 DEFAULT_MSG
   PIP3_EXECUTABLE
 )
  
