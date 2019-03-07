@@ -20,7 +20,7 @@ function(cinch_add_sphinx)
         #----------------------------------------------------------------------#
 
         find_package(Sphinx REQUIRED)
-        find_package(Pip3 REQUIRED)
+        #find_package(Pip3 REQUIRED)
         find_package(Breathe REQUIRED)
 
         #execute_process(COMMAND ${PIP3_EXECUTABLE} show breathe
