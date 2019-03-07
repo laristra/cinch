@@ -20,29 +20,7 @@ function(cinch_add_sphinx)
         #----------------------------------------------------------------------#
 
         find_package(Sphinx REQUIRED)
-        #find_package(Pip3 REQUIRED)
         find_package(Breathe REQUIRED)
-
-        #execute_process(COMMAND ${PIP3_EXECUTABLE} show breathe
-        #    OUTPUT_VARIABLE _breathe)
-
-        #if("${_breathe}" STREQUAL "")
-        #    message(FATAL_ERROR "Breathe project not installed "
-        #        "(pip3 install breathe)")
-        #endif()
-
-        #string(REPLACE "\n" ";" _breathe ${_breathe})
-        #set(CINCH_BREATHE_PACKAGE_DIR)
-        #foreach(line ${_breathe})
-        #    if(line MATCHES "Location:.*")
-        #        string(REPLACE ":" ";" line ${line})
-        #        list(GET line 1 _path)
-        #        string(STRIP ${_path} _path)
-        #        set(CINCH_BREATHE_PACKAGE_DIR ${_path})
-        #        break()
-        #    endif()
-        #endforeach()
-
 
         #----------------------------------------------------------------------#
         # Make sure that the Breathe package is installed
