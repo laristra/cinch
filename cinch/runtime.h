@@ -41,7 +41,7 @@ namespace cinch {
 enum exit_mode_t : size_t {
   success,
   unrecognized_option,
-  help
+  option_exit
 }; // enum exit_mode_t
 
 /*!

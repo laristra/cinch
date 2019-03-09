@@ -72,7 +72,8 @@ int main(int argc, char ** argv) {
     runtime_.initialize_runtimes(argc, argv)
 #endif
   ) {
-    std::exit(1);
+    runtime_.finalize_runtimes(argc, argv, exit_mode_t::option_exit);
+    return 1;
   } // if
 
   // Invoke the primary callback
@@ -80,7 +81,7 @@ int main(int argc, char ** argv) {
 
   // Invoke registered runtime finalizations
   if(runtime_.finalize_runtimes(argc, argv, exit_mode_t::success)) {
-    std::exit(1);
+    return 1;
   } // if
 
   return result;
