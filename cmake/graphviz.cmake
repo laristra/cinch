@@ -16,11 +16,11 @@ if(ENABLE_GRAPHVIZ)
         message(FATAL_ERROR "Graphviz is required for this build configuration")
     endif()
 
-    message(STATUS "Found Graphviz: ${GRAPHVIZ_INCLUDE_DIRS}")
+    message(STATUS "Found Graphviz: ${Graphviz_INCLUDE_DIRS}")
 
-    include_directories(${GRAPHVIZ_INCLUDE_DIRS})
+    include_directories(${Graphviz_INCLUDE_DIRS})
     add_definitions(-DENABLE_GRAPHVIZ)
-    list(APPEND CINCH_RUNTIME_LIBRARIES ${GRAPHVIZ_LIBRARIES})
+    list(APPEND CINCH_RUNTIME_LIBRARIES ${Graphviz_LIBRARIES})
 endif(ENABLE_GRAPHVIZ)
 
 #------------------------------------------------------------------------------#

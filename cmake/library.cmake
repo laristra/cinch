@@ -127,15 +127,12 @@ function(cinch_add_library_target target directory)
     endforeach()
 
     if(EXISTS ${PROJECT_SOURCE_DIR}/.clang-format)
-      find_program(CLANG_FORMAT "clang-format")
-      find_package_handle_standard_args(CLANG_FORMAT REQUIRED_VARS CLANG_FORMAT)
-
+      find_package(CLANG_FORMAT 7.0.1)
       if (CLANG_FORMAT_FOUND)
         add_custom_target(format-${target} COMMAND ${CLANG_FORMAT}
             -style=file -i ${GLOBAL_HEADERS} ${SOURCES})
       else()
-        add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND}
-            -E echo "No clang-format found")
+        add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND} -E echo "No clang-format v7.0.1 or newer found")
       endif()
     else()
       add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND}
@@ -152,7 +149,12 @@ endfunction(cinch_add_library_target)
 function(cinch_target_link_libraries target)
 
     if (ARGN)
-        target_link_libraries( ${target} ${ARGN} )
+        get_target_property(_type ${target} TYPE)
+        if ( ${_type} STREQUAL "INTERFACE_LIBRARY")
+            target_link_libraries( ${target} INTERFACE ${ARGN} )
+        else()
+            target_link_libraries( ${target} ${ARGN} )
+        endif()
     endif()
 
 endfunction()
