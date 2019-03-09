@@ -3,13 +3,13 @@
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#include <gtest/gtest.h>
+#include <fstream>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <gtest/internal/gtest-internal.h>
+#include <iostream>
 #include <memory>
 #include <regex>
-#include <iostream>
-#include <fstream>
 
 #ifndef output_h
 #define output_h
@@ -19,7 +19,6 @@ namespace cinch {
 class test_output_t
 {
 public:
-
   static test_output_t & instance() {
     static test_output_t g;
     return g;
@@ -40,7 +39,7 @@ public:
   void to_file(const char * filename) {
     std::ofstream f(filename);
 
-    if(! f.good()) {
+    if(!f.good()) {
       std::cerr << "Failed to open " << filename << std::endl;
       std::exit(1);
     } // if
@@ -64,7 +63,7 @@ public:
 
     std::ifstream f(testdir_filename);
 
-    if(! f.good()) {
+    if(!f.good()) {
       std::cerr << "Failed to open " << filename << std::endl;
       std::exit(1);
     } // if
@@ -80,10 +79,8 @@ public:
   } // equal_blessed
 
 private:
-
   test_output_t()
-    : stream_(new std::ostream(default_.rdbuf())) {
-  } // test_output_t
+    : stream_(new std::ostream(default_.rdbuf())) {} // test_output_t
 
   std::stringstream default_;
   std::shared_ptr<std::ostream> stream_;
