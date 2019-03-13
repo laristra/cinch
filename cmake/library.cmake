@@ -121,25 +121,9 @@ function(cinch_add_library_target target directory)
             DESTINATION include/${directory}/${DIR})
     endforeach()
 
-
     foreach(file ${${target}_PUBLIC_HEADERS})
         install(FILES ${directory}/${file} DESTINATION include)
     endforeach()
-
-    if(EXISTS ${PROJECT_SOURCE_DIR}/.clang-format)
-      find_package(CLANG_FORMAT 7.0.1)
-      if (CLANG_FORMAT_FOUND)
-        add_custom_target(format-${target} COMMAND ${CLANG_FORMAT}
-            -style=file -i ${GLOBAL_HEADERS} ${SOURCES})
-      else()
-        add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND} -E echo "No clang-format v7.0.1 or newer found")
-      endif()
-    else()
-      add_custom_target(format-${target} COMMAND ${CMAKE_COMMAND}
-          -E echo "No ${PROJECT_SOURCE_DIR}/.clang-format found")
-    endif()
-
-    mark_as_advanced(CLANG_FORMAT)
 endfunction(cinch_add_library_target)
 
 #
