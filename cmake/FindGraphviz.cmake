@@ -53,4 +53,4 @@ ELSE(Graphviz_FOUND)
 	SET(Graphviz_INCLUDE_DIRS)
 ENDIF(Graphviz_FOUND)
 
-MARK_AS_ADVANCED(Graphviz_INCLUDE_DIRS Graphviz_LIBRARIES)
+MARK_AS_ADVANCED(Graphviz_INCLUDE_DIRS Graphviz_INCLUDE_DIR Graphviz_LIBRARIES Graphviz_cdt_LIBRARY Graphviz_cgraph_LIBRARY Graphviz_gvc_LIBRARY Graphviz_gvpr_LIBRARY Graphviz_pathplan_LIBRARY Graphviz_xdot_LIBRARY)
