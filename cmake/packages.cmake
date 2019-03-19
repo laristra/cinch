@@ -16,6 +16,7 @@ macro(cinch_load_extras)
   include(doxygen)
   include(hdf5)
   include(sphinx)
+  include(format)
 
   if(opt_in_LEGION)
     include(legion)

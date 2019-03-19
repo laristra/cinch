@@ -5,17 +5,17 @@
 
 // Boost command-line options
 #if defined(ENABLE_BOOST)
-  #include <boost/program_options.hpp>
-  using namespace boost::program_options;
+#include <boost/program_options.hpp>
+using namespace boost::program_options;
 #endif
 
 // This define lets us use the same test driver for gtest and internal
 // devel tests.
 #if defined(CINCH_DEVEL_TARGET)
-  #include "cinchdevel.h"
+#include "cinchdevel.h"
 #else
-  #include <gtest/gtest.h>
-  #include "cinchtest.h"
+#include "cinchtest.h"
+#include <gtest/gtest.h>
 #endif
 
 //----------------------------------------------------------------------------//
@@ -23,10 +23,11 @@
 //----------------------------------------------------------------------------//
 
 #if defined(CINCH_DEVEL_TARGET)
-void print_devel_code_label(std::string name) {
+void
+print_devel_code_label(std::string name) {
   // Print some test information.
-  clog(info) <<
-    OUTPUT_LTGREEN("Executing development target " << name) << std::endl;
+  clog(info) << OUTPUT_LTGREEN("Executing development target " << name)
+             << std::endl;
 } // print_devel_code_label
 #endif
 
@@ -35,16 +36,20 @@ void print_devel_code_label(std::string name) {
 //----------------------------------------------------------------------------//
 
 #if defined(CINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER)
-  int driver_initialization(int argc, char ** argv);
+int driver_initialization(int argc, char ** argv);
 #else
-  inline int driver_initialization(int argc, char ** argv) { return 0; }
+inline int
+driver_initialization(int argc, char ** argv) {
+  return 0;
+}
 #endif
 
 //----------------------------------------------------------------------------//
 // Main
 //----------------------------------------------------------------------------//
 
-int main(int argc, char ** argv) {
+int
+main(int argc, char ** argv) {
 
 #if !defined(CINCH_DEVEL_TARGET)
   // Initialize the GTest runtime
@@ -58,20 +63,18 @@ int main(int argc, char ** argv) {
   options_description desc("Cinch test options");
 
   // Add command-line options
-  desc.add_options()
-    ("help,h", "Print this message and exit.")
-    ("tags,t", value(&tags)->implicit_value("0"),
-      "Enable the specified output tags, e.g., --tags=tag1,tag2."
-      " Passing --tags by itself will print the available tags.")
-    ;
+  desc.add_options()("help,h", "Print this message and exit.")("tags,t",
+    value(&tags)->implicit_value("0"),
+    "Enable the specified output tags, e.g., --tags=tag1,tag2."
+    " Passing --tags by itself will print the available tags.");
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
   notify(vm);
 
-if(vm.count("help")) {
-  std::cout << desc << std::endl;
-  return 1;
-} // if
+  if(vm.count("help")) {
+    std::cout << desc << std::endl;
+    return 1;
+  } // if
 #endif // ENABLE_BOOST
   int result(0);
 
@@ -79,7 +82,7 @@ if(vm.count("help")) {
     // Output the available tags
     std::cout << "Available tags (CLOG):" << std::endl;
 
-    for(auto t: clog_tag_map()) {
+    for(auto t : clog_tag_map()) {
       std::cout << "  " << t.first << std::endl;
     } // for
   }
@@ -98,7 +101,7 @@ if(vm.count("help")) {
     user_devel_code_logic();
 #else
     // Get GTest listeners
-    ::testing::TestEventListeners& listeners =
+    ::testing::TestEventListeners & listeners =
       ::testing::UnitTest::GetInstance()->listeners();
 
     // Adds a listener to the end.  Google Test takes the ownership.

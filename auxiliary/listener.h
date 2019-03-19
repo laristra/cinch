@@ -6,24 +6,21 @@
 #ifndef cinch_listener_h
 #define cinch_listener_h
 
-#include <gtest/gtest.h>
 #include "output.h"
+#include <gtest/gtest.h>
 
 namespace cinch {
 
 class listener : public ::testing::EmptyTestEventListener
 {
 public:
-
-  virtual void OnTestStart(const ::testing::TestInfo& test_info) {
+  virtual void OnTestStart(const ::testing::TestInfo & test_info) {
   } // OnTestStart
 
   virtual void OnTestPartResult(
-    const ::testing::TestPartResult& test_part_result) {
-  } // OnTestPartResult
+    const ::testing::TestPartResult & test_part_result) {} // OnTestPartResult
 
-  virtual void OnTestEnd(const ::testing::TestInfo& test_info) {
-  } // OnTestEnd
+  virtual void OnTestEnd(const ::testing::TestInfo & test_info) {} // OnTestEnd
 
 }; // class listener
 
