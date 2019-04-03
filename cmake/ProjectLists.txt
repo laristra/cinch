@@ -30,6 +30,7 @@ list(APPEND CMAKE_MODULE_PATH ${CINCH_SOURCE_DIR}/cmake)
 #------------------------------------------------------------------------------#
 
 include(common_includes)
+include(format)
 
 #------------------------------------------------------------------------------#
 # add some random includes for convinience
@@ -46,16 +47,16 @@ cinch_add_doxygen()
 cinch_add_sphinx()
 
 #------------------------------------------------------------------------------#
-# Include project configuration
-#------------------------------------------------------------------------------#
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
-
-#------------------------------------------------------------------------------#
 # Add support for Doxygen documentation
 #------------------------------------------------------------------------------#
 
 cinch_add_format()
+
+#------------------------------------------------------------------------------#
+# Include project configuration
+#------------------------------------------------------------------------------#
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
 #------------------------------------------------------------------------------#
 # Set output directories for targets
