@@ -78,13 +78,19 @@ struct runtime_t {
   std::string const & program() const { return program_; }
   std::string & program() { return program_; }
 
-  bool register_driver(std::function<int(int, char **)> const & driver) {
+#if defined(CINCH_ENABLE_BOOST)
+  using driver_function_t = std::function<int(int, char **, variables_map &)>;
+#else
+  using driver_function_t = std::function<int(int, char **)>;
+#endif
+
+  bool register_driver(driver_function_t const & driver) {
     cinch_function();
     driver_ = driver;
     return true;
   } // register_driver
 
-  std::function<int(int, char **)> const & driver() const {
+  driver_function_t const & driver() const {
     cinch_function();
     return driver_;
   } // driver
@@ -184,7 +190,7 @@ private:
   runtime_t & operator=(runtime_t &&) = delete;
 
   std::string program_;
-  std::function<int(int, char **)> driver_;
+  driver_function_t driver_;
   std::vector<runtime_handler_t> handlers_;
 
 }; // runtime_t

@@ -77,7 +77,11 @@ int main(int argc, char ** argv) {
   } // if
 
   // Invoke the primary callback
+#if defined(CINCH_ENABLE_BOOST)
+  int result = runtime_.driver()(argc, argv, vm);
+#else
   int result = runtime_.driver()(argc, argv);
+#endif
 
   // Invoke registered runtime finalizations
   if(runtime_.finalize_runtimes(argc, argv, exit_mode_t::success)) {
