@@ -30,7 +30,8 @@ int main(int argc, char ** argv) {
 
 #if defined(CINCH_ENABLE_BOOST)
   std::string program(argv[0]);
-  options_description desc(program.substr(program.rfind('/')+1).c_str());
+  program = "Basic Options (" + program.substr(program.rfind('/')+1) + ")";
+  options_description desc(program.c_str());
 
   // Add help option
   desc.add_options()("help,h", "Print this message and exit.");
