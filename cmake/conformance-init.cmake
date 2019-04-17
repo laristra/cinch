@@ -7,7 +7,7 @@
 # Set the default language standard for conformance tests
 #------------------------------------------------------------------------------#
 
-set(CXX_CONFORMANCE_STANDARD "c++14"
+set(CXX_CONFORMANCE_STANDARD "c++17"
     CACHE STRING "Set C++ standard (c++14,c++17, etc...)")
 
 #------------------------------------------------------------------------------#
