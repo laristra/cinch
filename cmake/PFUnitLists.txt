@@ -3,88 +3,90 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated)
-
-set(_PFUNIT ${CINCH_SOURCE_DIR}/pfunit)
-set(_PFUNIT_GENERATED_DIR ${CMAKE_BINARY_DIR}/pfunit/generated)
-
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE}
-        ${_PFUNIT}/source/GenerateAssertsOnArrays.py --maxRank 5
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated
-    RESULT_VARIABLE generated_result
-    OUTPUT_VARIABLE generated_output
-)
-
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE}
-        ${_PFUNIT}/source/GeneratedSources.py
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated
-    RESULT_VARIABLE generated_sources_result
-    OUTPUT_VARIABLE generated_sources_output
-)
-
-# We need to process the generated list to change the directory
-include(${_PFUNIT_GENERATED_DIR}/${generated_sources_output})
-set(_GENERATED_SOURCES)
-foreach(item ${srcs})
-    list(APPEND _GENERATED_SOURCES
-        ${CMAKE_BINARY_DIR}/pfunit/generated/${item})
-endforeach()
-
-add_library(pfunit
-    ${_GENERATED_SOURCES}
-    ${_PFUNIT}/source/AbstractTestParameter.F90
-    ${_PFUNIT}/source/AbstractTestResult.F90
-    ${_PFUNIT}/source/AssertBasic.F90
-    ${_PFUNIT}/source/Assert.F90
-    ${_PFUNIT}/source/BaseTestRunner.F90
-    ${_PFUNIT}/source/DebugListener.F90
-    ${_PFUNIT}/source/DynamicTestCase.F90
-    ${_PFUNIT}/source/Exception.F90
-    ${_PFUNIT}/source/Expectation.F90
-    ${_PFUNIT}/source/MockCall.F90
-    ${_PFUNIT}/source/Mock.F90
-    ${_PFUNIT}/source/MockRepository.F90
-    ${_PFUNIT}/source/ParallelContext.F90
-    ${_PFUNIT}/source/ParallelException.F90
-    ${_PFUNIT}/source/ParameterizedTestCase.F90
-    ${_PFUNIT}/source/Params.F90
-    ${_PFUNIT}/source/pFUnit.F90
-    ${_PFUNIT}/source/pFUnitPackage.F90
-    ${_PFUNIT}/source/RemoteProxyTestCase.F90
-    ${_PFUNIT}/source/ResultPrinter.F90
-    ${_PFUNIT}/source/RobustRunner.F90
-    ${_PFUNIT}/source/SerialContext.F90
-    ${_PFUNIT}/source/SourceLocation.F90
-    ${_PFUNIT}/source/StringConversionUtilities.F90
-    ${_PFUNIT}/source/SubsetRunner.F90
-    ${_PFUNIT}/source/SurrogateTestCase.F90
-    ${_PFUNIT}/source/TestCase.F90
-    ${_PFUNIT}/source/Test.F90
-    ${_PFUNIT}/source/TestFailure.F90
-    ${_PFUNIT}/source/TestListener.F90
-    ${_PFUNIT}/source/TestMethod.F90
-    ${_PFUNIT}/source/TestResult.F90
-    ${_PFUNIT}/source/TestRunner.F90
-    ${_PFUNIT}/source/TestSuite.F90
-    ${_PFUNIT}/source/ThrowFundamentalTypes.F90
-    ${_PFUNIT}/source/UnixPipeInterfaces.F90
-    ${_PFUNIT}/source/UnixProcess.F90
-    ${_PFUNIT}/source/XmlPrinter.F90
-)
-
-set(PFUNIT_DEFINES)
-list(APPEND PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
-list(APPEND PFUNIT_DEFINES BUILD_ROBUST)
-
-set_target_properties(pfunit PROPERTIES COMPILE_DEFINITIONS
-    "${PFUNIT_DEFINES}")
-set_target_properties(pfunit PROPERTIES COMPILE_FLAGS -UDEBUG)
-set_target_properties(pfunit
-    PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/lib)
-set_target_properties(pfunit
-    PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated)
+if ( NOT TARGET pfunit ) 
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated)
+  
+  set(_PFUNIT ${CINCH_SOURCE_DIR}/pfunit)
+  set(_PFUNIT_GENERATED_DIR ${CMAKE_BINARY_DIR}/pfunit/generated)
+  
+  execute_process(
+      COMMAND ${PYTHON_EXECUTABLE}
+          ${_PFUNIT}/source/GenerateAssertsOnArrays.py --maxRank 5
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated
+      RESULT_VARIABLE generated_result
+      OUTPUT_VARIABLE generated_output
+  )
+  
+  execute_process(
+      COMMAND ${PYTHON_EXECUTABLE}
+          ${_PFUNIT}/source/GeneratedSources.py
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated
+      RESULT_VARIABLE generated_sources_result
+      OUTPUT_VARIABLE generated_sources_output
+  )
+  
+  # We need to process the generated list to change the directory
+  include(${_PFUNIT_GENERATED_DIR}/${generated_sources_output})
+  set(_GENERATED_SOURCES)
+  foreach(item ${srcs})
+      list(APPEND _GENERATED_SOURCES
+          ${CMAKE_BINARY_DIR}/pfunit/generated/${item})
+  endforeach()
+  
+  add_library(pfunit
+      ${_GENERATED_SOURCES}
+      ${_PFUNIT}/source/AbstractTestParameter.F90
+      ${_PFUNIT}/source/AbstractTestResult.F90
+      ${_PFUNIT}/source/AssertBasic.F90
+      ${_PFUNIT}/source/Assert.F90
+      ${_PFUNIT}/source/BaseTestRunner.F90
+      ${_PFUNIT}/source/DebugListener.F90
+      ${_PFUNIT}/source/DynamicTestCase.F90
+      ${_PFUNIT}/source/Exception.F90
+      ${_PFUNIT}/source/Expectation.F90
+      ${_PFUNIT}/source/MockCall.F90
+      ${_PFUNIT}/source/Mock.F90
+      ${_PFUNIT}/source/MockRepository.F90
+      ${_PFUNIT}/source/ParallelContext.F90
+      ${_PFUNIT}/source/ParallelException.F90
+      ${_PFUNIT}/source/ParameterizedTestCase.F90
+      ${_PFUNIT}/source/Params.F90
+      ${_PFUNIT}/source/pFUnit.F90
+      ${_PFUNIT}/source/pFUnitPackage.F90
+      ${_PFUNIT}/source/RemoteProxyTestCase.F90
+      ${_PFUNIT}/source/ResultPrinter.F90
+      ${_PFUNIT}/source/RobustRunner.F90
+      ${_PFUNIT}/source/SerialContext.F90
+      ${_PFUNIT}/source/SourceLocation.F90
+      ${_PFUNIT}/source/StringConversionUtilities.F90
+      ${_PFUNIT}/source/SubsetRunner.F90
+      ${_PFUNIT}/source/SurrogateTestCase.F90
+      ${_PFUNIT}/source/TestCase.F90
+      ${_PFUNIT}/source/Test.F90
+      ${_PFUNIT}/source/TestFailure.F90
+      ${_PFUNIT}/source/TestListener.F90
+      ${_PFUNIT}/source/TestMethod.F90
+      ${_PFUNIT}/source/TestResult.F90
+      ${_PFUNIT}/source/TestRunner.F90
+      ${_PFUNIT}/source/TestSuite.F90
+      ${_PFUNIT}/source/ThrowFundamentalTypes.F90
+      ${_PFUNIT}/source/UnixPipeInterfaces.F90
+      ${_PFUNIT}/source/UnixProcess.F90
+      ${_PFUNIT}/source/XmlPrinter.F90
+  )
+  
+  set(PFUNIT_DEFINES)
+  list(APPEND PFUNIT_DEFINES ${CMAKE_Fortran_COMPILER_ID})
+  list(APPEND PFUNIT_DEFINES BUILD_ROBUST)
+  
+  set_target_properties(pfunit PROPERTIES COMPILE_DEFINITIONS
+      "${PFUNIT_DEFINES}")
+  set_target_properties(pfunit PROPERTIES COMPILE_FLAGS -UDEBUG)
+  set_target_properties(pfunit
+      PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/lib)
+  set_target_properties(pfunit
+      PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/pfunit/generated)
+endif () # NOT TARGET pfunit
 
 set(PFUNIT_LIBRARY pfunit)
 
