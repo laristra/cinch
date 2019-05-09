@@ -10,7 +10,11 @@ include(FindPackageHandleStandardArgs)
 #------------------------------------------------------------------------------#
 
 if (NOT LLVM_FOUND)
-  find_package(LLVM ${Clang_FIND_VERSION})
+  if ( Clang_FIND_VERSION )
+    find_package(LLVM ${Clang_FIND_VERSION} REQUIRED)
+  else()
+    find_package(LLVM ${Clang_FIND_VERSION})
+  endif()
 endif()
 
 #------------------------------------------------------------------------------#
@@ -56,6 +60,15 @@ find_path(CLANG_INCLUDE_DIR clang/Basic/Version.h
     PATH_SUFFIXES include
 )
 
+# i think below is more likely to succeed
+if (NOT CLANG_INCLUDE_DIR AND LLVM_INCLUDE_DIRS)
+  find_path(CLANG_INCLUDE_DIR Version.h
+    HINTS ${LLVM_INCLUDE_DIRS}
+    PATH_SUFFIXES clang/Basic
+  )
+endif()
+
+
 mark_as_advanced(CLANG_INCLUDE_DIR)
 
 #------------------------------------------------------------------------------#
@@ -70,6 +83,13 @@ foreach(_lib ${Clang_FIND_COMPONENTS})
         HINTS ${_clang_base_dir}
         PATH_SUFFIXES lib lib64
     )
+
+    # again, i think this is more likely to succeed
+    if (NOT _clang_${_lib} AND LLVM_LIBRARY_DIRS)
+       find_library(_clang_${_lib} clang${_lib}
+         HINTS ${LLVM_LIBRARY_DIRS}
+       )
+    endif()
 
     if(_clang_${_lib})
         list(APPEND CLANG_LIBRARIES ${_clang_${_lib}})
