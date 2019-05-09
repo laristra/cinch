@@ -43,6 +43,10 @@ find_program(LLVM_CONFIG
     DOC "Path to llvm-config tool.")
 find_program(LLVM_CONFIG NAMES ${llvm_config_names})
 
+if(NOT LLVM_FIND_VERSION)
+  set(LLVM_FIND_VERSION 0)
+endif(NOT LLVM_FIND_VERSION)
+
 # Prints a warning/failure message depending on the required/quiet flags. Copied
 # from FindPackageHandleStandardArgs.cmake because it doesn't seem to be exposed.
 macro(_LLVM_FAIL _msg)

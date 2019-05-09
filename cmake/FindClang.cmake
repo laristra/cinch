@@ -56,7 +56,7 @@ get_filename_component(_clang_base_dir "${_clang_base_dir}" PATH)
 #------------------------------------------------------------------------------#
 
 find_path(CLANG_INCLUDE_DIR clang/Basic/Version.h
-    HINTS ${_clang_base_dir}
+    HINTS ${_clang_base_dir} ${LLVM_INCLUDE_DIRS}
     PATH_SUFFIXES include
 )
 
@@ -80,7 +80,7 @@ set(CLANG_LIBRARIES)
 foreach(_lib ${Clang_FIND_COMPONENTS})
 
     find_library(_clang_${_lib} clang${_lib}
-        HINTS ${_clang_base_dir}
+        HINTS ${_clang_base_dir} ${LLVM_LIBRARY_DIRS}
         PATH_SUFFIXES lib lib64
     )
 
@@ -107,7 +107,7 @@ mark_as_advanced(CLANG_INCLUDE_DIRS)
 # Standard argument handling.
 #------------------------------------------------------------------------------#
 
-find_package_handle_standard_args(clang
+find_package_handle_standard_args(Clang
     REQUIRED_VARS
         CLANG_EXEC
         CLANGXX_EXEC
