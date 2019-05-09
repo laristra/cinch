@@ -4,12 +4,23 @@
 
 include(FindPackageHandleStandardArgs)
 
+
+#------------------------------------------------------------------------------#
+# Look for LLVM first
+#------------------------------------------------------------------------------#
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM ${Clang_FIND_VERSION})
+endif()
+
 #------------------------------------------------------------------------------#
 # Look for executables (clang & clang++).
 #------------------------------------------------------------------------------#
+set(clang_names clang-7 clang-6 clang-5 clang-4 clang-3 clang)
+set(clangpp_names clang++-7 clang++-6 clang++-5 clang++-4 clang++-3 clang++)
 
-find_program(CLANG_EXEC NAMES "clang" PATH_SUFFIXES bin)
-find_program(CLANGXX_EXEC NAMES "clang++" PATH_SUFFIXES bin)
+find_program(CLANG_EXEC NAMES ${clang_names} PATH_SUFFIXES bin)
+find_program(CLANGXX_EXEC NAMES ${clangpp_names} PATH_SUFFIXES bin)
 
 mark_as_advanced(CLANG_EXEC CLANGXX_EXEC)
 
@@ -65,8 +76,12 @@ foreach(_lib ${Clang_FIND_COMPONENTS})
     endif(_clang_${_lib})
 
 endforeach(_lib ${Clang_FIND_COMPONENTS})
+        
+list(APPEND CLANG_LIBRARIES ${LLVM_LIBRARIES})
+set(CLANG_INCLUDE_DIRS ${CLANG_INCLUDE_DIR} ${LLVM_INCLUDE_DIRS})
 
 mark_as_advanced(CLANG_LIBRARIES)
+mark_as_advanced(CLANG_INCLUDE_DIRS)
 
 #------------------------------------------------------------------------------#
 # Standard argument handling.
@@ -77,6 +92,7 @@ find_package_handle_standard_args(clang
         CLANG_EXEC
         CLANGXX_EXEC
         CLANG_INCLUDE_DIR
+        CLANG_INCLUDE_DIRS
         CLANG_LIBRARIES
     VERSION_VAR
         CLANG_VERSION
