@@ -64,7 +64,7 @@
     endif()
 
     if (HPX_FOUND AND test_POLICY STREQUAL "HPX")
-        hpx_setup_target(${name} NOPREFIX)
+        hpx_setup_target(${name} NOPREFIX NOTLLKEYWORD)
     endif()
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
