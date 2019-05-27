@@ -11,6 +11,7 @@ if(ENABLE_BOOST)
     atomic
     filesystem
     regex
+    serialization
     system
     QUIET)
 
