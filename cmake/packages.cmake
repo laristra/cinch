@@ -12,6 +12,7 @@ macro(cinch_load_extras)
     "${multiValueArgs}" ${ARGN} )
 
   include(boost)
+  include(kokkos)
   include(coverage)
   include(doxygen)
   include(sphinx)
