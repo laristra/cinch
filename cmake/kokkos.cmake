@@ -11,11 +11,10 @@ if(ENABLE_KOKKOS)
     message(FATAL_ERROR "Clang version 8 or greater required for Kokkos")
   endif()
 
-  find_package(Kokkos)
+  find_package(Kokkos REQUIRED)
 
-  include_directories(${Kokkos_INCLUDE_DIRS})
-  link_directories(${Kokkos_LIBRARY_DIRS})
+  include_directories(${KOKKOS_INCLUDE_DIR})
+  link_directories(${KOKKOS_LIBRARY_DIRS})
 
-  # Note that it would be nice to have a Kokkos_LIBRARIES variable
   list(APPEND CINCH_RUNTIME_LIBRARIES ${KOKKOS_CORE_LIBRARY})
 endif()
