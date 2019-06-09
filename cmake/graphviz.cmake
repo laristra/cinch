@@ -19,7 +19,6 @@ if(ENABLE_GRAPHVIZ)
     message(STATUS "Found Graphviz: ${Graphviz_INCLUDE_DIRS}")
 
     include_directories(${Graphviz_INCLUDE_DIRS})
-    add_definitions(-DENABLE_GRAPHVIZ)
     list(APPEND CINCH_RUNTIME_LIBRARIES ${Graphviz_LIBRARIES})
 endif(ENABLE_GRAPHVIZ)
 
