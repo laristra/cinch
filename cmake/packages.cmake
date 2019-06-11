@@ -18,6 +18,8 @@ macro(cinch_load_extras)
   include(sphinx)
   include(format)
 
+  include(hdf5)
+
   if(opt_in_LEGION)
     include(legion)
   endif()
