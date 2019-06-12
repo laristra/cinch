@@ -6,6 +6,8 @@ option(ENABLE_BOOST "Enable Boost" OFF)
 
 if(ENABLE_BOOST)
 
+  set(Boost_NO_BOOST_CMAKE ON)
+
   find_package(Boost REQUIRED 
     program_options
     atomic
