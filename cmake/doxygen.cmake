@@ -3,7 +3,7 @@
 # All rights reserved.
 #------------------------------------------------------------------------------#
 
-function(cinch_add_doxygen)
+function(cinch_add_doxygen_option)
 
     #--------------------------------------------------------------------------#
     # Add option to enable doxygen
@@ -12,6 +12,10 @@ function(cinch_add_doxygen)
     option(ENABLE_DOXYGEN "Enable Doxygen documentation" OFF)
     option(ENABLE_DOXYGEN_WARN "Enable Doxygen warnings" OFF)
     mark_as_advanced(ENABLE_DOXYGEN_WARN)
+
+endfunction()
+
+function(cinch_add_doxygen)
 
     if(ENABLE_DOXYGEN)
 
@@ -39,7 +43,7 @@ function(cinch_add_doxygen)
         if(CINCH_CONFIG_INFOTAG)
             if(NOT EXISTS ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
                 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
-            endif(NOT EXISTS ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
+            endif()
 
             set(_directory ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
 
@@ -89,7 +93,7 @@ function(cinch_add_doxygen)
             #------------------------------------------------------------------#
 
             set(_install ${CMAKE_PROJECT_NAME})
-        endif(CINCH_CONFIG_INFOTAG)
+        endif()
 
         #----------------------------------------------------------------------#
         # Create directory for intermediate files
@@ -97,7 +101,7 @@ function(cinch_add_doxygen)
 
         if(NOT EXISTS ${_directory}/.doxygen)
             file(MAKE_DIRECTORY ${_directory}/.doxygen)
-        endif(NOT EXISTS ${_directory}/.doxygen)
+        endif()
 
         #----------------------------------------------------------------------#
         # Generate doxygen configuration file
@@ -107,7 +111,7 @@ function(cinch_add_doxygen)
             set(DOXYGEN_WARN YES)
         else()
             set(DOXYGEN_WARN NO)
-        endif(ENABLE_DOXYGEN_WARN)
+        endif()
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen.conf.in
             ${_directory}/.doxygen/doxygen.conf)
@@ -128,9 +132,9 @@ function(cinch_add_doxygen)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${_directory}/doxygen
                 $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
 
-    endif(ENABLE_DOXYGEN)
+    endif()
 
-endfunction(cinch_add_doxygen)
+endfunction()
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.

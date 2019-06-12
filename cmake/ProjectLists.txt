@@ -46,13 +46,20 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 cinch_add_format()
 
 #------------------------------------------------------------------------------#
+# Add options for Doxygen & Sphinx documentation
+#------------------------------------------------------------------------------#
+
+cinch_add_doxygen_option()
+cinch_add_sphinx_option()
+
+#------------------------------------------------------------------------------#
 # Include project configuration
 #------------------------------------------------------------------------------#
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config/project.cmake)
 
 #------------------------------------------------------------------------------#
-# Add support for Doxygen documentation
+# Add support for Doxygen & Sphinx documentation
 #------------------------------------------------------------------------------#
 
 cinch_add_doxygen()
