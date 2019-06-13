@@ -8,7 +8,7 @@ include_directories(${CINCH_SOURCE_DIR}/logging)
 # Install cinch logging utility
 #--------------------------------------------------------------------------#
 
-install(FILES ${CMAKE_SOURCE_DIR}/cinch/logging/cinchlog.h
+install(FILES ${CINCH_SOURCE_DIR}/logging/cinchlog.h
     DESTINATION include)
 
 option(ENABLE_CLOG "Enable Cinch logging" OFF)
