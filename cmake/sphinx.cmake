@@ -5,13 +5,17 @@
 
 include(copy_directory)
 
-function(cinch_add_sphinx)
+function(cinch_add_sphinx_option)
 
     #--------------------------------------------------------------------------#
     # Add option to enable Sphinx
     #--------------------------------------------------------------------------#
 
     option(ENABLE_SPHINX "Enable Sphinx documentation" OFF)
+
+endfunction()
+
+function(cinch_add_sphinx)
 
     if(ENABLE_SPHINX)
 
@@ -45,7 +49,7 @@ function(cinch_add_sphinx)
 
             if(NOT EXISTS ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
                 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
-            endif(NOT EXISTS ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
+            endif()
 
             set(_directory ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME})
 
@@ -155,9 +159,9 @@ function(cinch_add_sphinx)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${_directory}/sphinx
             $ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/share/${_install})
 
-    endif(ENABLE_SPHINX)
+    endif()
 
-endfunction(cinch_add_sphinx)
+endfunction()
 
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
