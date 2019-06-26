@@ -249,7 +249,7 @@ string(REGEX REPLACE "([0-9]+).*" "\\1" LLVM_VERSION_MAJOR "${LLVM_VERSION_STRIN
 string(REGEX REPLACE "[0-9]+\\.([0-9]+).*[A-Za-z]*" "\\1" LLVM_VERSION_MINOR "${LLVM_VERSION_STRING}" )
 
 if (LLVM_FIND_VERSION)
-  if (${LLVM_VERSION_STRING} VERSION_LESS ${LLVM_FIND_VERSION})
+  if ("${LLVM_VERSION_STRING}" VERSION_LESS ${LLVM_FIND_VERSION})
     message(FATAL_ERROR "Unsupported LLVM version found ${LLVM_VERSION_STRING}. At least version ${LLVM_FIND_VERSION} is required.")
   endif()
 endif()
