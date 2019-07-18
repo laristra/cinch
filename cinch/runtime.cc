@@ -46,23 +46,6 @@ int main(int argc, char ** argv) {
 
   notify(vm);
 
-  // Gather the unregistered options, if there are any, print a help message
-  // and die nicely.
-  std::vector<std::string> unrecog_options =
-    collect_unrecognized(parsed.options, include_positional);
-
-  if(unrecog_options.size()) {
-    std::cout << std::endl << "Unrecognized options: ";
-    for ( int i=0; i<unrecog_options.size(); ++i ) {
-      std::cout << unrecog_options[i] << " ";
-    }
-    std::cout << std::endl << std::endl << desc << std::endl;
-  } // if
-
-  if(vm.count("help")) {
-    std::cout << desc << std::endl;
-    return 1;
-  } // if
 #endif
 
   // Invoke registered runtime initializations
@@ -76,6 +59,35 @@ int main(int argc, char ** argv) {
     runtime_.finalize_runtimes(argc, argv, exit_mode_t::option_exit);
     return 1;
   } // if
+
+#if defined(CINCH_ENABLE_BOOST)
+  // Gather the unregistered options, if there are any, print a help message
+  // and die nicely.
+  std::vector<std::string> unrecog_options =
+    collect_unrecognized(parsed.options, include_positional);
+
+  if(unrecog_options.size()) {
+    if(runtime_.join_output()) {
+      std::cout << std::endl << "Unrecognized options: ";
+      for(size_t i=0; i<unrecog_options.size(); ++i) {
+        std::cout << unrecog_options[i] << " ";
+      }
+      std::cout << std::endl << std::endl << desc << std::endl;
+    } // if
+
+    // runtime_.unrecognized_option(argc, argv, ...); 
+    return 1;
+  } // if
+
+  if(vm.count("help")) {
+    if(runtime_.join_output()) {
+      std::cout << desc << std::endl;
+    } // if
+
+    runtime_.finalize_runtimes(argc, argv, exit_mode_t::help);
+    return 1;
+  } // if
+#endif
 
   // Invoke the primary callback
 #if defined(CINCH_ENABLE_BOOST)

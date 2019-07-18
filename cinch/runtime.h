@@ -41,11 +41,12 @@ namespace cinch {
 enum exit_mode_t : size_t {
   success,
   unrecognized_option,
+  help,
   option_exit
 }; // enum exit_mode_t
 
 /*!
-  Type to define runtime initialization and finalization handlers.
+  Type to define runtime handlers.
  */
 
 struct runtime_handler_t {
@@ -84,6 +85,8 @@ struct runtime_t {
   using driver_function_t = std::function<int(int, char **)>;
 #endif
 
+  using output_function_t = std::function<bool()>;
+
   bool register_driver(driver_function_t const & driver) {
     cinch_function();
     driver_ = driver;
@@ -94,6 +97,24 @@ struct runtime_t {
     cinch_function();
     return driver_;
   } // driver
+
+  bool register_output_driver(output_function_t const & output_driver) {
+    cinch_function();
+    output_driver_ = output_driver;
+    return true;
+  } // register_output_driver
+
+  /*!
+    Invoke the registered output driver to determine if the underlying
+    process should participate in I/O operations.
+
+    This fuction is mostly useful for limiting output to a single process
+    for help messages.
+   */
+
+  bool join_output() {
+    return output_driver_();
+  } // join_output
 
   /*!
     Append the given runtime handler to the vector of handlers. Handlers
@@ -191,6 +212,7 @@ private:
 
   std::string program_;
   driver_function_t driver_;
+  output_function_t output_driver_ = {};
   std::vector<runtime_handler_t> handlers_;
 
 }; // runtime_t
@@ -203,7 +225,7 @@ private:
   Register the primary runtime driver function.
 
   @param driver The primary driver with a 'int(int, char **)' signature
-                that should be invoked by the FleCSI runtime.
+                that should be invoked by the Cinch runtime.
  */
 
 #define cinch_register_runtime_driver(driver)                                  \
@@ -211,6 +233,23 @@ private:
                                                                                \
   inline bool cinch_registered_driver_##driver =                               \
     cinch::runtime_t::instance().register_driver(driver)
+
+/*!
+  @def cinch_register_output_driver(driver)
+
+  Register a function to specify which processes should participate in
+  I/O operations.
+
+  @param driver The output driver with a 'bool()' signature
+                that should be invoked by the Cinch runtime to determine
+                which processes should join output operations.
+ */
+
+#define cinch_register_output_driver(driver)                                   \
+  /* MACRO IMPLEMENTATION */                                                   \
+                                                                               \
+  inline bool cinch_registered_output_driver_##driver =                        \
+    cinch::runtime_t::instance().register_output_driver(driver)
 
 /*!
   @def cinch_register_runtime_handler(handler)
