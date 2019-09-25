@@ -24,11 +24,9 @@ if(NOT CMAKE_BUILD_TYPE)
         "CMake build type <Debug|Release|RelWithDebInfo|MinSizeRel>" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_definitions(-DDEBUG)
-endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 #------------------------------------------------------------------------------#
 # Print useful information
