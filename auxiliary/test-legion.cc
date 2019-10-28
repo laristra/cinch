@@ -26,6 +26,10 @@ using namespace boost::program_options;
 #include <gtest/gtest.h>
 #endif
 
+#if defined (ENABLE_KOKKOS)
+#include <Kokkos_Core.hpp>
+#endif
+
 //----------------------------------------------------------------------------//
 // Allow extra initialization steps to be added by the user.
 //----------------------------------------------------------------------------//
@@ -112,6 +116,10 @@ main(int argc, char ** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 #endif
 
+#if defined (ENABLE_KOKKOS)
+  Kokkos::initialize(argc, argv);
+#endif
+
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
 
@@ -177,6 +185,10 @@ main(int argc, char ** argv) {
     result = RUN_ALL_TESTS();
 #endif
   } // if
+
+#if defined (ENABLE_KOKKOS)
+  Kokkos::finalize();
+#endif
 
   return result;
 } // main
