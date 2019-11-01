@@ -55,6 +55,12 @@
         target_link_libraries(${name} ${Boost_LIBRARIES})
     endif()
 
+    if (ENABLE_KOKKOS)
+      target_compile_definitions(${name} PRIVATE
+            ENABLE_KOKKOS)
+      target_link_libraries(${name} ${Kokkos_LIBRARIES})
+    endif()
+
     if(test_policy_libraries)
         target_link_libraries(${name} ${test_policy_libraries})
     endif()

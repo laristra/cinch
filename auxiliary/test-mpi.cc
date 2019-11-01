@@ -22,6 +22,10 @@ using namespace boost::program_options;
 #include <gtest/gtest.h>
 #endif
 
+#if defined (ENABLE_KOKKOS)
+#include <Kokkos_Core.hpp>
+#endif
+
 //----------------------------------------------------------------------------//
 // Allow extra initialization steps to be added by the user.
 //----------------------------------------------------------------------------//
@@ -98,6 +102,10 @@ main(int argc, char ** argv) {
   // Initialize tags to output all tag groups from CLOG
   std::string tags("all");
 
+#if defined (ENABLE_KOKKOS)
+  Kokkos::initialize(argc, argv);
+#endif
+
 #if defined(ENABLE_BOOST)
   options_description desc("Cinch test options");
 
@@ -168,6 +176,10 @@ main(int argc, char ** argv) {
     result = RUN_ALL_TESTS();
 #endif
   } // if
+
+#if defined (ENABLE_KOKKOS)
+  Kokkos::finalize();
+#endif
 
   // Shutdown the MPI runtime
   MPI_Finalize();

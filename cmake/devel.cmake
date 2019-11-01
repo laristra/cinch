@@ -46,6 +46,16 @@ function(cinch_add_devel_target name)
     target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
 
     #--------------------------------------------------------------------------#
+    # Kokkos
+    #--------------------------------------------------------------------------#
+
+    if (ENABLE_KOKKOS)
+      cinch_target_link_libraries(
+        ${name} ${Kokkos_LIBRARIES}
+      )
+    endif()
+
+    #--------------------------------------------------------------------------#
     # Set test properties.
     #--------------------------------------------------------------------------#
 
