@@ -137,7 +137,7 @@ function(cinch_target_link_libraries target)
         if ( ${_type} STREQUAL "INTERFACE_LIBRARY")
             target_link_libraries( ${target} INTERFACE ${ARGN} )
         else()
-            target_link_libraries( ${target} ${ARGN} )
+            target_link_libraries( ${target} INTERFACE  ${ARGN} )
         endif()
     endif()
 
