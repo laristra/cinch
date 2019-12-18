@@ -9,7 +9,7 @@
 
 
 # We are c++17, which is a cmake-3.9 feature
-set(CINCH_REQUIRED_CMAKE_VERSION 3.9)
+set(CINCH_REQUIRED_CMAKE_VERSION 3.12.4)
 
 
 cmake_minimum_required(VERSION ${CINCH_REQUIRED_CMAKE_VERSION})
