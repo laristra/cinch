@@ -63,7 +63,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost 1.59.0 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Threads)
@@ -74,7 +74,7 @@ add_executable(clog_test clog_test.cc)
 
 add_definitions(-DENABLE_CLOG)
 
-target_link_libraries(clog_test ${Boost_LIBRARIES})
+target_link_libraries(clog_test  Boost::boost Boost::program_options)
 target_link_libraries(clog_test ${CMAKE_THREAD_LIBS_INIT})
 if(CLOG_ENABLE_MPI)
     target_link_libraries(clog_test ${MPI_LIBRARIES})
