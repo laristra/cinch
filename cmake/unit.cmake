@@ -78,7 +78,7 @@ if(ENABLE_UNIT_TESTS)
     endif(FORTRAN_ENABLED EQUAL -1)
 
     if(FORTRAN_ENABLED)
-        find_package(PythonInterp QUIET)
+        find_package(Python COMPONENTS Interpreter QUIET)
         find_package(pFUnit QUIET)
 
         if(NOT PFUNIT_FOUND)
@@ -321,7 +321,7 @@ function(cinch_add_unit name)
             if("${_EXT}" STREQUAL ".pf")
                 get_filename_component(_BASE ${source} NAME_WE)
                 add_custom_command(OUTPUT ${_OUTPUT_DIR}/${_BASE}.F90
-                    COMMAND ${PYTHON_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
+                    COMMAND ${Python_EXECUTABLE} ${PFUNIT_PARSER} ${_PATH}
                     ${_OUTPUT_DIR}/${_BASE}.F90
                     DEPENDS ${source}
                     COMMENT

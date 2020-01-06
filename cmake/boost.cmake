@@ -26,7 +26,7 @@ endif()
 
 if(ENABLE_BOOST)
 
-    find_package(Boost  REQUIRED 
+    find_package(Boost 1.59.0 REQUIRED 
       program_options
       atomic
       filesystem
@@ -39,7 +39,7 @@ if(ENABLE_BOOST)
     #FIXME rmove add_definition below after we replace 
     # ENABLE_BOOST_PROGRAM_OPTIONS with ENABLE_BOOST in FleCSI
     add_definitions(-DENABLE_BOOST_PROGRAM_OPTIONS)
-    list(APPEND CINCH_RUNTIME_LIBRARIES ${Boost_LIBRARIES})
+    list(APPEND CINCH_RUNTIME_LIBRARIES Boost::boost Boost::program_options Boost::atomic Boost::filesystem Boost::regex Boost::system)
 
 endif()
 

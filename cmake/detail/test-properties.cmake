@@ -48,11 +48,11 @@
     #--------------------------------------------------------------------------#
 
     if(ENABLE_BOOST)
-        find_package(Boost COMPONENTS program_options REQUIRED QUIET)
+        find_package(Boost 1.59.0 COMPONENTS program_options REQUIRED QUIET)
         target_include_directories(${name} PRIVATE ${Boost_INCLUDE_DIRS})
         target_compile_definitions(${name} PRIVATE
             ENABLE_BOOST)
-        target_link_libraries(${name} ${Boost_LIBRARIES})
+        target_link_libraries(${name} Boost::boost Boost::program_options)
     endif()
 
     if (ENABLE_KOKKOS)
