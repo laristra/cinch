@@ -7,7 +7,7 @@
 # Require some version of cmake
 #------------------------------------------------------------------------------#
 
-cmake_minimum_required(VERSION 3.12.4)
+cmake_minimum_required(VERSION 3.12)
 
 option(ENABLE_CLOG "Enable Cinch logging" OFF)
 if(ENABLE_CLOG)
