@@ -13,6 +13,7 @@ if(ENABLE_KOKKOS)
     message(FATAL_ERROR "Clang version 8 or greater required for Kokkos")
   endif()
 
+  set(Kokkos_LIBRARIES Kokkos::kokkos)
   list(APPEND CINCH_RUNTIME_LIBRARIES ${Kokkos_LIBRARIES})
 
 endif()

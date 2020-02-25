@@ -52,21 +52,21 @@
         target_include_directories(${name} PRIVATE ${Boost_INCLUDE_DIRS})
         target_compile_definitions(${name} PRIVATE
             ENABLE_BOOST)
-        target_link_libraries(${name} Boost::boost Boost::program_options)
+        target_link_libraries(${name} PUBLIC Boost::boost Boost::program_options)
     endif()
 
     if (ENABLE_KOKKOS)
       target_compile_definitions(${name} PRIVATE
             ENABLE_KOKKOS)
-      target_link_libraries(${name} ${Kokkos_LIBRARIES})
+        target_link_libraries(${name} PUBLIC ${Kokkos_LIBRARIES})
     endif()
 
     if(test_policy_libraries)
-        target_link_libraries(${name} ${test_policy_libraries})
+        target_link_libraries(${name} PUBLIC ${test_policy_libraries})
     endif()
 
     if(test_LIBRARIES)
-        target_link_libraries(${name} ${test_LIBRARIES})
+        target_link_libraries(${name} PUBLIC ${test_LIBRARIES})
     endif()
 
     if (HPX_FOUND AND test_POLICY STREQUAL "HPX")
