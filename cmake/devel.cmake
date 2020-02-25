@@ -43,16 +43,14 @@ function(cinch_add_devel_target name)
     # CLOG has pthread dependency
     #--------------------------------------------------------------------------#
 
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(${name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
     #--------------------------------------------------------------------------#
     # Kokkos
     #--------------------------------------------------------------------------#
 
     if (ENABLE_KOKKOS)
-      cinch_target_link_libraries(
-        ${name} ${Kokkos_LIBRARIES}
-      )
+        target_link_libraries(${name} PUBLIC ${Kokkos_LIBRARIES})
     endif()
 
     #--------------------------------------------------------------------------#
