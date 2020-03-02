@@ -1,74 +1,31 @@
 #------------------------------------------------------------------------------#
-# Copyright (c) 2014 Los Alamos National Security, LLC
-# All rights reserved.
+#  @@@@@@@@  @@           @@@@@@   @@@@@@@@ @@
+# /@@/////  /@@          @@////@@ @@////// /@@
+# /@@       /@@  @@@@@  @@    // /@@       /@@
+# /@@@@@@@  /@@ @@///@@/@@       /@@@@@@@@@/@@
+# /@@////   /@@/@@@@@@@/@@       ////////@@/@@
+# /@@       /@@/@@//// //@@    @@       /@@/@@
+# /@@       @@@//@@@@@@ //@@@@@@  @@@@@@@@ /@@
+# //       ///  //////   //////  ////////  //
+#
+# Copyright (c) 2016 Los Alamos National Laboratory, LLC
+# All rights reserved
 #------------------------------------------------------------------------------#
 
-# This function creates a sequential version number using a call to
-# 'git describe master'
+execute_process(COMMAND ${CMAKE_SOURCE_DIR}/VERSION
+  OUTPUT_VARIABLE version_output)
+string(REGEX REPLACE "\n$" "" version "${version_output}")
 
-set(VERSION_CREATION "git describe" CACHE STRING "Set a static version")
+string(REPLACE " " ";" fields ${version_output})
 
-if(NOT "${VERSION_CREATION}" STREQUAL "git describe")
-    set(${PROJECT_NAME}_VERSION ${VERSION_CREATION})
-else()
-
-    #--------------------------------------------------------------------------#
-    # Make sure that git is available
-    #--------------------------------------------------------------------------#
-
-    find_package(Git)
-
-    if(NOT GIT_FOUND)
-        message(WARNING "Git not found, using dummy version dummy-0.0.0")
-        set(_version "dummy-0.0.0")
-    else()
-
-        #----------------------------------------------------------------------#
-        # Call 'git describe'
-        #----------------------------------------------------------------------#
-
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 HEAD
-        OUTPUT_VARIABLE _version
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    endif()
-
-    #--------------------------------------------------------------------------#
-    # If 'git describe' failed somehow, create a dummy
-    #--------------------------------------------------------------------------#
-
-    if(NOT _version)
-        message(WARNING "Git describe failed, using dummy version dummy-0.0.0")
-        set(_version "dummy-0.0.0")
-    endif()
-
-    #--------------------------------------------------------------------------#
-    # Set the parent scope version variable
-    #--------------------------------------------------------------------------#
-
-    set(${PROJECT_NAME}_VERSION ${_version})
-
-    # Count the number of occurances of '.' in the version
-    string(REGEX MATCHALL "\\." _matches ${_version})
-    list(LENGTH _matches _matches)
-
-    # Create list from tokens in version delimited by '.'
-    string(REGEX REPLACE "\\..*" "" _major ${_version})
-    string(REPLACE "." ";" version_list ${_version})
-
-    # These must be defined because of Cinch version conventions
-    list(GET version_list 0 ${PROJECT_NAME}_MAJOR)
-    list(GET version_list 1 ${PROJECT_NAME}_MINOR)
-
-    set(${PROJECT_NAME}_PATCH 0)
-    if(${_matches} STREQUAL "2")
-        list(GET version_list 2 ${PROJECT_NAME}_PATCH)
-    endif()
-
+list(GET fields 1 ${PROJECT_NAME}_VERSION)
+list(SUBLIST fields 2 -1 rest)
+set(${PROJECT_NAME}_COMMITS)
+if(rest)
+  string(REPLACE ";" "\ " commits "${rest}")
+  string(REGEX REPLACE "\n$" "" commits "${commits}")
+  set(${PROJECT_NAME}_COMMITS ${commits})
 endif()
 
-#------------------------------------------------------------------------------#
-# Formatting options for emacs and vim.
-# vim: set tabstop=4 shiftwidth=4 expandtab :
-#------------------------------------------------------------------------------#
+message(STATUS "VERSION STRING: ${version_output}")
+message(STATUS "FleCSI Version: ${${PROJECT_NAME}_VERSION}")
