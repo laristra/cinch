@@ -70,7 +70,7 @@
     endif()
 
     if (HPX_FOUND AND test_POLICY STREQUAL "HPX")
-        hpx_setup_target(${name} NOPREFIX NOTLLKEYWORD)
+        hpx_setup_target(${name} NOPREFIX PUBLIC)
     endif()
 #------------------------------------------------------------------------------#
 # Formatting options for emacs and vim.
