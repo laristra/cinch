@@ -124,6 +124,8 @@ endif(ENABLE_UNIT_TESTS)
     ENV{'OPENMPI'} is "true".
   ``FOLDER``
     specify folder for MS Office input files  
+  ``GPUCOUNT <gpuscount>...``
+    specify the number of GPU to run the test with Kokkos CUDA support 
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -145,8 +147,8 @@ function(cinch_add_unit name)
     set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
     set(multi_value_args
-        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS TESTLABELS FOLDER
-    )
+        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS TESTLABELS 
+        FOLDER GPUCOUNT)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
 
@@ -455,6 +457,17 @@ function(cinch_add_unit name)
     if(NOT unit_THREADS)
         set(unit_THREADS 1)
     endif(NOT unit_THREADS)
+
+    #--------------------------------------------------------------------------#
+    # Check Kokkos and GPU support                                             #
+    #--------------------------------------------------------------------------#
+
+    if(ENABLE_KOKKOS AND Kokkos_ENABLE_CUDA)
+      if(NOT unit_GPUCOUNT)
+        set(unit_GPUCOUNT 1)
+      endif(NOT unit_GPUCOUNT)
+      list(APPEND unit_ARGUMENTS -ll:gpu ${unit_GPUCOUNT})
+    endif(ENABLE_KOKKOS AND Kokkos_ENABLE_CUDA)
 
     #--------------------------------------------------------------------------#
     # Add the test target to CTest
