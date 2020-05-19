@@ -15,6 +15,8 @@ if(ENABLE_KOKKOS)
 
   set(Kokkos_LIBRARIES Kokkos::kokkos)
   list(APPEND CINCH_RUNTIME_LIBRARIES ${Kokkos_LIBRARIES})
+  # If kokkos enable, add compile flag for test-mpi 
+  add_definitions("-DENABLE_KOKKOS")
 
 endif()
 
