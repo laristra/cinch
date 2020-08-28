@@ -123,9 +123,9 @@ endif(ENABLE_UNIT_TESTS)
     Test does NOT get run (but still build) if
     ENV{'OPENMPI'} is "true".
   ``FOLDER``
-    specify folder for MS Office input files  
+    specify folder for MS Office input files
   ``GPUCOUNT <gpuscount>...``
-    specify the number of GPU to run the test with Kokkos CUDA support 
+    specify the number of GPU to run the test with Kokkos CUDA support
 #]=============================================================================]
 
 function(cinch_add_unit name)
@@ -147,7 +147,7 @@ function(cinch_add_unit name)
     set(options NOCI NOOPENMPI)
     set(one_value_args POLICY)
     set(multi_value_args
-        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS TESTLABELS 
+        SOURCES INPUTS THREADS LIBRARIES DEFINES DRIVER ARGUMENTS TESTLABELS
         FOLDER GPUCOUNT)
     cmake_parse_arguments(unit "${options}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
