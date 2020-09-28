@@ -38,6 +38,8 @@ if(ENABLE_HPX)
     add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
     add_definitions(-D_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING)
     add_definitions(-DGTEST_LANG_CXX11=1)
+    add_definitions(-Zc:preprocessor -wd5104 -wd5105)
+    add_definitions(-wd4244 -wd4251 -wd4275) # from gtest
   endif()
 
   message(STATUS "HPX found: ${HPX_FOUND}")
