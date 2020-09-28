@@ -25,23 +25,12 @@
 #define CINCH_WRITE(f) cinch::test_output_t::instance().to_file((f))
 
 // Dump captured output on failure
-#if !defined(_MSC_VER)
 #define CINCH_ASSERT(ASSERTION, ...)                                           \
   ASSERT_##ASSERTION(__VA_ARGS__) << CINCH_DUMP()
-#else
-// MSVC has a brain-dead preprocessor...
-#define CINCH_ASSERT(ASSERTION, x, y) ASSERT_##ASSERTION(x, y) << CINCH_DUMP()
-#endif
 
 // Dump captured output on failure
-#if !defined(_MSC_VER)
 #define CINCH_EXPECT(EXPECTATION, ...)                                         \
   EXPECT_##EXPECTATION(__VA_ARGS__) << CINCH_DUMP()
-#else
-// MSVC has a brain-dead preprocessor...
-#define CINCH_EXPECT(EXPECTATION, x, y)                                        \
-  EXPECT_##EXPECTATION(x, y) << CINCH_DUMP()
-#endif
 
 // compare collections with varying levels of assertions
 #define CINCH_CHECK_EQUAL_COLLECTIONS(...)                                     \

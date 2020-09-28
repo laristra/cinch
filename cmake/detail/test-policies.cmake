@@ -35,7 +35,7 @@
         set(test_policy_exec_threads ${MPIEXEC_NUMPROC_FLAG})
         set(test_policy_defines -DCINCH_ENABLE_MPI)
 
-    elseif(MPI_${MPI_LANGUAGE}_FOUND AND HPX_FOUND AND
+    elseif(HPX_FOUND AND # MPI_${MPI_LANGUAGE}_FOUND AND
         (test_POLICY STREQUAL "HPX" OR test_POLICY STREQUAL "MPI"))
 
         set(test_policy_runtime ${CINCH_SOURCE_DIR}/auxiliary/test-hpx.cc)

@@ -76,6 +76,7 @@ function(cinch_add_devel_target name)
     string(TOUPPER ${_first} _first)
     string(REGEX REPLACE "^.(.*)" "${_first}\\1" _leafdir "${_leafdir}")
     string(CONCAT _folder "Tests/" ${_leafdir})
+    string(CONCAT _folder ${_folder} "/Devel")
     set_target_properties(${name} PROPERTIES FOLDER "${_folder}")
 
 endfunction(cinch_add_devel_target)
