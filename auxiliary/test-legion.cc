@@ -10,6 +10,7 @@
 #include <cstring>
 #include <legion.h>
 #include <vector>
+#include <stdexcept>
 
 // Boost command-line options
 #if defined(ENABLE_BOOST)
@@ -69,26 +70,23 @@ main(int argc, char ** argv) {
   int rank(0);
 
 #if defined(CINCH_ENABLE_MPI)
-  // Get the MPI version
-  int version, subversion;
-  MPI_Get_version(&version, &subversion);
-
-  if(version == 3 && subversion > 0) {
-    int provided;
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
-    // If you fail this assertion, then your version of MPI
-    // does not support calls from multiple threads and you
-    // cannot use the GASNet MPI conduit
-    if(provided < MPI_THREAD_MULTIPLE)
+#if defined(GASNET_CONDUIT_MPI) || defined(REALM_USE_MPI)
+  //MPI library has to support THREAD_MULTIPLE for Legion run-time
+  int provided;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+  // If you fail this assertion, then your version of MPI
+  // does not support calls from multiple threads and you
+  // cannot use the GASNet+Legion conduit
+  if(provided < MPI_THREAD_MULTIPLE)
       printf("ERROR: Your implementation of MPI does not support "
              "MPI_THREAD_MULTIPLE which is required for use of the "
              "GASNet MPI conduit with the Legion-MPI Interop!\n");
-    assert(provided == MPI_THREAD_MULTIPLE);
-  }
-  else {
-    // Initialize the MPI runtime
-    MPI_Init(&argc, &argv);
-  } // if
+  if (provided != MPI_THREAD_MULTIPLE)
+    throw std::runtime_error("MPI library has to support THREAD_MULTIPLE");
+#else
+  // Perform MPI start-up like normal for most GASNet conduits
+  MPI_Init(&argc, &argv);
+#endif
 
   // Disable XML output, if requested, everywhere but rank 0
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -177,6 +175,12 @@ main(int argc, char ** argv) {
     result = RUN_ALL_TESTS();
 #endif
   } // if
+
+#ifndef GASNET_CONDUIT_MPI
+  // Then finalize MPI like normal
+  // Exception for the MPI conduit which does its own finalization
+  MPI_Finalize();
+#endif
 
   return result;
 } // main

@@ -21,48 +21,13 @@ if(ENABLE_UNIT_TESTS)
     # Google Test
     #--------------------------------------------------------------------------#
 
-    find_package(GTest QUIET)
-
-    # we found gtest, just set/include what we need
-    if(GTEST_FOUND)
-
-        include_directories(${GTEST_INCLUDE_DIRS})
-        if(MSVC)
-          # suppress stupid TR1 warnings issued by MSVC while compiling GTest
-          add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-        endif()
-
-    endif()
-
-    # if GTEST_INCLUDE_DIRS and GTEST_LIBRARIES are not set, set them
-    # to cinch's
-    if (NOT GTEST_INCLUDE_DIRS)
-        set(GTEST_INCLUDE_DIRS
-          ${CINCH_SOURCE_DIR}/gtest/googlemock/include
-          ${CINCH_SOURCE_DIR}/gtest/googletest
-          ${CINCH_SOURCE_DIR}/gtest/googletest/include)
-    endif()
-    if (NOT GTEST_LIBRARIES)
-        set(GTEST_LIBRARIES gtest)
-    endif()
-
-    # gtest was not found, so we need to build it.  but since this gets called
-    # multiple times, protect ourselves from redifining the same target
-    if(NOT TARGET gtest AND NOT GTEST_FOUND)
-
-        find_package(Threads)
-        add_library(gtest
-            ${CINCH_SOURCE_DIR}/gtest/googletest/src/gtest-all.cc)
-        target_include_directories(gtest PRIVATE
-            ${CINCH_SOURCE_DIR}/gtest/googletest)
-        target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
-        target_include_directories(gtest PRIVATE ${GTEST_INCLUDE_DIRS})
-        set_target_properties(gtest PROPERTIES FOLDER "Dependencies")
-        if(BUILD_SHARED_LIBS)
-            set_target_properties(gtest PROPERTIES
-                COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
-        endif()
-
+    if(NOT TARGET GTest::GTest)
+      find_package(GTest REQUIRED)
+      include_directories(${GTEST_INCLUDE_DIRS})
+      if(MSVC)
+        # suppress stupid TR1 warnings issued by MSVC while compiling GTest
+        add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+      endif()
     endif()
 
     #--------------------------------------------------------------------------#
@@ -367,8 +332,7 @@ function(cinch_add_unit name)
         endforeach()
 
         add_executable(${name} ${unit_SOURCES} ${_OUTPUT_DIR}/${_TARGET_MAIN})
-        target_link_libraries(${name} ${GTEST_LIBRARIES})
-        target_include_directories(${name} PRIVATE ${GTEST_INCLUDE_DIRS})
+        target_link_libraries(${name} GTest::GTest)
         target_include_directories(${name} PRIVATE
             ${CINCH_SOURCE_DIR}/auxiliary)
     endif()
