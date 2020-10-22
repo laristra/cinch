@@ -43,34 +43,34 @@ driver_initialization(int argc, char ** argv) {
 
 #if defined(CINCH_ENABLE_MPI)
 namespace detail {
-    template<char Delimiter>
-    struct word_delimited_by : std::string {};
+template<char Delimiter>
+struct word_delimited_by : std::string {};
 
-    template<char Delimiter>
-    inline std::istream&
-        operator>>(std::istream& is, word_delimited_by<Delimiter>& str) {
-        std::getline(is, str, Delimiter);
-        return is;
-    }
+template<char Delimiter>
+inline std::istream &
+operator>>(std::istream & is, word_delimited_by<Delimiter> & str) {
+  std::getline(is, str, Delimiter);
+  return is;
+}
 
-    bool
-        detect_mpi_environment() {
+bool
+detect_mpi_environment() {
 #if defined(__bgq__)
-        // If running on BG/Q, we can safely assume to always run in an
-        // MPI environment
-        return true;
+  // If running on BG/Q, we can safely assume to always run in an
+  // MPI environment
+  return true;
 #else
-        static std::vector<std::string> const envvars = { "MV2_COMM_WORLD_RANK",
-          "PMI_RANK", "OMPI_COMM_WORLD_SIZE", "ALPS_APP_PE", "PMIX_RANK" };
+  static std::vector<std::string> const envvars = {"MV2_COMM_WORLD_RANK",
+    "PMI_RANK", "OMPI_COMM_WORLD_SIZE", "ALPS_APP_PE", "PMIX_RANK"};
 
-        for (auto const& envvar : envvars) {
-            char* env = std::getenv(envvar.c_str());
-            if (env)
-                return true;
-        }
-        return false;
+  for(auto const & envvar : envvars) {
+    char * env = std::getenv(envvar.c_str());
+    if(env)
+      return true;
+  }
+  return false;
 #endif
-    }
+}
 } // namespace detail
 #endif
 
@@ -109,7 +109,14 @@ main(int argc, char ** argv) {
   bool has_mpi = ::detail::detect_mpi_environment();
   if(has_mpi) {
     // Initialize the MPI runtime
-    MPI_Init(&argc, &argv);
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if(provided < MPI_THREAD_MULTIPLE) {
+      printf("ERROR: Your implementation of MPI does not support "
+             "MPI_THREAD_MULTIPLE which is required for use of "
+             "MPI conduit with the HPX-MPI Interop!\n");
+    }
+    assert(provided == MPI_THREAD_MULTIPLE);
 
     // Disable XML output, if requested, everywhere but rank 0
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
