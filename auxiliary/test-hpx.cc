@@ -166,7 +166,12 @@ main(int argc, char ** argv) {
 
 #if defined(CINCH_ENABLE_MPI)
     if(has_mpi) {
-      MPI_Finalize();
+      int finalized = 1;
+      MPI_Finalized(&finalized);
+      if (!finalized) {
+        // Shutdown the MPI runtime
+        MPI_Finalize();
+      }
     }
 #endif
 
@@ -216,8 +221,12 @@ main(int argc, char ** argv) {
 
 #if defined(CINCH_ENABLE_MPI)
   if(has_mpi) {
-    // Shutdown the MPI runtime
-    MPI_Finalize();
+    int finalized = 1;
+    MPI_Finalized(&finalized);
+    if (!finalized) {
+      // Shutdown the MPI runtime
+      MPI_Finalize();
+    }
   }
 #endif
 
