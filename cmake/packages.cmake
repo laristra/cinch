@@ -15,6 +15,7 @@ macro(cinch_load_extras)
   include(kokkos)
   include(coverage)
   include(doxygen)
+  include(hdf5)
   include(sphinx)
   include(format)
 
